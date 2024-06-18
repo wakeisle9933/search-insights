@@ -41,7 +41,6 @@ class SearchConsoleController {
                 .setEndDate("2024-06-17")
                 .setDimensions(listOf("query"))
         val execute = service.searchanalytics().query(domain, request).execute()
-        println("")
     }
 
 }
