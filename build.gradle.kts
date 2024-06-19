@@ -40,6 +40,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     compileOnly ("org.projectlombok:lombok")
     annotationProcessor ("org.projectlombok:lombok")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 }
 
 
