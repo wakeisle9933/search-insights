@@ -17,6 +17,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.floor
 
 @Service
 class SearchConsoleService (
@@ -122,16 +123,17 @@ class SearchConsoleService (
 
         // Header width
         sheet.setColumnWidth(0, 5 * 1440)
+        sheet.setColumnWidth(3, 2 * 1440)
         sheet.setColumnWidth(5, 5 * 1440)
 
         // Data
         allRows.forEachIndexed { index, row ->
             val dataRow = sheet.createRow(index + 4)
             dataRow.createCell(0).setCellValue(row.getKeys()[0])
-            dataRow.createCell(1).setCellValue(row.position)
+            dataRow.createCell(1).setCellValue(floor(row.position * 100) / 100)
             dataRow.createCell(2).setCellValue(row.clicks)
             dataRow.createCell(3).setCellValue(row.impressions)
-            dataRow.createCell(4).setCellValue(row.ctr)
+            dataRow.createCell(4).setCellValue(floor(row.ctr * 100) / 100)
             // Making Hyperlink
             val linkCell = dataRow.createCell(5)
             linkCell.setCellValue(row.getKeys()[1])
