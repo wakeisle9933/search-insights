@@ -8,6 +8,7 @@ import com.google.api.services.searchconsole.v1.model.SearchAnalyticsQueryReques
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import org.apache.poi.common.usermodel.HyperlinkType
+import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -16,11 +17,6 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import org.apache.poi.ss.usermodel.CreationHelper
-import org.apache.poi.ss.usermodel.Font
-import org.apache.poi.ss.usermodel.Hyperlink
-import org.apache.poi.ss.usermodel.IndexedColors
-import org.apache.poi.xssf.usermodel.XSSFHyperlink
 
 @Service
 class SearchConsoleService (
@@ -80,8 +76,43 @@ class SearchConsoleService (
         val sheet = workbook.createSheet("Search Analytics Raw Data")
         val creationHelper = workbook.creationHelper
 
+        // Summary Data
+        val avgPosition = allRows.map { it.position }.average()
+        val totalClicks = allRows.sumOf { it.clicks }
+        val totalImpressions = allRows.sumOf { it.impressions }
+        val avgCTR = allRows.map { it.ctr }.average()
+
+        // Summary Header
+        val summaryHeaderRow = sheet.createRow(0)
+        val threeDaysAgo = LocalDate.now().minusDays(3)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formattedDate = threeDaysAgo.format(formatter)
+        summaryHeaderRow.createCell(0).setCellValue(formattedDate + " Summary")
+        summaryHeaderRow.createCell(1).setCellValue("Position")
+        summaryHeaderRow.createCell(2).setCellValue("Click")
+        summaryHeaderRow.createCell(3).setCellValue("Impressions")
+        summaryHeaderRow.createCell(4).setCellValue("CTR")
+
+        val summaryDataRow = sheet.createRow(1)
+        summaryDataRow.createCell(1).setCellValue(avgPosition)
+        summaryDataRow.createCell(2).setCellValue(totalClicks)
+        summaryDataRow.createCell(3).setCellValue(totalImpressions)
+        summaryDataRow.createCell(4).setCellValue(avgCTR)
+
+        // Empty
+        val separatorRow = sheet.createRow(2)
+        val redStyle = workbook.createCellStyle()
+        redStyle.fillForegroundColor = IndexedColors.RED.index
+        redStyle.fillPattern = FillPatternType.SOLID_FOREGROUND
+
+        // Empty Background
+        for (i in 0..5) {
+            val cell = separatorRow.createCell(i)
+            cell.cellStyle = redStyle
+        }
+
         // Header
-        val headerRow = sheet.createRow(0)
+        val headerRow = sheet.createRow(3)
         headerRow.createCell(0).setCellValue("Query")
         headerRow.createCell(1).setCellValue("Position")
         headerRow.createCell(2).setCellValue("Clicks")
@@ -95,7 +126,7 @@ class SearchConsoleService (
 
         // Data
         allRows.forEachIndexed { index, row ->
-            val dataRow = sheet.createRow(index + 1)
+            val dataRow = sheet.createRow(index + 4)
             dataRow.createCell(0).setCellValue(row.getKeys()[0])
             dataRow.createCell(1).setCellValue(row.position)
             dataRow.createCell(2).setCellValue(row.clicks)
