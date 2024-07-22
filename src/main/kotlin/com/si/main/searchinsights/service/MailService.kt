@@ -1,5 +1,6 @@
 package com.si.main.searchinsights.service
 
+import com.si.main.searchinsights.util.DateUtils
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
 import org.apache.commons.io.output.ByteArrayOutputStream
@@ -22,7 +23,8 @@ class MailService(
     fun sendMail(excelData: ByteArrayOutputStream, fileName: String) {
         val message: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true, "UTF-8")
-        helper.setSubject("Google Search Insights")
+        val formattedDate = DateUtils.getFormattedDateBeforeDays(3)
+        helper.setSubject("$formattedDate Google Search Insights")
         helper.setText("", true) // HTML 내용 설정
         helper.addBcc(mail)
         helper.addAttachment(fileName, InputStreamSource {
