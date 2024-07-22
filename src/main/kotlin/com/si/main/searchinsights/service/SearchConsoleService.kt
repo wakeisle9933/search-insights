@@ -7,6 +7,7 @@ import com.google.api.services.searchconsole.v1.model.ApiDataRow
 import com.google.api.services.searchconsole.v1.model.SearchAnalyticsQueryRequest
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import com.si.main.searchinsights.util.DateUtils
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.ss.usermodel.*
@@ -46,9 +47,7 @@ class SearchConsoleService (
 
     fun fetchSearchAnalyticsData(): List<ApiDataRow> {
         val service = getSearchConsoleService()
-        val threeDaysAgo = LocalDate.now().minusDays(3)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val formattedDate = threeDaysAgo.format(formatter)
+        val formattedDate = DateUtils.getFormattedDateBeforeDays(3);
 
         var startRow = 0
         val rowLimit = 1000 // API Max Limit
@@ -87,10 +86,8 @@ class SearchConsoleService (
 
         // Summary Header
         val summaryHeaderRow = sheet.createRow(0)
-        val threeDaysAgo = LocalDate.now().minusDays(3)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val formattedDate = threeDaysAgo.format(formatter)
-        summaryHeaderRow.createCell(0).setCellValue(formattedDate + " Summary")
+        val formattedDate = DateUtils.getFormattedDateBeforeDays(3);
+        summaryHeaderRow.createCell(0).setCellValue("$formattedDate Summary")
         summaryHeaderRow.createCell(1).setCellValue("Position")
         summaryHeaderRow.createCell(2).setCellValue("Click")
         summaryHeaderRow.createCell(3).setCellValue("Impressions")
