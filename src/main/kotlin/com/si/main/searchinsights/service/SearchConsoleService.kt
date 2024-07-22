@@ -7,13 +7,13 @@ import com.google.api.services.searchconsole.v1.model.ApiDataRow
 import com.google.api.services.searchconsole.v1.model.SearchAnalyticsQueryRequest
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -44,7 +44,7 @@ class SearchConsoleService (
     }
 
 
-    fun fetchSearchAnalyticsData() {
+    fun fetchSearchAnalyticsData(): List<ApiDataRow> {
         val service = getSearchConsoleService()
         val threeDaysAgo = LocalDate.now().minusDays(3)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -68,11 +68,13 @@ class SearchConsoleService (
 
         println("entire dataset: ${allRows.size}")
 
-        createExcelFile(allRows, "search_analytics_data.xlsx")
+        return allRows
+
+        // createExcelFile(allRows, "search_analytics_data.xlsx")
 
     }
 
-    fun createExcelFile(allRows: List<ApiDataRow>, fileName: String) {
+    fun createExcelFile(allRows: List<ApiDataRow>): ByteArrayOutputStream {
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet("Search Analytics Raw Data")
         val creationHelper = workbook.creationHelper
@@ -151,11 +153,11 @@ class SearchConsoleService (
             linkCell.cellStyle = linkStyle
         }
 
-        FileOutputStream(fileName).use { outputStream ->
-            workbook.write(outputStream)
-        }
+        val outputStream = ByteArrayOutputStream()
+        workbook.write(outputStream)
         workbook.close()
 
+        return outputStream
     }
 
 }

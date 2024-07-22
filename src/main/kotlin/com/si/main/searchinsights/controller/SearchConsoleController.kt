@@ -30,7 +30,9 @@ class SearchConsoleController (
 
     @GetMapping("/mail-sending-test")
     fun sendDailyMailing() {
-        mailService.sendMail()
+        val excelFile =
+            searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData())
+        mailService.sendMail(excelFile, "search_insights.xlsx")
     }
 
 }
