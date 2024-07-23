@@ -10,14 +10,14 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.si.main.searchinsights.util.DateUtils
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.common.usermodel.HyperlinkType
-import org.apache.poi.ss.usermodel.*
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import kotlin.math.floor
 
 @Service
