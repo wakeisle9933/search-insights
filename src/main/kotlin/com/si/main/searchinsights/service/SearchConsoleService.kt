@@ -45,17 +45,18 @@ class SearchConsoleService (
     }
 
 
-    fun fetchSearchAnalyticsData(): List<ApiDataRow> {
+    fun fetchSearchAnalyticsData(
+        startDate: String = DateUtils.getFormattedDateBeforeDays(3),
+        endDate: String = startDate
+    ): List<ApiDataRow> {
         val service = getSearchConsoleService()
-        val formattedDate = DateUtils.getFormattedDateBeforeDays(3);
-
         var startRow = 0
         val rowLimit = 1000 // API Max Limit
         val allRows = mutableListOf<ApiDataRow>()
         do {
             val request = SearchAnalyticsQueryRequest()
-                .setStartDate(formattedDate)
-                .setEndDate(formattedDate)
+                .setStartDate(startDate)
+                .setEndDate(endDate)
                 .setDimensions(listOf("query", "page"))
                 .setRowLimit(rowLimit)
                 .setStartRow(startRow)
@@ -68,9 +69,6 @@ class SearchConsoleService (
         println("entire dataset: ${allRows.size}")
 
         return allRows
-
-        // createExcelFile(allRows, "search_analytics_data.xlsx")
-
     }
 
     fun createExcelFile(allRows: List<ApiDataRow>): ByteArrayOutputStream {
