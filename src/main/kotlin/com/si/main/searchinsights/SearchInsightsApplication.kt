@@ -1,23 +1,27 @@
 package com.si.main.searchinsights
 
+import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.service.DatePersistenceService
 import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
-import jdk.internal.misc.VM.shutdown
 import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.context.ApplicationContext
 import java.time.LocalDate
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.system.exitProcess
 
 @SpringBootApplication
 class SearchInsightsApplication(
     private val searchConsoleService: SearchConsoleService,
     private val mailService: MailService,
-    private val datePersistenceService: DatePersistenceService
+    private val datePersistenceService: DatePersistenceService,
+    private val context: ApplicationContext
 ) : CommandLineRunner {
+
+    private val logger = logger()
 
     override fun run(vararg args: String?) {
         val today = LocalDate.now()
@@ -27,17 +31,17 @@ class SearchInsightsApplication(
             val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData())
             mailService.sendMail(excelFile, "search_insights.xlsx")
             datePersistenceService.writeLastRunDate(today)
-            println("Complete tasks today!")
+            logger.info("Complete tasks today!")
         } else {
-            println("Today task already completed!")
+            logger.info("Today task already completed!")
         }
 
         // 2시간 후 종료
         val scheduler = Executors.newSingleThreadScheduledExecutor()
         scheduler.schedule({
-            shutdown()
+            logger.info("Search Insights Shut down!")
+            SpringApplication.exit(context, { 0 })  // 이렇게 변경해
             scheduler.shutdown()
-            exitProcess(0)
         }, 2, TimeUnit.HOURS)
     }
 }

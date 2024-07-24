@@ -7,6 +7,7 @@ import com.google.api.services.searchconsole.v1.model.ApiDataRow
 import com.google.api.services.searchconsole.v1.model.SearchAnalyticsQueryRequest
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.util.DateUtils
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.common.usermodel.HyperlinkType
@@ -28,6 +29,9 @@ class SearchConsoleService (
     private val domain: String
 
 ) {
+
+    private val logger = logger()
+
     fun getSearchConsoleService(): SearchConsole {
         val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
         val jsonFactory = GsonFactory.getDefaultInstance()
@@ -66,8 +70,7 @@ class SearchConsoleService (
             startRow += rowLimit
         } while (execute.rows?.size == rowLimit)
 
-        println("entire dataset: ${allRows.size}")
-
+        logger.info("entire dataset: ${allRows.size}")
         return allRows
     }
 

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController
 class SearchConsoleController(
     private val mailService: MailService,
     private val searchConsoleService: SearchConsoleService,
-
     ) {
 
     @GetMapping("/test")
