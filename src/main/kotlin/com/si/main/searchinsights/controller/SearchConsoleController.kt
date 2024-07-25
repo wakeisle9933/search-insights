@@ -1,5 +1,6 @@
 package com.si.main.searchinsights.controller
 
+import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,7 +32,7 @@ class SearchConsoleController(
                 searchConsoleService.fetchSearchAnalyticsData()
             )
         }
-        mailService.sendMail(excelFile, "search_insights.xlsx")
+        mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM)
     }
 
 }

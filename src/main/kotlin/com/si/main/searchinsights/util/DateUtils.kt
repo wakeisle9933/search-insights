@@ -11,4 +11,12 @@ object DateUtils {
         return date.format(formatter)
     }
 
+    fun getFirstDayOfCurrentMonth(): String {
+        return LocalDate.now().withDayOfMonth(1).format(formatter)
+    }
+
+    fun getLastDayOfCurrentMonth(): String {
+        return LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).format(formatter)
+    }
+
 }

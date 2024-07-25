@@ -1,5 +1,6 @@
 package com.si.main.searchinsights.service
 
+import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.util.DateUtils
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
@@ -20,11 +21,11 @@ class MailService(
 ) {
 
     @Throws(MessagingException::class)
-    fun sendMail(excelData: ByteArrayOutputStream, fileName: String) {
+    fun sendMail(excelData: ByteArrayOutputStream, fileName: String, frequency: ReportFrequency) {
         val message: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true, "UTF-8")
         val formattedDate = DateUtils.getFormattedDateBeforeDays(3)
-        helper.setSubject("$formattedDate Google Search Insights")
+        helper.setSubject("$formattedDate $frequency Google Search Insights")
         helper.setText("", true) // HTML 내용 설정
         helper.addBcc(mail)
         helper.addAttachment(fileName, InputStreamSource {
