@@ -1,0 +1,153 @@
+package com.si.main.searchinsights.service
+
+import com.google.api.services.searchconsole.v1.model.ApiDataRow
+import com.si.main.searchinsights.data.PrefixSummary
+import org.apache.poi.common.usermodel.HyperlinkType
+import org.apache.poi.ss.usermodel.*
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.springframework.stereotype.Service
+import kotlin.math.floor
+
+@Service
+class SpreadSheetService {
+    fun createRawDataSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
+        val sheet = workbook.createSheet("Search Analytics Raw Data")
+        val creationHelper = workbook.creationHelper
+
+        // Summary Data
+        val avgPosition = allRows.map { it.position }.average()
+        val totalClicks = allRows.sumOf { it.clicks }
+        val totalImpressions = allRows.sumOf { it.impressions }
+        val avgCTR = allRows.map { it.ctr }.average()
+
+        // Summary Header
+        val headerStyle = createHeaderStyle(workbook)
+        val summaryHeaderRow = sheet.createRow(0)
+        val summaryHeaders = listOf("Raw Data", "Position", "Clicks", "Impressions", "CTR")
+        summaryHeaders.forEachIndexed { index, header ->
+            val cell = summaryHeaderRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        val summaryDataRow = sheet.createRow(1)
+        summaryDataRow.createCell(1).setCellValue(avgPosition)
+        summaryDataRow.createCell(2).setCellValue(totalClicks)
+        summaryDataRow.createCell(3).setCellValue(totalImpressions)
+        summaryDataRow.createCell(4).setCellValue(avgCTR)
+
+        // Header
+        val headerRow = sheet.createRow(3)
+        val headers = listOf("Query", "Position", "Clicks", "Impressions", "CTR", "Page Link")
+        headers.forEachIndexed { index, header ->
+            val cell = headerRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        // Header width
+        sheet.setColumnWidth(0, 5 * 1440)
+        sheet.setColumnWidth(3, 2 * 1440)
+        sheet.setColumnWidth(5, 5 * 1440)
+
+        // Data
+        allRows.forEachIndexed { index, row ->
+            val dataRow = sheet.createRow(index + 4)
+            dataRow.createCell(0).setCellValue(row.getKeys()[0])
+            dataRow.createCell(1).setCellValue(floor(row.position * 100) / 100)
+            dataRow.createCell(2).setCellValue(row.clicks)
+            dataRow.createCell(3).setCellValue(row.impressions)
+            dataRow.createCell(4).setCellValue(floor(row.ctr * 100) / 100)
+            // Making Hyperlink
+            val linkCell = dataRow.createCell(5)
+            linkCell.setCellValue(row.getKeys()[1])
+
+            val hyperlink = creationHelper.createHyperlink(HyperlinkType.URL)
+            hyperlink.address = row.getKeys()[1]
+            linkCell.hyperlink = hyperlink
+
+            // Link Style
+            val linkStyle = workbook.createCellStyle()
+            val linkFont = workbook.createFont()
+            linkFont.underline = Font.U_SINGLE
+            linkFont.color = IndexedColors.BLUE.index
+            linkStyle.setFont(linkFont)
+            linkCell.cellStyle = linkStyle
+        }
+
+        return sheet
+    }
+
+    fun createPrefixSummarySheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
+        val sheet = workbook.createSheet("Prefix Summary")
+        val groupedData = groupByPrefix(allRows)
+        val summaryData = calculatePrefixSummary(groupedData)
+
+        // header setting, style
+        val headerStyle = createHeaderStyle(workbook)
+        val headerRow = sheet.createRow(0)
+        val headers = listOf("Prefix", "Avg Position", "Total Clicks", "Total Impressions", "Avg CTR")
+        headers.forEachIndexed { index, header ->
+            val cell = headerRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        // input data
+        summaryData.forEachIndexed { index, summary ->
+            val row = sheet.createRow(index + 1)
+            row.createCell(0).setCellValue(summary.prefix)
+            row.createCell(1).setCellValue(floor(summary.avgPosition * 100) / 100)
+            row.createCell(2).setCellValue(summary.totalClicks)
+            row.createCell(3).setCellValue(summary.totalImpressions)
+            row.createCell(4).setCellValue(floor(summary.avgCTR * 100) / 100)
+        }
+
+        // automatically adjust column widths
+        for (i in 0..4) {
+            sheet.autoSizeColumn(i)
+        }
+
+        return sheet
+    }
+    fun calculatePrefixSummary(groupedData: Map<String, List<ApiDataRow>>): List<PrefixSummary> {
+        return groupedData.map { (prefix, rows) ->
+            PrefixSummary(
+                prefix = prefix,
+                avgPosition = rows.map { it.position }.average(),
+                totalClicks = rows.sumOf { it.clicks },
+                totalImpressions = rows.sumOf { it.impressions },
+                avgCTR = rows.map { it.ctr }.average()
+            )
+        }.sortedByDescending { it.totalClicks }
+    }
+
+    fun getPrefix(query: String): String {
+        return query.split(" ").firstOrNull() ?: ""
+    }
+
+    fun groupByPrefix(allRows: List<ApiDataRow>): Map<String, List<ApiDataRow>> {
+        return allRows.groupBy { getPrefix(it.getKeys()[0]) }
+    }
+
+    fun createHeaderStyle(workbook: XSSFWorkbook): XSSFCellStyle {
+        val style = workbook.createCellStyle()
+        val font = workbook.createFont()
+
+        // Set Bold
+        font.bold = true
+        style.setFont(font)
+
+        // Set Background (연한 회색)
+        style.fillForegroundColor = IndexedColors.GREY_25_PERCENT.index
+        style.fillPattern = FillPatternType.SOLID_FOREGROUND
+
+        // Set Border
+        style.borderBottom = BorderStyle.THIN
+        style.bottomBorderColor = IndexedColors.BLACK.index
+
+        return style
+    }
+
+}
