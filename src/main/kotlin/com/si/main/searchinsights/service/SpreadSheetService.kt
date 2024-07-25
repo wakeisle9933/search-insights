@@ -79,38 +79,43 @@ class SpreadSheetService {
         return sheet
     }
 
-    fun createPrefixSummarySheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
-        val sheet = workbook.createSheet("Prefix Summary")
-        val groupedData = groupByPrefix(allRows)
-        val summaryData = calculatePrefixSummary(groupedData)
+    fun createPrefixSummarySheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): List<Sheet> {
+        return listOf(1, 2, 3).map { wordCount ->
+            val sheetName = "Prefix Summary (${wordCount} word${if (wordCount > 1) "s" else ""})"
+            val sheet = workbook.createSheet(sheetName)
+            val groupedData = groupByPrefix(allRows, wordCount)
+            val summaryData = calculatePrefixSummary(groupedData)
 
-        // header setting, style
-        val headerStyle = createHeaderStyle(workbook)
-        val headerRow = sheet.createRow(0)
-        val headers = listOf("Prefix", "Avg Position", "Total Clicks", "Total Impressions", "Avg CTR")
-        headers.forEachIndexed { index, header ->
-            val cell = headerRow.createCell(index)
-            cell.setCellValue(header)
-            cell.cellStyle = headerStyle
+            // header setting, style
+            val headerStyle = createHeaderStyle(workbook)
+            val headerRow = sheet.createRow(0)
+            val headers =
+                listOf("Prefix", "Avg Position", "Total Clicks", "Total Impressions", "Avg CTR")
+            headers.forEachIndexed { index, header ->
+                val cell = headerRow.createCell(index)
+                cell.setCellValue(header)
+                cell.cellStyle = headerStyle
+            }
+
+            // input data
+            summaryData.forEachIndexed { index, summary ->
+                val row = sheet.createRow(index + 1)
+                row.createCell(0).setCellValue(summary.prefix)
+                row.createCell(1).setCellValue(floor(summary.avgPosition * 100) / 100)
+                row.createCell(2).setCellValue(summary.totalClicks)
+                row.createCell(3).setCellValue(summary.totalImpressions)
+                row.createCell(4).setCellValue(floor(summary.avgCTR * 100) / 100)
+            }
+
+            // automatically adjust column widths
+            for (i in 0..4) {
+                sheet.autoSizeColumn(i)
+            }
+
+            sheet
         }
-
-        // input data
-        summaryData.forEachIndexed { index, summary ->
-            val row = sheet.createRow(index + 1)
-            row.createCell(0).setCellValue(summary.prefix)
-            row.createCell(1).setCellValue(floor(summary.avgPosition * 100) / 100)
-            row.createCell(2).setCellValue(summary.totalClicks)
-            row.createCell(3).setCellValue(summary.totalImpressions)
-            row.createCell(4).setCellValue(floor(summary.avgCTR * 100) / 100)
-        }
-
-        // automatically adjust column widths
-        for (i in 0..4) {
-            sheet.autoSizeColumn(i)
-        }
-
-        return sheet
     }
+
     fun calculatePrefixSummary(groupedData: Map<String, List<ApiDataRow>>): List<PrefixSummary> {
         return groupedData.map { (prefix, rows) ->
             PrefixSummary(
@@ -123,12 +128,19 @@ class SpreadSheetService {
         }.sortedByDescending { it.totalClicks }
     }
 
-    fun getPrefix(query: String): String {
-        return query.split(" ").firstOrNull() ?: ""
+    fun getPrefix(query: String, wordCount: Int): String {
+        return query.split(" ").take(wordCount).joinToString(" ")
     }
 
-    fun groupByPrefix(allRows: List<ApiDataRow>): Map<String, List<ApiDataRow>> {
-        return allRows.groupBy { getPrefix(it.getKeys()[0]) }
+    fun groupByPrefix(allRows: List<ApiDataRow>, wordCount: Int): Map<String, List<ApiDataRow>> {
+        return allRows.groupBy { row ->
+            val words = row.getKeys()[0].split(" ")
+            when {
+                wordCount == 1 -> words.firstOrNull() ?: ""
+                words.size >= wordCount -> words.take(wordCount).joinToString(" ")
+                else -> ""
+            }
+        }.filterKeys { it.isNotEmpty() }
     }
 
     fun createHeaderStyle(workbook: XSSFWorkbook): XSSFCellStyle {
