@@ -7,6 +7,7 @@ import com.google.api.services.searchconsole.v1.model.ApiDataRow
 import com.google.api.services.searchconsole.v1.model.SearchAnalyticsQueryRequest
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.util.DateUtils
 import org.apache.commons.io.output.ByteArrayOutputStream
@@ -18,10 +19,9 @@ import java.io.InputStream
 
 @Service
 class SearchConsoleService (
-    private val mailService: MailService,
+    private val spreadSheetService: SpreadSheetService,
     @Value("\${domain}")
     private val domain: String
-
 ) {
 
     private val logger = logger()
@@ -68,12 +68,13 @@ class SearchConsoleService (
         return allRows
     }
 
-    fun createExcelFile(allRows: List<ApiDataRow>): ByteArrayOutputStream {
+    fun createExcelFile(allRows: List<ApiDataRow>, reportFrequency: ReportFrequency): ByteArrayOutputStream {
         val workbook = XSSFWorkbook()
-        val spreadSheetService = SpreadSheetService()
-
         spreadSheetService.createRawDataSheet(workbook, allRows)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
+        if(reportFrequency == ReportFrequency.DAILY) {
+            spreadSheetService.createBacklinkSummarySheet(workbook);
+        }
 
         val outputStream = ByteArrayOutputStream()
         workbook.write(outputStream)

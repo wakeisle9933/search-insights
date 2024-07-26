@@ -1,16 +1,28 @@
 package com.si.main.searchinsights.service
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.api.services.searchconsole.v1.model.ApiDataRow
+import com.si.main.searchinsights.data.Backlink
 import com.si.main.searchinsights.data.PrefixSummary
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import kotlin.math.floor
 
 @Service
-class SpreadSheetService {
+class SpreadSheetService(
+    @Value("\${base.domain}")
+    private val baseDomain: String,
+    @Value("\${rapidapi.key}")
+    private val rapidApiKey: String
+) {
+
     fun createRawDataSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
         val sheet = workbook.createSheet("Search Analytics Raw Data")
         val creationHelper = workbook.creationHelper
@@ -114,6 +126,67 @@ class SpreadSheetService {
 
             sheet
         }
+    }
+
+    fun createBacklinkSummarySheet(workbook: XSSFWorkbook) {
+        val sheet = workbook.createSheet("Backlink Summary")
+
+        // Summary Header
+        val headerStyle = createHeaderStyle(workbook)
+        val summaryHeaderRow = sheet.createRow(0)
+        val summaryHeaders = listOf("URL To", "Title", "URL From")
+        summaryHeaders.forEachIndexed { index, header ->
+            val cell = summaryHeaderRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        val backlinks = try {
+            getBacklinksFromAhrefs()
+        } catch (e: Exception) {
+            println("Error fetching backlinks: ${e.message}")
+            emptyList()
+        }
+
+        // Input data
+        backlinks.forEachIndexed { index, backlink ->
+            val row = sheet.createRow(index + 1)
+            row.createCell(0).setCellValue(backlink.urlTo)
+            row.createCell(1).setCellValue(backlink.title)
+            row.createCell(2).setCellValue(backlink.urlFrom)
+        }
+
+        // Automatically adjust column widths
+        for (i in 0..2) {
+            sheet.autoSizeColumn(i)
+        }
+    }
+
+    private fun getBacklinksFromAhrefs(): List<Backlink> {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://ahrefs1.p.rapidapi.com/v1/backlink-checker?url=$baseDomain&mode=subdomains")
+            .get()
+            .addHeader("x-rapidapi-key", rapidApiKey)
+            .addHeader("x-rapidapi-host", "ahrefs1.p.rapidapi.com")
+            .build()
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string() ?: return emptyList()
+
+        val mapper = jacksonObjectMapper()
+        val jsonData: Map<String, Any> = mapper.readValue(responseBody, object : TypeReference<Map<String, Any>>() {})
+
+        val topBacklinks = jsonData["topBacklinks"] as? Map<String, Any>
+        val backlinks = topBacklinks?.get("backlinks") as? List<Map<String, Any>>
+
+        return backlinks?.map { backlink ->
+            Backlink(
+                title = backlink["title"] as? String ?: "",
+                urlFrom = backlink["urlFrom"] as? String ?: "",
+                urlTo = backlink["urlTo"] as? String ?: ""
+            )
+        } ?: emptyList()
     }
 
     fun calculatePrefixSummary(groupedData: Map<String, List<ApiDataRow>>): List<PrefixSummary> {

@@ -13,11 +13,6 @@ class SearchConsoleController(
     private val searchConsoleService: SearchConsoleService,
     ) {
 
-    @GetMapping("/test")
-    fun sendDailySearchAnalytics() {
-        searchConsoleService.fetchSearchAnalyticsData()
-    }
-
     @GetMapping("/email-search-insights-report")
     fun sendDailyMailing(
         @RequestParam(required = false) fromDate: String? = null,
@@ -25,11 +20,11 @@ class SearchConsoleController(
     ) {
         val excelFile = if (fromDate != null && toDate != null) {
             searchConsoleService.createExcelFile(
-                searchConsoleService.fetchSearchAnalyticsData(fromDate, toDate)
+                searchConsoleService.fetchSearchAnalyticsData(fromDate, toDate), ReportFrequency.CUSTOM
             )
         } else {
             searchConsoleService.createExcelFile(
-                searchConsoleService.fetchSearchAnalyticsData()
+                searchConsoleService.fetchSearchAnalyticsData(), ReportFrequency.CUSTOM
             )
         }
         mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM)

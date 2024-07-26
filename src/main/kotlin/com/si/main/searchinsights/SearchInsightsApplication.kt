@@ -31,20 +31,26 @@ class SearchInsightsApplication(
         val lastRunDate = datePersistenceService.readLastRunDate()
 
         if (lastRunDate != today) {
-            val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData())
+            val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(), ReportFrequency.DAILY)
             mailService.sendMail(excelFile, "daily_search_insights.xlsx", ReportFrequency.DAILY)
 
             // Weekly Report
             if(today.dayOfWeek == DayOfWeek.WEDNESDAY) {
-                val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(
-                    DateUtils.getFormattedDateBeforeDays(10), DateUtils.getFormattedDateBeforeDays(7) ))
+                val excelFile = searchConsoleService.createExcelFile(
+                                    searchConsoleService.fetchSearchAnalyticsData(
+                                        DateUtils.getFormattedDateBeforeDays(10)
+                                        ,DateUtils.getFormattedDateBeforeDays(7))
+                                ,ReportFrequency.WEEKLY)
                 mailService.sendMail(excelFile, "weekly_search_insights.xlsx", ReportFrequency.WEEKLY)
             }
 
             // Monthly Report
             if(today.dayOfMonth == 3) {
-                val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(
-                    DateUtils.getFirstDayOfCurrentMonth(), DateUtils.getLastDayOfCurrentMonth()))
+                val excelFile = searchConsoleService.createExcelFile(
+                                    searchConsoleService.fetchSearchAnalyticsData(
+                                        DateUtils.getFirstDayOfCurrentMonth()
+                                        ,DateUtils.getLastDayOfCurrentMonth())
+                                ,ReportFrequency.MONTHLY)
                 mailService.sendMail(excelFile, "monthly_search_insights.xlsx", ReportFrequency.MONTHLY)
             }
 

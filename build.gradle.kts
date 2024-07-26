@@ -41,6 +41,7 @@ dependencies {
     compileOnly ("org.projectlombok:lombok")
     annotationProcessor ("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 }
 
 
