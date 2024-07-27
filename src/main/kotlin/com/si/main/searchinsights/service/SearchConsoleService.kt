@@ -73,7 +73,8 @@ class SearchConsoleService (
         spreadSheetService.createRawDataSheet(workbook, allRows)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
         if(reportFrequency == ReportFrequency.DAILY) {
-            spreadSheetService.createBacklinkSummarySheet(workbook);
+            spreadSheetService.createBacklinkToolSheet(workbook)
+            spreadSheetService.createBacklinkSummarySheet(workbook)
         }
 
         val outputStream = ByteArrayOutputStream()

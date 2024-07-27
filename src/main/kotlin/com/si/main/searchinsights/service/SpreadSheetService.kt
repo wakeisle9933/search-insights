@@ -162,6 +162,51 @@ class SpreadSheetService(
         }
     }
 
+    fun createBacklinkToolSheet(workbook: XSSFWorkbook) {
+        val sheet = workbook.createSheet("Backlink Tools")
+        val creationHelper = workbook.creationHelper
+
+        // Summary Header
+        val headerStyle = createHeaderStyle(workbook)
+        val summaryHeaderRow = sheet.createRow(0)
+        val summaryHeaders = listOf("Tool", "Link")
+        summaryHeaders.forEachIndexed { index, header ->
+            val cell = summaryHeaderRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        val backlinkTools = listOf(
+            Pair("Google Search Console", "https://search.google.com/search-console/links?resource_id=https%3A%2F%2F$baseDomain%2F&hl=ko"),
+            Pair("Semrush", "https://www.semrush.com/analytics/backlinks/overview/?q=$baseDomain&searchType=domain")
+        )
+
+        backlinkTools.forEachIndexed { index, (tool, link) ->
+            val row = sheet.createRow(index + 1)
+            row.createCell(0).setCellValue(tool)
+
+            val linkCell = row.createCell(1)
+            linkCell.setCellValue(link)
+
+            val hyperlink = creationHelper.createHyperlink(HyperlinkType.URL)
+            hyperlink.address = link
+            linkCell.hyperlink = hyperlink
+
+            // Link Style
+            val linkStyle = workbook.createCellStyle()
+            val linkFont = workbook.createFont()
+            linkFont.underline = Font.U_SINGLE
+            linkFont.color = IndexedColors.BLUE.index
+            linkStyle.setFont(linkFont)
+            linkCell.cellStyle = linkStyle
+        }
+
+        // Automatically adjust column widths
+        for (i in 0..2) {
+            sheet.autoSizeColumn(i)
+        }
+    }
+
     private fun getBacklinksFromAhrefs(): List<Backlink> {
         val client = OkHttpClient()
         val request = Request.Builder()
