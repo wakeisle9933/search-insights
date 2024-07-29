@@ -43,3 +43,4 @@ out/
 /src/main/resources/credential/search-insights.json
 /src/main/resources/application.properties
 last_run_date.txt
+docker_command
