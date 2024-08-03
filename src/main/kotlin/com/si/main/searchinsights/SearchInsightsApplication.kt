@@ -48,8 +48,8 @@ class SearchInsightsApplication(
             if(today.dayOfMonth == 3) {
                 val excelFile = searchConsoleService.createExcelFile(
                                     searchConsoleService.fetchSearchAnalyticsData(
-                                        DateUtils.getFirstDayOfCurrentMonth()
-                                        ,DateUtils.getLastDayOfCurrentMonth())
+                                        DateUtils.getFirstDayOfPreviousMonth()
+                                        ,DateUtils.getLastDayOfPreviousMonth())
                                 ,ReportFrequency.MONTHLY)
                 mailService.sendMail(excelFile, "monthly_search_insights.xlsx", ReportFrequency.MONTHLY)
             }
