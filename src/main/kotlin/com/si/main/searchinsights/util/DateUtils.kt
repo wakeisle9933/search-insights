@@ -6,6 +6,11 @@ import java.time.format.DateTimeFormatter
 object DateUtils {
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+    fun getFormattedCurrentDate(): String {
+        val date = LocalDate.now()
+        return date.format(formatter)
+    }
+
     fun getFormattedDateBeforeDays(days: Long): String {
         val date = LocalDate.now().minusDays(days)
         return date.format(formatter)
