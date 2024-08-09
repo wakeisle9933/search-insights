@@ -27,7 +27,7 @@ class SearchConsoleController(
                 searchConsoleService.fetchSearchAnalyticsData(), ReportFrequency.CUSTOM
             )
         }
-        mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM)
+        mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, fromDate, toDate)
     }
 
 }

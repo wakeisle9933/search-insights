@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object DateUtils {
+
+    private val shortDateFormatter = DateTimeFormatter.ofPattern("MM-dd")
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     fun getFormattedCurrentDate(): String {

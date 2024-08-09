@@ -12,7 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import java.time.DayOfWeek
-import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -27,7 +28,8 @@ class SearchInsightsApplication(
     private val logger = logger()
 
     override fun run(vararg args: String?) {
-        val today = LocalDate.now()
+        val seoulZone = ZoneId.of("Asia/Seoul")
+        val today = ZonedDateTime.now(seoulZone).toLocalDate()
         val lastRunDate = datePersistenceService.readLastRunDate()
 
         if (lastRunDate != today) {
@@ -39,7 +41,7 @@ class SearchInsightsApplication(
                 val excelFile = searchConsoleService.createExcelFile(
                                     searchConsoleService.fetchSearchAnalyticsData(
                                         DateUtils.getFormattedDateBeforeDays(10)
-                                        ,DateUtils.getFormattedDateBeforeDays(7))
+                                        ,DateUtils.getFormattedDateBeforeDays(3))
                                 ,ReportFrequency.WEEKLY)
                 mailService.sendMail(excelFile, "weekly_search_insights.xlsx", ReportFrequency.WEEKLY)
             }
