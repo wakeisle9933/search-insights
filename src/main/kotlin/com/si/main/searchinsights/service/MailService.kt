@@ -5,6 +5,9 @@ import com.si.main.searchinsights.util.DateUtils
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
 import org.apache.commons.io.output.ByteArrayOutputStream
+import org.apache.poi.openxml4j.util.ZipSecureFile
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.InputStreamSource
 import org.springframework.mail.javamail.JavaMailSender
@@ -32,6 +35,19 @@ class MailService(
             ReportFrequency.CUSTOM -> Pair(customStartDate ?: LocalDate.now(), customEndDate ?: LocalDate.now())
         }
 
+        // POI Security Setting
+        ZipSecureFile.setMinInflateRatio(0.001)
+
+        // Excel Sheet 0 A2 Cell Edit
+        val workbook = XSSFWorkbook(ByteArrayInputStream(excelData.toByteArray()))
+        val sheet = workbook.getSheetAt(0)
+        val cell = sheet.getRow(1).getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)
+        cell.setCellValue("$startDate ~ $endDate")
+
+        val modifiedExcelData = ByteArrayOutputStream()
+        workbook.write(modifiedExcelData)
+        workbook.close()
+
         helper.setSubject("${startDate.toString().substring(5)} ~ ${endDate.toString().substring(5)} $frequency Google Search Insights")
 
         val htmlContent = """
@@ -47,7 +63,7 @@ class MailService(
         helper.setText(htmlContent, true)
         helper.addBcc(mail)
         helper.addAttachment(fileName, InputStreamSource {
-            ByteArrayInputStream(excelData.toByteArray())
+            ByteArrayInputStream(modifiedExcelData.toByteArray())
         })
         mailSender.send(message)
     }
