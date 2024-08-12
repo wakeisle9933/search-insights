@@ -42,6 +42,7 @@ dependencies {
     annotationProcessor ("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.google.analytics:google-analytics-data:0.16.0")
 }
 
 
