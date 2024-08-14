@@ -20,11 +20,11 @@ class SearchConsoleController(
     ) {
         val excelFile = if (fromDate != null && toDate != null) {
             searchConsoleService.createExcelFile(
-                searchConsoleService.fetchSearchAnalyticsData(fromDate, toDate), ReportFrequency.CUSTOM
+                searchConsoleService.fetchSearchAnalyticsData(fromDate, toDate), searchConsoleService.fetchAnalyticsData(fromDate, toDate), ReportFrequency.CUSTOM
             )
         } else {
             searchConsoleService.createExcelFile(
-                searchConsoleService.fetchSearchAnalyticsData(), ReportFrequency.CUSTOM
+                searchConsoleService.fetchSearchAnalyticsData(), searchConsoleService.fetchAnalyticsData(fromDate, toDate), ReportFrequency.CUSTOM
             )
         }
         mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, fromDate, toDate)

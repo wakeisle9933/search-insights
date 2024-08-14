@@ -97,44 +97,47 @@ class SearchConsoleService (
     ): List<PageViewInfo> {
         val startDate = startDateParam ?: LocalDate.now().minusDays(3).toString()
         val endDate = endDateParam ?: startDate
-        val client = getAnalyticsSerivce()
-        val request = RunReportRequest.newBuilder().apply {
-            property = "properties/$propId"
-            addDateRanges(DateRange.newBuilder().apply {
-                this.startDate = DateUtils.convertToLocalDateString(startDate)
-                this.endDate = DateUtils.convertToLocalDateString(endDate)
-            })
-            addDimensions(Dimension.newBuilder().setName("pagePath"))
-            addDimensions(Dimension.newBuilder().setName("pageTitle"))
-            addMetrics(Metric.newBuilder().setName("screenPageViews"))
-            limit?.let { this.limit = it.toLong() }
-            addOrderBys(OrderBy.newBuilder().apply {
-                metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews").build()
-                desc = true
-            })
-        }.build()
 
-        return try {
-            val response = client.runReport(request)
-            response.rowsList.map { row ->
-                PageViewInfo(
-                    pagePath = row.getDimensionValues(0).value,
-                    pageTitle = row.getDimensionValues(1).value,
-                    pageViews = row.getMetricValues(0).value.toInt()
-                )
+        return getAnalyticsSerivce().use { client ->
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = DateUtils.convertToLocalDateString(startDate)
+                    this.endDate = DateUtils.convertToLocalDateString(endDate)
+                })
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                limit?.let { this.limit = it.toLong() }
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews").build()
+                    desc = true
+                })
+            }.build()
+
+            try {
+                client.runReport(request).rowsList.map { row ->
+                    PageViewInfo(
+                        pagePath = row.getDimensionValues(0).value,
+                        pageTitle = row.getDimensionValues(1).value,
+                        pageViews = row.getMetricValues(0).value.toInt()
+                    )
+                }
+            } catch (e: Exception) {
+                logger.error("Analytics Data fetch error", e)
+                emptyList()  // 에러 발생 시 빈 리스트 반환
             }
-        } catch (e: Exception) {
-            throw RuntimeException("Analytics Data fetch error : ${e.message}")
         }
     }
 
     fun createExcelFile(allRows: List<ApiDataRow>, analyticsAllRows: List<PageViewInfo>, reportFrequency: ReportFrequency): ByteArrayOutputStream {
         val workbook = XSSFWorkbook()
         spreadSheetService.createRawDataSheet(workbook, allRows)
+        spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
         if(reportFrequency == ReportFrequency.DAILY) {
-            spreadSheetService.createBacklinkToolSheet(workbook)
-            spreadSheetService.createBacklinkSummarySheet(workbook)
+            //spreadSheetService.createBacklinkToolSheet(workbook)
+            //spreadSheetService.createBacklinkSummarySheet(workbook)
         }
 
         val outputStream = ByteArrayOutputStream()

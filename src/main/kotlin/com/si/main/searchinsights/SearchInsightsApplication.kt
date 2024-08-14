@@ -32,14 +32,18 @@ class SearchInsightsApplication(
         val today = ZonedDateTime.now(seoulZone).toLocalDate()
         val lastRunDate = datePersistenceService.readLastRunDate()
 
+
         if (lastRunDate != today) {
-            val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(), ReportFrequency.DAILY)
+            val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(), searchConsoleService.fetchAnalyticsData(), ReportFrequency.DAILY)
             mailService.sendMail(excelFile, "daily_search_insights.xlsx", ReportFrequency.DAILY)
 
             // Weekly Report
             if(today.dayOfWeek == DayOfWeek.WEDNESDAY) {
                 val excelFile = searchConsoleService.createExcelFile(
                                     searchConsoleService.fetchSearchAnalyticsData(
+                                        DateUtils.getFormattedDateBeforeDays(10)
+                                        ,DateUtils.getFormattedDateBeforeDays(3))
+                                    ,searchConsoleService.fetchAnalyticsData(
                                         DateUtils.getFormattedDateBeforeDays(10)
                                         ,DateUtils.getFormattedDateBeforeDays(3))
                                 ,ReportFrequency.WEEKLY)
@@ -50,6 +54,9 @@ class SearchInsightsApplication(
             if(today.dayOfMonth == 3) {
                 val excelFile = searchConsoleService.createExcelFile(
                                     searchConsoleService.fetchSearchAnalyticsData(
+                                        DateUtils.getFirstDayOfPreviousMonth()
+                                        ,DateUtils.getLastDayOfPreviousMonth())
+                                    ,searchConsoleService.fetchAnalyticsData(
                                         DateUtils.getFirstDayOfPreviousMonth()
                                         ,DateUtils.getLastDayOfPreviousMonth())
                                 ,ReportFrequency.MONTHLY)

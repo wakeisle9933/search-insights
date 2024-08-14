@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.api.services.searchconsole.v1.model.ApiDataRow
 import com.si.main.searchinsights.data.Backlink
+import com.si.main.searchinsights.data.PageViewInfo
 import com.si.main.searchinsights.data.PrefixSummary
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -17,6 +18,8 @@ import kotlin.math.floor
 
 @Service
 class SpreadSheetService(
+    @Value("\${domain}")
+    private val fullDomain: String,
     @Value("\${base.domain}")
     private val baseDomain: String,
     @Value("\${rapidapi.key}")
@@ -24,7 +27,7 @@ class SpreadSheetService(
 ) {
 
     fun createRawDataSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
-        val sheet = workbook.createSheet("Search Analytics Raw Data")
+        val sheet = workbook.createSheet("Search Console Raw Data")
         val creationHelper = workbook.creationHelper
 
         // Summary Data
@@ -205,6 +208,67 @@ class SpreadSheetService(
         for (i in 0..2) {
             sheet.autoSizeColumn(i)
         }
+    }
+
+    fun createRawAnalyticsDataSheet(workbook: XSSFWorkbook, allRows: List<PageViewInfo>): Sheet  {
+        val sheet = workbook.createSheet("Google Analytics Raw Data")
+        val creationHelper = workbook.creationHelper
+
+        // Summary Header
+        val headerStyle = createHeaderStyle(workbook)
+        val summaryHeaderRow = sheet.createRow(0)
+        val summaryHeaders = listOf("Total Pageview")
+        summaryHeaders.forEachIndexed { index, header ->
+            val cell = summaryHeaderRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        val totalPageView = allRows.sumOf { it.pageViews }
+        val summaryDataRow = sheet.createRow(1)
+        summaryDataRow.createCell(0).setCellValue(totalPageView.toString())
+
+        // Header
+        val headerRow = sheet.createRow(3)
+        val headers = listOf("Views", "Page Title", "Page Path")
+        headers.forEachIndexed { index, header ->
+            val cell = headerRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        // Data
+        allRows.forEachIndexed { index, row ->
+            val dataRow = sheet.createRow(index + 4)
+            dataRow.createCell(0).setCellValue(row.pageTitle)
+            dataRow.createCell(1).setCellValue(row.pageViews.toString())
+            dataRow.createCell(2).setCellValue(row.pagePath)
+            // Making Hyperlink
+            val linkCell = dataRow.createCell(2)
+            val cleanPath = row.pagePath.removePrefix("/")
+            val fullUrl = fullDomain + cleanPath
+            linkCell.setCellValue(row.pagePath)
+
+            val hyperlink = creationHelper.createHyperlink(HyperlinkType.URL)
+            hyperlink.address = fullUrl
+            linkCell.hyperlink = hyperlink
+
+            // Link Style
+            val linkStyle = workbook.createCellStyle()
+            val linkFont = workbook.createFont()
+            linkFont.underline = Font.U_SINGLE
+            linkFont.color = IndexedColors.BLUE.index
+            linkStyle.setFont(linkFont)
+            linkCell.cellStyle = linkStyle
+        }
+
+        // Automatically adjust column widths
+        for (i in 0..2) {
+            sheet.autoSizeColumn(i)
+        }
+
+        return sheet
+
     }
 
     private fun getBacklinksFromAhrefs(): List<Backlink> {
