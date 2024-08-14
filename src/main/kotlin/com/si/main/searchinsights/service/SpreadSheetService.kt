@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.api.services.searchconsole.v1.model.ApiDataRow
 import com.si.main.searchinsights.data.Backlink
 import com.si.main.searchinsights.data.PageViewInfo
+import com.si.main.searchinsights.data.PrefixAnalyticsSummary
 import com.si.main.searchinsights.data.PrefixSummary
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -96,7 +97,7 @@ class SpreadSheetService(
 
     fun createPrefixSummarySheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): List<Sheet> {
         return listOf(1, 2, 3).map { wordCount ->
-            val sheetName = "Prefix Summary (${wordCount} word${if (wordCount > 1) "s" else ""})"
+            val sheetName = "Prefix GSC Summary (${wordCount}w)"
             val sheet = workbook.createSheet(sheetName)
             val groupedData = groupByPrefix(allRows, wordCount)
             val summaryData = calculatePrefixSummary(groupedData)
@@ -124,6 +125,40 @@ class SpreadSheetService(
 
             // automatically adjust column widths
             for (i in 0..4) {
+                sheet.autoSizeColumn(i)
+            }
+
+            sheet
+        }
+    }
+
+    fun createPrefixAnalyticsSummarySheet(workbook: XSSFWorkbook, allRows: List<PageViewInfo>): List<Sheet> {
+        return listOf(1, 2, 3).map { wordCount ->
+            val sheetName = "Prefix GA Summary (${wordCount}w)"
+            val sheet = workbook.createSheet(sheetName)
+            val groupedData = groupByAnalyticsPrefix(allRows, wordCount)
+            val summaryData = calculateAnalyticsPrefixSummary(groupedData)
+
+            // header setting, style
+            val headerStyle = createHeaderStyle(workbook)
+            val headerRow = sheet.createRow(0)
+            val headers =
+                listOf("Prefix", "Total PageViews")
+            headers.forEachIndexed { index, header ->
+                val cell = headerRow.createCell(index)
+                cell.setCellValue(header)
+                cell.cellStyle = headerStyle
+            }
+
+            // input data
+            summaryData.forEachIndexed { index, summary ->
+                val row = sheet.createRow(index + 1)
+                row.createCell(0).setCellValue(summary.prefix)
+                row.createCell(1).setCellValue(summary.totalPageView)
+            }
+
+            // automatically adjust column widths
+            for (i in 0..1) {
                 sheet.autoSizeColumn(i)
             }
 
@@ -217,7 +252,7 @@ class SpreadSheetService(
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
         val summaryHeaderRow = sheet.createRow(0)
-        val summaryHeaders = listOf("Total Pageview")
+        val summaryHeaders = listOf("Total PageView")
         summaryHeaders.forEachIndexed { index, header ->
             val cell = summaryHeaderRow.createCell(index)
             cell.setCellValue(header)
@@ -310,13 +345,41 @@ class SpreadSheetService(
         }.sortedByDescending { it.totalClicks }
     }
 
+    fun calculateAnalyticsPrefixSummary(groupedData: Map<String, List<PageViewInfo>>): List<PrefixAnalyticsSummary> {
+        return groupedData.map { (prefix, rows) ->
+            PrefixAnalyticsSummary(
+                prefix = prefix,
+                totalPageView = rows.sumOf { it.pageViews }
+            )
+        }.sortedByDescending { it.totalPageView }
+    }
+
     fun getPrefix(query: String, wordCount: Int): String {
         return query.split(" ").take(wordCount).joinToString(" ")
     }
 
-    fun groupByPrefix(allRows: List<ApiDataRow>, wordCount: Int): Map<String, List<ApiDataRow>> {
+    fun <T> groupByPrefix(allRows: List<T>, wordCount: Int, keyExtractor: (T) -> String): Map<String, List<T>> {
         return allRows.groupBy { row ->
-            val words = row.getKeys()[0].split(" ")
+            val words = keyExtractor(row).split(" ")
+            when {
+                wordCount == 1 -> words.firstOrNull() ?: ""
+                words.size >= wordCount -> words.take(wordCount).joinToString(" ")
+                else -> ""
+            }
+        }.filterKeys { it.isNotEmpty() }
+    }
+
+    fun groupByPrefix(allRows: List<ApiDataRow>, wordCount: Int): Map<String, List<ApiDataRow>> {
+        return groupByPrefixGeneric(allRows, wordCount) { it.getKeys()[0] }
+    }
+
+    fun groupByAnalyticsPrefix(allRows: List<PageViewInfo>, wordCount: Int): Map<String, List<PageViewInfo>> {
+        return groupByPrefixGeneric(allRows, wordCount) { it.pageTitle }
+    }
+
+    private fun <T> groupByPrefixGeneric(allRows: List<T>, wordCount: Int, keyExtractor: (T) -> String): Map<String, List<T>> {
+        return allRows.groupBy { row ->
+            val words = keyExtractor(row).split(" ")
             when {
                 wordCount == 1 -> words.firstOrNull() ?: ""
                 words.size >= wordCount -> words.take(wordCount).joinToString(" ")

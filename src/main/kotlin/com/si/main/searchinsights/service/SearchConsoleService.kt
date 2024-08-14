@@ -120,7 +120,7 @@ class SearchConsoleService (
                     PageViewInfo(
                         pagePath = row.getDimensionValues(0).value,
                         pageTitle = row.getDimensionValues(1).value,
-                        pageViews = row.getMetricValues(0).value.toInt()
+                        pageViews = row.getMetricValues(0).value.toDouble()
                     )
                 }
             } catch (e: Exception) {
@@ -133,8 +133,9 @@ class SearchConsoleService (
     fun createExcelFile(allRows: List<ApiDataRow>, analyticsAllRows: List<PageViewInfo>, reportFrequency: ReportFrequency): ByteArrayOutputStream {
         val workbook = XSSFWorkbook()
         spreadSheetService.createRawDataSheet(workbook, allRows)
-        spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
+        spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
+        spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)
         if(reportFrequency == ReportFrequency.DAILY) {
             spreadSheetService.createBacklinkToolSheet(workbook)
             spreadSheetService.createBacklinkSummarySheet(workbook)
