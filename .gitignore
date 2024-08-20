@@ -44,3 +44,4 @@ out/
 /src/main/resources/application.properties
 last_run_date.txt
 docker_command
+repopack-output.txt
