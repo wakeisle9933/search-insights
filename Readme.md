@@ -7,9 +7,9 @@ Hey there! Welcome to the Search Insights project! 🎉 This project analyzes Go
 1. Fetch Google Search Console data 🕵️‍♀️
 2. Grab Google Analytics data 📈
 3. Analyze and summarize data 🧮
-4. Generate Excel reports 📑
-5. Send reports via email 📧
-6. Analyze the backlinks that came to your website 🥸
+4. Analyze the backlinks that came to your website 🥸
+5. Generate Excel reports 📑
+6. Send reports via email 📧
 
 ## Getting Started 🚀
 
