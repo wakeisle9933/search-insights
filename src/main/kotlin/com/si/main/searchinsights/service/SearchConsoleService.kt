@@ -136,10 +136,14 @@ class SearchConsoleService (
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
         spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
         spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)
+
+        if(reportFrequency == ReportFrequency.WEEKLY ||
+            reportFrequency == ReportFrequency.MONTHLY) {
+            spreadSheetService.createBacklinkSummarySheet(workbook)
+        }
+
         if(reportFrequency == ReportFrequency.DAILY) {
             spreadSheetService.createBacklinkToolSheet(workbook)
-            // spreadSheetService.createBacklinkSummarySheet(workbook)
-            // API LIMIT TEMP BLOCK
         }
 
         val outputStream = ByteArrayOutputStream()
