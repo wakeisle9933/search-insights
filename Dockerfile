@@ -19,6 +19,9 @@ WORKDIR /app
 # Get Gradle / Source
 COPY . .
 
+# Python 파일 복사
+COPY src/main/resources/python /app/src/main/resources/python
+
 RUN ./gradlew build -x test
 
 CMD ["java", "-jar", "/app/build/libs/search-insights-0.0.1-SNAPSHOT.jar"]
