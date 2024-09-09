@@ -133,6 +133,7 @@ class SearchConsoleService (
     fun createExcelFile(allRows: List<ApiDataRow>, analyticsAllRows: List<PageViewInfo>, reportFrequency: ReportFrequency): ByteArrayOutputStream {
         val workbook = XSSFWorkbook()
         spreadSheetService.createRawDataSheet(workbook, allRows)
+        spreadSheetService.createHighImpressionsLowPositionSheet(workbook, allRows)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
         spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
         spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)

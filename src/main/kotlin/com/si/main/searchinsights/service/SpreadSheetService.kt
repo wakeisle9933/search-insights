@@ -333,6 +333,59 @@ class SpreadSheetService(
         } ?: emptyList()
     }
 
+    fun createHighImpressionsLowPositionSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
+        val sheet = workbook.createSheet("Potential Hits")
+        val creationHelper = workbook.creationHelper
+
+        // Header Style
+        val headerStyle = createHeaderStyle(workbook)
+
+        // Header
+        val headerRow = sheet.createRow(0)
+        val headers = listOf("Query", "Position", "Clicks", "Impressions", "CTR", "Page Link")
+        headers.forEachIndexed { index, header ->
+            val cell = headerRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
+        }
+
+        // Data Filtering, Sorting
+        val filteredRows = allRows.filter { it.position > 3.0 }
+            .sortedByDescending { it.impressions }
+
+        filteredRows.forEachIndexed { index, row ->
+            val dataRow = sheet.createRow(index + 1)
+            dataRow.createCell(0).setCellValue(row.getKeys()[0])
+            dataRow.createCell(1).setCellValue(floor(row.position * 100) / 100)
+            dataRow.createCell(2).setCellValue(row.clicks)
+            dataRow.createCell(3).setCellValue(row.impressions)
+            dataRow.createCell(4).setCellValue(floor(row.ctr * 100) / 100)
+
+            // Hyperlink
+            val linkCell = dataRow.createCell(5)
+            linkCell.setCellValue(row.getKeys()[1])
+
+            val hyperlink = creationHelper.createHyperlink(HyperlinkType.URL)
+            hyperlink.address = row.getKeys()[1]
+            linkCell.hyperlink = hyperlink
+
+            // Hyperlink Style
+            val linkStyle = workbook.createCellStyle()
+            val linkFont = workbook.createFont()
+            linkFont.underline = Font.U_SINGLE
+            linkFont.color = IndexedColors.BLUE.index
+            linkStyle.setFont(linkFont)
+            linkCell.cellStyle = linkStyle
+        }
+
+        // Automatically adjust column widths
+        for (i in 0..5) {
+            sheet.autoSizeColumn(i)
+        }
+
+        return sheet
+    }
+
     fun calculatePrefixSummary(groupedData: Map<String, List<ApiDataRow>>): List<PrefixSummary> {
         return groupedData.map { (prefix, rows) ->
             PrefixSummary(
