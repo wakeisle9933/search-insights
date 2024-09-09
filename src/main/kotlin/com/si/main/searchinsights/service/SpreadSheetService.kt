@@ -20,6 +20,7 @@ import kotlin.math.floor
 
 @Service
 class SpreadSheetService(
+    private val googleTrendsService: GoogleTrendsService,
     @Value("\${domain}")
     private val fullDomain: String,
     @Value("\${base.domain}")
@@ -392,39 +393,40 @@ class SpreadSheetService(
         return sheet
     }
 
-    fun fetchGoogleTrends(): List<String> {
-        val scriptPath = javaClass.classLoader.getResource("python/fetch_trends.py")?.toURI()?.path
-            ?: throw IllegalStateException("Python script not found")
+    fun createGoogleTrendsSheet(workbook: XSSFWorkbook): Sheet {
+        val sheet = workbook.createSheet("Google Trends")
+        val headerStyle = createHeaderStyle(workbook)
 
-        // Windows에서 경로 문제 해결
-        val fixedPath = if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            scriptPath.removePrefix("/")
-        } else {
-            scriptPath
+        // Rank Column Style
+        val centerStyle = workbook.createCellStyle()
+        centerStyle.alignment = HorizontalAlignment.CENTER
+
+        // Header
+        val headerRow = sheet.createRow(0)
+        val headers = listOf("Rank", "Keyword")
+        headers.forEachIndexed { index, header ->
+            val cell = headerRow.createCell(index)
+            cell.setCellValue(header)
+            cell.cellStyle = headerStyle
         }
 
-        val process = ProcessBuilder("python", fixedPath).start()
+        // Get Google Trends
+        val trends = googleTrendsService.fetchGoogleTrends()
 
-        val result = process.inputStream.bufferedReader().readText()
-        val error = process.errorStream.bufferedReader().readText()
-        process.waitFor()
-
-        if (error.isNotEmpty()) {
-            logger.error("Error from Python script: $error")
-            return emptyList()
+        // Set data
+        trends.forEachIndexed { index, keyword ->
+            val row = sheet.createRow(index + 1)
+            val rankCell = row.createCell(0)
+            rankCell.setCellValue((index + 1).toDouble())
+            rankCell.cellStyle = centerStyle  // Centre alignment
+            row.createCell(1).setCellValue(keyword)
         }
 
-        if (result.isEmpty()) {
-            logger.error("No data received from Python script.")
-            return emptyList()
-        }
+        // Column widths setting
+        sheet.setColumnWidth(0, 10 * 128)
+        sheet.autoSizeColumn(1)
 
-        return try {
-            jacksonObjectMapper().readValue(result, object : TypeReference<List<String>>() {})
-        } catch (e: Exception) {
-            logger.error("Error parsing Google Trends data", e)
-            emptyList()
-        }
+        return sheet
     }
 
     fun calculatePrefixSummary(groupedData: Map<String, List<ApiDataRow>>): List<PrefixSummary> {
