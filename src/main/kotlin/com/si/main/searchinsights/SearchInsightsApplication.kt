@@ -5,6 +5,7 @@ import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.service.DatePersistenceService
 import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
+import com.si.main.searchinsights.service.SpreadSheetService
 import com.si.main.searchinsights.util.DateUtils
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
@@ -22,6 +23,7 @@ class SearchInsightsApplication(
     private val searchConsoleService: SearchConsoleService,
     private val mailService: MailService,
     private val datePersistenceService: DatePersistenceService,
+    private val spreadSheetService: SpreadSheetService,
     private val context: ApplicationContext
 ) : CommandLineRunner {
 
@@ -31,7 +33,6 @@ class SearchInsightsApplication(
         val seoulZone = ZoneId.of("Asia/Seoul")
         val today = ZonedDateTime.now(seoulZone).toLocalDate()
         val lastRunDate = datePersistenceService.readLastRunDate()
-
 
         if (lastRunDate != today) {
             val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(), searchConsoleService.fetchAnalyticsData(), ReportFrequency.DAILY)

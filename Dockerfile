@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
+# Python, pytrends 설치
+RUN apt-get update && apt-get install -y python3 python3-pip
+RUN pip3 install pytrends
+
 WORKDIR /app
 
 # Get Gradle / Source

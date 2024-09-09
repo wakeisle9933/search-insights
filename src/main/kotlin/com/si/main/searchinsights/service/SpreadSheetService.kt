@@ -7,6 +7,7 @@ import com.si.main.searchinsights.data.Backlink
 import com.si.main.searchinsights.data.PageViewInfo
 import com.si.main.searchinsights.data.PrefixAnalyticsSummary
 import com.si.main.searchinsights.data.PrefixSummary
+import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.poi.common.usermodel.HyperlinkType
@@ -25,7 +26,12 @@ class SpreadSheetService(
     private val baseDomain: String,
     @Value("\${rapidapi.key}")
     private val rapidApiKey: String
+
 ) {
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 
     fun createRawDataSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
         val sheet = workbook.createSheet("Search Console Raw Data")
@@ -384,6 +390,41 @@ class SpreadSheetService(
         }
 
         return sheet
+    }
+
+    fun fetchGoogleTrends(): List<String> {
+        val scriptPath = javaClass.classLoader.getResource("python/fetch_trends.py")?.toURI()?.path
+            ?: throw IllegalStateException("Python script not found")
+
+        // Windows에서 경로 문제 해결
+        val fixedPath = if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            scriptPath.removePrefix("/")
+        } else {
+            scriptPath
+        }
+
+        val process = ProcessBuilder("python", fixedPath).start()
+
+        val result = process.inputStream.bufferedReader().readText()
+        val error = process.errorStream.bufferedReader().readText()
+        process.waitFor()
+
+        if (error.isNotEmpty()) {
+            logger.error("Error from Python script: $error")
+            return emptyList()
+        }
+
+        if (result.isEmpty()) {
+            logger.error("No data received from Python script.")
+            return emptyList()
+        }
+
+        return try {
+            jacksonObjectMapper().readValue(result, object : TypeReference<List<String>>() {})
+        } catch (e: Exception) {
+            logger.error("Error parsing Google Trends data", e)
+            emptyList()
+        }
     }
 
     fun calculatePrefixSummary(groupedData: Map<String, List<ApiDataRow>>): List<PrefixSummary> {

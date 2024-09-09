@@ -37,12 +37,12 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.apache.poi:poi-ooxml:5.2.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     compileOnly ("org.projectlombok:lombok")
     annotationProcessor ("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.google.analytics:google-analytics-data:0.16.0")
+    implementation("io.github.microutils:kotlin-logging:2.1.23")
 }
 
 
@@ -54,4 +54,11 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<ProcessResources> {
+    from("src/main/resources/python") {
+        into("python")
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 }
