@@ -411,7 +411,7 @@ class SpreadSheetService(
         }
 
         // Get Google Trends
-        val trends = googleTrendsService.fetchGoogleTrends()
+        val trends = googleTrendsService.fetchTrendingSearches()
 
         // Set data
         trends.forEachIndexed { index, keyword ->

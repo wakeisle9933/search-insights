@@ -7,21 +7,36 @@ import org.springframework.stereotype.Service
 
 @Service
 class GoogleTrendsService {
-    companion object {
-        private val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
+
+    private val mapper = jacksonObjectMapper()
+
+    fun fetchTrendingSearches(): List<String> {
+        val result = executePythonScript("trending_searches")
+        return mapper.convertValue(result, object : TypeReference<List<String>>() {})
     }
-    fun fetchGoogleTrends(): List<String> {
-        val scriptPath = javaClass.classLoader.getResource("python/fetch_trends.py")?.toURI()?.path
-            ?: throw IllegalStateException("Python script not found")
 
-        // Windows에서 경로 문제 해결
-        val fixedPath = if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            scriptPath.removePrefix("/")
-        } else {
-            scriptPath
-        }
+    fun fetchRelatedQueries(keyword: String): Map<String, Any> {
+        val result = executePythonScript("related_queries", keyword)
+        return mapper.convertValue(result, object : TypeReference<Map<String, Any>>() {})
+    }
 
-        val process = ProcessBuilder("python", fixedPath).start()
+    fun fetchRelatedTopics(keyword: String): Map<String, Any> {
+        val result = executePythonScript("related_topics", keyword)
+        return mapper.convertValue(result, object : TypeReference<Map<String, Any>>() {})
+    }
+
+    fun fetchSuggestions(keyword: String): List<Map<String, String>> {
+        val result = executePythonScript("suggestions", keyword)
+        return mapper.convertValue(result, object : TypeReference<List<Map<String, String>>>() {})
+    }
+
+    private fun executePythonScript(method: String, vararg args: String): Any {
+        // 절대 경로로 수정
+        val scriptPath = "/app/src/main/resources/python/fetch_trends.py"
+
+        val command = listOf("python3", scriptPath, method) + args
+        val process = ProcessBuilder(command).start()
 
         val result = process.inputStream.bufferedReader().readText()
         val error = process.errorStream.bufferedReader().readText()
@@ -29,19 +44,9 @@ class GoogleTrendsService {
 
         if (error.isNotEmpty()) {
             logger.error("Error from Python script: $error")
-            return emptyList()
+            throw RuntimeException("Error executing Python script")
         }
 
-        if (result.isEmpty()) {
-            logger.error("No data received from Python script.")
-            return emptyList()
-        }
-
-        return try {
-            jacksonObjectMapper().readValue(result, object : TypeReference<List<String>>() {})
-        } catch (e: Exception) {
-            logger.error("Error parsing Google Trends data", e)
-            emptyList()
-        }
+        return jacksonObjectMapper().readValue(result, Any::class.java)
     }
 }
