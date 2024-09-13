@@ -388,6 +388,12 @@ class SpreadSheetService(
         // Automatically adjust column widths
         for (i in 0..5) {
             sheet.autoSizeColumn(i)
+            if (i == 0) {
+                val maxWidth = 12000
+                if (sheet.getColumnWidth(i) > maxWidth) {
+                    sheet.setColumnWidth(i, maxWidth)
+                }
+            }
         }
 
         return sheet
