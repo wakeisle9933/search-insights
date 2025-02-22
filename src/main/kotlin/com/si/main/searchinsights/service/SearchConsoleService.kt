@@ -134,7 +134,6 @@ class SearchConsoleService (
         val workbook = XSSFWorkbook()
         spreadSheetService.createRawDataSheet(workbook, allRows)
         spreadSheetService.createHighImpressionsLowPositionSheet(workbook, allRows)
-        spreadSheetService.createGoogleTrendsSheet(workbook)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
         spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
         spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)

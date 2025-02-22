@@ -20,7 +20,6 @@ import kotlin.math.floor
 
 @Service
 class SpreadSheetService(
-    private val googleTrendsService: GoogleTrendsService,
     @Value("\${domain}")
     private val fullDomain: String,
     @Value("\${base.domain}")
@@ -395,42 +394,6 @@ class SpreadSheetService(
                 }
             }
         }
-
-        return sheet
-    }
-
-    fun createGoogleTrendsSheet(workbook: XSSFWorkbook): Sheet {
-        val sheet = workbook.createSheet("Google Trends")
-        val headerStyle = createHeaderStyle(workbook)
-
-        // Rank Column Style
-        val centerStyle = workbook.createCellStyle()
-        centerStyle.alignment = HorizontalAlignment.CENTER
-
-        // Header
-        val headerRow = sheet.createRow(0)
-        val headers = listOf("Rank", "Keyword")
-        headers.forEachIndexed { index, header ->
-            val cell = headerRow.createCell(index)
-            cell.setCellValue(header)
-            cell.cellStyle = headerStyle
-        }
-
-        // Get Google Trends
-        val trends = googleTrendsService.fetchTrendingSearches()
-
-        // Set data
-        trends.forEachIndexed { index, keyword ->
-            val row = sheet.createRow(index + 1)
-            val rankCell = row.createCell(0)
-            rankCell.setCellValue((index + 1).toDouble())
-            rankCell.cellStyle = centerStyle  // Centre alignment
-            row.createCell(1).setCellValue(keyword)
-        }
-
-        // Column widths setting
-        sheet.setColumnWidth(0, 10 * 128)
-        sheet.autoSizeColumn(1)
 
         return sheet
     }
