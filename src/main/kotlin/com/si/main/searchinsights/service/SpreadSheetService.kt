@@ -387,11 +387,14 @@ class SpreadSheetService(
         // Automatically adjust column widths
         for (i in 0..5) {
             sheet.autoSizeColumn(i)
-            if (i == 0) {
-                val maxWidth = 12000
-                if (sheet.getColumnWidth(i) > maxWidth) {
+            if (i == 0) {  // Query 열인 경우
+                val maxWidth = 5 * 1440  // 최대 너비 설정
+                val currentWidth = sheet.getColumnWidth(i)
+                // 현재 너비가 최대 너비보다 크면 최대 너비로 제한
+                if (currentWidth > maxWidth) {
                     sheet.setColumnWidth(i, maxWidth)
                 }
+                // 현재 너비가 최대 너비보다 작으면 현재 너비 유지 (자동 조정된 값)
             }
         }
 
