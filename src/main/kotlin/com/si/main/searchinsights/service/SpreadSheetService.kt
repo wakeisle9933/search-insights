@@ -36,6 +36,7 @@ class SpreadSheetService(
     fun createRawDataSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
         val sheet = workbook.createSheet("Search Console Raw Data")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Summary Data
         val avgPosition = allRows.map { it.position }.average()
@@ -90,11 +91,6 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Link Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
@@ -209,6 +205,7 @@ class SpreadSheetService(
     fun createBacklinkToolSheet(workbook: XSSFWorkbook) {
         val sheet = workbook.createSheet("Backlink Tools")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -237,11 +234,6 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Link Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
@@ -254,6 +246,7 @@ class SpreadSheetService(
     fun createRawAnalyticsDataSheet(workbook: XSSFWorkbook, allRows: List<PageViewInfo>): Sheet  {
         val sheet = workbook.createSheet("Google Analytics Raw Data")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -295,11 +288,6 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Link Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
@@ -342,6 +330,7 @@ class SpreadSheetService(
     fun createHighImpressionsLowPositionSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
         val sheet = workbook.createSheet("Potential Hits")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Header Style
         val headerStyle = createHeaderStyle(workbook)
@@ -376,11 +365,6 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Hyperlink Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
@@ -473,6 +457,15 @@ class SpreadSheetService(
         style.bottomBorderColor = IndexedColors.BLACK.index
 
         return style
+    }
+
+    private fun createLinkStyle(workbook: XSSFWorkbook): XSSFCellStyle {
+        val linkStyle = workbook.createCellStyle()
+        val linkFont = workbook.createFont()
+        linkFont.underline = Font.U_SINGLE
+        linkFont.color = IndexedColors.BLUE.index
+        linkStyle.setFont(linkFont)
+        return linkStyle
     }
 
 }
