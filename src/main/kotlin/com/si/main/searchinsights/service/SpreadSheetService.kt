@@ -294,6 +294,14 @@ class SpreadSheetService(
         // Automatically adjust column widths
         for (i in 0..2) {
             sheet.autoSizeColumn(i)
+            if (i == 0) { // 첫 번째 열 최대 길이 제한
+                val maxWidth = 13 * 1440
+                val currentWidth = sheet.getColumnWidth(i)
+
+                if (currentWidth > maxWidth) {
+                    sheet.setColumnWidth(i, maxWidth)
+                }
+            }
         }
 
         return sheet
