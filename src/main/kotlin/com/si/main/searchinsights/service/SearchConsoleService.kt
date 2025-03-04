@@ -64,7 +64,7 @@ class SearchConsoleService (
 
 
     fun fetchSearchAnalyticsData(
-        startDate: String = DateUtils.getFormattedDateBeforeDays(4),
+        startDate: String = DateUtils.getFormattedDateBeforeDays(3),
         endDate: String = startDate
     ): List<ApiDataRow> {
         val service = getSearchConsoleService()
