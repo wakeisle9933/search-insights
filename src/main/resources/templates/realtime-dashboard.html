@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 대시보드 - Search Insights</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1a73e8;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    .dashboard-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .dashboard-title {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .active-users {
+      font-size: 24px;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+    .update-time {
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+    }
+    .progress-bar {
+      background-color: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    .progress-value {
+      background-color: #1a73e8;
+      height: 8px;
+      border-radius: 4px;
+    }
+
+    /* 메인 탭 스타일링 */
+    .main-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    .main-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      background-color: #f8f8f8;
+      margin-right: 5px;
+      transition: all 0.3s ease;
+    }
+    .main-tab:hover {
+      background-color: #e6f7ff;
+    }
+    .main-tab.active {
+      background-color: #1a73e8;
+      color: white;
+      font-weight: bold;
+      transform: translateY(-3px);
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* 서브 탭 스타일링 */
+    .sub-tabs {
+      display: flex;
+      margin-bottom: 15px;
+      margin-top: 10px;
+    }
+    .sub-tab {
+      padding: 8px 15px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background-color: #f8f8f8;
+      margin-right: 8px;
+      font-size: 0.9em;
+      transition: all 0.2s ease;
+    }
+    .sub-tab:hover {
+      background-color: #e6f7ff;
+    }
+    .sub-tab.active {
+      background-color: #4285f4;
+      color: white;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    .sub-tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+    .sub-tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 귀여운 아이콘들 */
+    .heart-icon {
+      color: #ff4081;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>😎 실시간 대시보드</h1>
+
+  <!-- 메인 탭 -->
+  <div class="main-tabs">
+    <div class="main-tab active" onclick="showMainTab('today')">🌞 오늘 전체</div>
+    <div class="main-tab" onclick="showMainTab('last30min')">⚡ 최근 30분</div>
+  </div>
+
+  <!-- 오늘 전체 탭 컨텐츠 -->
+  <div id="today-content" class="tab-content active">
+    <div class="dashboard-box">
+      <div class="dashboard-title">🔎 오늘 전체 활성 사용자</div>
+      <div class="active-users" id="today-active-users">0</div>
+      <div class="update-time" id="today-update-time">마지막 업데이트: -</div>
+    </div>
+
+    <!-- 서브 탭 (오늘 전체) -->
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="showSubTab('today', 'full')">📊 전체 제목</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'prefix1')">1️⃣ 접두어 (1단어)</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'prefix2')">2️⃣ 접두어 (2단어)</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'prefix3')">3️⃣ 접두어 (3단어)</div>
+    </div>
+
+    <!-- 전체 제목 테이블 (오늘) -->
+    <div id="today-full-content" class="sub-tab-content active">
+      <div class="dashboard-box">
+        <div class="dashboard-title">📈 페이지 제목별 조회수 (오늘)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>페이지 제목</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-page-title-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 1단어 테이블 (오늘) -->
+    <div id="today-prefix1-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (1단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-prefix1-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 2단어 테이블 (오늘) -->
+    <div id="today-prefix2-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (2단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-prefix2-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 3단어 테이블 (오늘) -->
+    <div id="today-prefix3-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (3단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-prefix3-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최근 30분 탭 컨텐츠 -->
+  <div id="last30min-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="dashboard-title">🔥 최근 30분 활성 사용자</div>
+      <div class="active-users" id="last30min-active-users">0</div>
+      <div class="update-time" id="last30min-update-time">마지막 업데이트: -</div>
+    </div>
+
+    <!-- 서브 탭 (최근 30분) -->
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="showSubTab('last30min', 'full')">📊 전체 제목</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'prefix1')">1️⃣ 접두어 (1단어)</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'prefix2')">2️⃣ 접두어 (2단어)</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'prefix3')">3️⃣ 접두어 (3단어)</div>
+    </div>
+
+    <!-- 전체 제목 테이블 (최근 30분) -->
+    <div id="last30min-full-content" class="sub-tab-content active">
+      <div class="dashboard-box">
+        <div class="dashboard-title">📈 페이지 제목별 조회수 (최근 30분)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>페이지 제목</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-page-title-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 1단어 테이블 (최근 30분) -->
+    <div id="last30min-prefix1-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (1단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-prefix1-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 2단어 테이블 (최근 30분) -->
+    <div id="last30min-prefix2-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (2단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-prefix2-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 3단어 테이블 (최근 30분) -->
+    <div id="last30min-prefix3-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (3단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-prefix3-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 페이지 로드시 처음 데이터 가져오기
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchTodayData();
+    fetchLast30MinData();
+
+    // 10초마다 데이터 갱신
+    setInterval(fetchTodayData, 10000);
+    setInterval(fetchLast30MinData, 10000);
+  });
+
+  // 메인 탭 전환 함수
+  function showMainTab(tabName) {
+    // 모든 메인 탭과 탭 컨텐츠를 비활성화
+    document.querySelectorAll('.main-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+
+    // 선택한 메인 탭과 해당 컨텐츠를 활성화
+    if (tabName === 'today') {
+      document.querySelector('.main-tab:nth-child(1)').classList.add('active');
+      document.getElementById('today-content').classList.add('active');
+    } else if (tabName === 'last30min') {
+      document.querySelector('.main-tab:nth-child(2)').classList.add('active');
+      document.getElementById('last30min-content').classList.add('active');
+    }
+  }
+
+  // 서브 탭 전환 함수
+  function showSubTab(mainTab, subTab) {
+    // 해당 메인 탭 내의 모든 서브 탭과 서브 탭 컨텐츠를 비활성화
+    const subTabs = document.querySelectorAll(`#${mainTab}-content .sub-tab`);
+    const subContents = document.querySelectorAll(`#${mainTab}-content .sub-tab-content`);
+
+    subTabs.forEach(tab => {
+      tab.classList.remove('active');
+    });
+    subContents.forEach(content => {
+      content.classList.remove('active');
+    });
+
+    // 선택한 서브 탭 활성화 (indexOf로 찾기)
+    const tabTypes = ['full', 'prefix1', 'prefix2', 'prefix3'];
+    const tabIndex = tabTypes.indexOf(subTab);
+    if (tabIndex >= 0) {
+      subTabs[tabIndex].classList.add('active');
+      document.getElementById(`${mainTab}-${subTab}-content`).classList.add('active');
+    }
+  }
+
+  function fetchTodayData() {
+    fetch('/api/realtime-pageviews')
+    .then(response => response.json())
+    .then(data => {
+      // 활성 사용자 및 전체 페이지뷰 업데이트
+      document.getElementById('today-active-users').textContent = data.activeUsers;
+      updateTime('today-update-time');
+
+      // 전체 테이블 업데이트
+      updatePageViewsTable(data.pageViews, 'today-page-title-views');
+
+      // 접두어별 테이블 업데이트
+      updatePrefixViewsTable(data.pageViews, 'today-prefix1-views', 1);
+      updatePrefixViewsTable(data.pageViews, 'today-prefix2-views', 2);
+      updatePrefixViewsTable(data.pageViews, 'today-prefix3-views', 3);
+    })
+    .catch(error => console.error('오늘 데이터 가져오기 실패:', error));
+  }
+
+  function fetchLast30MinData() {
+    fetch('/api/last30min-pageviews')
+    .then(response => response.json())
+    .then(data => {
+      // 활성 사용자 및 전체 페이지뷰 업데이트
+      document.getElementById('last30min-active-users').textContent = data.activeUsers;
+      updateTime('last30min-update-time');
+
+      // 전체 테이블 업데이트
+      updatePageViewsTable(data.pageViews, 'last30min-page-title-views');
+
+      // 접두어별 테이블 업데이트
+      updatePrefixViewsTable(data.pageViews, 'last30min-prefix1-views', 1);
+      updatePrefixViewsTable(data.pageViews, 'last30min-prefix2-views', 2);
+      updatePrefixViewsTable(data.pageViews, 'last30min-prefix3-views', 3);
+    })
+    .catch(error => console.error('최근 30분 데이터 가져오기 실패:', error));
+  }
+
+  // 전체 페이지 제목별 조회수 테이블 업데이트
+  function updatePageViewsTable(data, tableId) {
+    const tableBody = document.getElementById(tableId);
+    tableBody.innerHTML = '';
+
+    // 총 조회수 계산
+    const totalViews = data.reduce((sum, item) => sum + item.pageViews, 0);
+
+    // 데이터 정렬 (조회수 기준 내림차순)
+    data.sort((a, b) => b.pageViews - a.pageViews);
+
+    // 테이블에 데이터 추가
+    data.forEach(item => {
+      const row = document.createElement('tr');
+
+      // 페이지 제목 셀
+      const titleCell = document.createElement('td');
+      titleCell.textContent = item.pageTitle || '(제목 없음)';
+      row.appendChild(titleCell);
+
+      // 조회수 셀
+      const viewsCell = document.createElement('td');
+      viewsCell.textContent = Math.round(item.pageViews);
+      row.appendChild(viewsCell);
+
+      // 비율 셀 (프로그레스 바)
+      const ratioCell = document.createElement('td');
+      const percentage = totalViews > 0 ? (item.pageViews / totalViews * 100) : 0;
+
+      const progressContainer = document.createElement('div');
+      progressContainer.style.display = 'flex';
+      progressContainer.style.alignItems = 'center';
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.style.width = '100px';
+
+      const progressValue = document.createElement('div');
+      progressValue.className = 'progress-value';
+      progressValue.style.width = `${percentage}%`;
+
+      const percentText = document.createElement('span');
+      percentText.textContent = `${percentage.toFixed(1)}%`;
+
+      progressBar.appendChild(progressValue);
+      progressContainer.appendChild(progressBar);
+      progressContainer.appendChild(percentText);
+      ratioCell.appendChild(progressContainer);
+
+      row.appendChild(ratioCell);
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 접두어(Prefix)별 조회수 테이블 업데이트
+  function updatePrefixViewsTable(data, tableId, wordCount) {
+    const tableBody = document.getElementById(tableId);
+    tableBody.innerHTML = '';
+
+    // 페이지 제목을 접두어로 그룹화
+    const prefixGroups = groupByPrefix(data, wordCount);
+
+    // 총 조회수 계산
+    const totalViews = data.reduce((sum, item) => sum + item.pageViews, 0);
+
+    // 정렬된 접두어 배열 (조회수 기준 내림차순)
+    const sortedPrefixes = Object.keys(prefixGroups).sort((a, b) => {
+      const sumA = prefixGroups[a].reduce((sum, item) => sum + item.pageViews, 0);
+      const sumB = prefixGroups[b].reduce((sum, item) => sum + item.pageViews, 0);
+      return sumB - sumA;
+    });
+
+    // 테이블에 데이터 추가
+    sortedPrefixes.forEach(prefix => {
+      const items = prefixGroups[prefix];
+      const prefixTotalViews = items.reduce((sum, item) => sum + item.pageViews, 0);
+
+      const row = document.createElement('tr');
+
+      // 접두어 셀
+      const prefixCell = document.createElement('td');
+      prefixCell.textContent = prefix;
+      row.appendChild(prefixCell);
+
+      // 조회수 셀
+      const viewsCell = document.createElement('td');
+      viewsCell.textContent = Math.round(prefixTotalViews);
+      row.appendChild(viewsCell);
+
+      // 비율 셀 (프로그레스 바)
+      const ratioCell = document.createElement('td');
+      const percentage = totalViews > 0 ? (prefixTotalViews / totalViews * 100) : 0;
+
+      const progressContainer = document.createElement('div');
+      progressContainer.style.display = 'flex';
+      progressContainer.style.alignItems = 'center';
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.style.width = '100px';
+
+      const progressValue = document.createElement('div');
+      progressValue.className = 'progress-value';
+      progressValue.style.width = `${percentage}%`;
+
+      const percentText = document.createElement('span');
+      percentText.textContent = `${percentage.toFixed(1)}%`;
+
+      progressBar.appendChild(progressValue);
+      progressContainer.appendChild(progressBar);
+      progressContainer.appendChild(percentText);
+      ratioCell.appendChild(progressContainer);
+
+      row.appendChild(ratioCell);
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 페이지 제목을 접두어로 그룹화하는 함수
+  function groupByPrefix(data, wordCount) {
+    const groups = {};
+
+    data.forEach(item => {
+      const title = item.pageTitle || '(제목 없음)';
+      const words = title.split(' ');
+
+      let prefix;
+      if (wordCount === 1) {
+        prefix = words.length > 0 ? words[0] : '';
+      } else if (words.length >= wordCount) {
+        prefix = words.slice(0, wordCount).join(' ');
+      } else {
+        prefix = title; // 단어 수가 부족한 경우 전체 제목을 사용
+      }
+
+      if (prefix) {
+        if (!groups[prefix]) {
+          groups[prefix] = [];
+        }
+        groups[prefix].push(item);
+      }
+    });
+
+    return groups;
+  }
+
+  function updateTime(elementId) {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    document.getElementById(elementId).textContent = `마지막 업데이트: ${timeString}`;
+  }
+</script>
+</body>
+</html>

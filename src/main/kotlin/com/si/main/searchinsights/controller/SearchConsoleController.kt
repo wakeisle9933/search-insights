@@ -77,4 +77,5 @@ class SearchConsoleController(
 
         mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, effectiveFromDate, effectiveToDate)
     }
+
 }

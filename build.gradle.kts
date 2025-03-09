@@ -45,6 +45,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:2.1.23")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
     implementation("org.springdoc:springdoc-openapi-starter-common:2.3.0")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 }
 
 
