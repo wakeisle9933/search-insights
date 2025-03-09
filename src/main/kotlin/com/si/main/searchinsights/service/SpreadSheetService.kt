@@ -39,10 +39,10 @@ class SpreadSheetService(
         val linkStyle = createLinkStyle(workbook)
 
         // Summary Data
-        val avgPosition = allRows.map { it.position }.average()
+        val avgPosition = if (allRows.isEmpty()) 0.0 else allRows.map { it.position }.average()
         val totalClicks = allRows.sumOf { it.clicks }
         val totalImpressions = allRows.sumOf { it.impressions }
-        val avgCTR = allRows.map { it.ctr }.average()
+        val avgCTR = if (allRows.isEmpty()) 0.0 else allRows.map { it.ctr }.average()
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -55,10 +55,10 @@ class SpreadSheetService(
         }
 
         val summaryDataRow = sheet.createRow(1)
-        summaryDataRow.createCell(1).setCellValue(avgPosition)
+        summaryDataRow.createCell(1).setCellValue(if (avgPosition.isNaN()) 0.0 else avgPosition)
         summaryDataRow.createCell(2).setCellValue(totalClicks)
         summaryDataRow.createCell(3).setCellValue(totalImpressions)
-        summaryDataRow.createCell(4).setCellValue(avgCTR)
+        summaryDataRow.createCell(4).setCellValue(if (avgCTR.isNaN()) 0.0 else avgCTR)
 
         // Header
         val headerRow = sheet.createRow(3)
