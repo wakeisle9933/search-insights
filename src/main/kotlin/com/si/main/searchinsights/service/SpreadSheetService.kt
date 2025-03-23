@@ -439,7 +439,7 @@ class SpreadSheetService(
 
     private fun <T> groupByPrefixGeneric(allRows: List<T>, wordCount: Int, keyExtractor: (T) -> String): Map<String, List<T>> {
         return allRows.groupBy { row ->
-            val words = keyExtractor(row).split(" ")
+            val words = keyExtractor(row).lowercase().split(" ")
             when {
                 wordCount == 1 -> words.firstOrNull() ?: ""
                 words.size >= wordCount -> words.take(wordCount).joinToString(" ")

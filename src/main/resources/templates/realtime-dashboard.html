@@ -718,7 +718,7 @@
     const groups = {};
 
     data.forEach(item => {
-      const title = item.pageTitle || '(제목 없음)';
+      const title = (item.pageTitle || '(제목 없음)').toLowerCase();
       const words = title.split(' ');
 
       let prefix;
