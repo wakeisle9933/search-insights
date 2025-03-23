@@ -200,6 +200,8 @@
     <div class="dashboard-box">
       <div class="dashboard-title">🔎 오늘 전체 활성 사용자</div>
       <div class="active-users" id="today-active-users">0</div>
+      <div class="dashboard-title" style="margin-top: 15px;">🔢 오늘 전체 조회수</div>
+      <div class="active-users" id="today-total-pageviews">0</div>
       <div class="update-time" id="today-update-time">마지막 업데이트: -</div>
     </div>
 
@@ -293,6 +295,8 @@
     <div class="dashboard-box">
       <div class="dashboard-title">🔥 최근 30분 활성 사용자</div>
       <div class="active-users" id="last30min-active-users">0</div>
+      <div class="dashboard-title" style="margin-top: 15px;">🔢 최근 30분 전체 조회수</div>
+      <div class="active-users" id="last30min-total-pageviews">0</div>
       <div class="update-time" id="last30min-update-time">마지막 업데이트: -</div>
     </div>
 
@@ -396,6 +400,8 @@
         </div>
       </div>
       <div class="active-users" id="custom-date-active-users">0</div>
+      <div class="dashboard-title" style="margin-top: 15px;">🔢 지정 기간 전체 조회수</div>
+      <div class="active-users" id="custom-date-total-pageviews">0</div>
       <div class="update-time" id="custom-date-update-time">마지막 업데이트: -</div>
     </div>
 
@@ -563,6 +569,11 @@
     .then(data => {
       // 활성 사용자 및 전체 페이지뷰 업데이트
       document.getElementById('today-active-users').textContent = data.activeUsers;
+
+      // 전체 조회수 계산 및 표시
+      const totalPageViews = data.pageViews.reduce((sum, item) => sum + item.pageViews, 0);
+      document.getElementById('today-total-pageviews').textContent = Math.round(totalPageViews);
+
       updateTime('today-update-time');
 
       // 전체 테이블 업데이트
@@ -582,6 +593,11 @@
     .then(data => {
       // 활성 사용자 및 전체 페이지뷰 업데이트
       document.getElementById('last30min-active-users').textContent = data.activeUsers;
+
+      // 전체 조회수 계산 및 표시
+      const totalPageViews = data.pageViews.reduce((sum, item) => sum + item.pageViews, 0);
+      document.getElementById('last30min-total-pageviews').textContent = Math.round(totalPageViews);
+
       updateTime('last30min-update-time');
 
       // 전체 테이블 업데이트
@@ -774,6 +790,11 @@
     .then(data => {
       // 활성 사용자 업데이트
       document.getElementById('custom-date-active-users').textContent = data.activeUsers;
+
+      // 전체 조회수 계산 및 표시
+      const totalPageViews = data.pageViews.reduce((sum, item) => sum + item.pageViews, 0);
+      document.getElementById('custom-date-total-pageviews').textContent = Math.round(totalPageViews);
+
       updateTime('custom-date-update-time');
 
       // 테이블 업데이트
