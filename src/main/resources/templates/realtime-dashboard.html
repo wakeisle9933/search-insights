@@ -146,6 +146,42 @@
       color: #ff4081;
       margin-right: 5px;
     }
+
+    .date-selector {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      gap: 10px;
+    }
+
+    .date-selector input[type="date"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .fetch-btn {
+      padding: 8px 15px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .fetch-btn:hover {
+      background-color: #1558b3;
+      transform: translateY(-2px);
+    }
+
+    .auto-update-check {
+      margin-left: 15px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
   </style>
 </head>
 <body>
@@ -156,6 +192,7 @@
   <div class="main-tabs">
     <div class="main-tab active" onclick="showMainTab('today')">🌞 오늘 전체</div>
     <div class="main-tab" onclick="showMainTab('last30min')">⚡ 최근 30분</div>
+    <div class="main-tab" onclick="showMainTab('custom-date')">📆 날짜 지정</div>
   </div>
 
   <!-- 오늘 전체 탭 컨텐츠 -->
@@ -343,6 +380,110 @@
       </div>
     </div>
   </div>
+
+  <!-- 날짜 지정 탭 컨텐츠 -->
+  <div id="custom-date-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="dashboard-title">📅 조회할 날짜 선택</div>
+      <div class="date-selector">
+        <input type="date" id="start-date" onchange="validateDates()">
+        <span>~</span>
+        <input type="date" id="end-date" onchange="validateDates()">
+        <button onclick="fetchCustomDateData()" class="fetch-btn">🔍 조회하기</button>
+        <div class="auto-update-check">
+          <input type="checkbox" id="auto-update-check">
+          <label for="auto-update-check">오늘 포함시 자동 업데이트</label>
+        </div>
+      </div>
+      <div class="active-users" id="custom-date-active-users">0</div>
+      <div class="update-time" id="custom-date-update-time">마지막 업데이트: -</div>
+    </div>
+
+    <!-- 서브 탭 (날짜 지정) -->
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="showSubTab('custom-date', 'full')">📊 전체 제목</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'prefix1')">1️⃣ 접두어 (1단어)</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'prefix2')">2️⃣ 접두어 (2단어)</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'prefix3')">3️⃣ 접두어 (3단어)</div>
+    </div>
+
+    <!-- 전체 제목 테이블 (날짜 지정) -->
+    <div id="custom-date-full-content" class="sub-tab-content active">
+      <div class="dashboard-box">
+        <div class="dashboard-title">📈 페이지 제목별 조회수 (지정 기간)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>페이지 제목</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-page-title-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 1단어 테이블 (날짜 지정) -->
+    <div id="custom-date-prefix1-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (1단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-prefix1-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 2단어 테이블 (날짜 지정) -->
+    <div id="custom-date-prefix2-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (2단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-prefix2-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 3단어 테이블 (날짜 지정) -->
+    <div id="custom-date-prefix3-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (3단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-prefix3-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -354,6 +495,21 @@
     // 10초마다 데이터 갱신
     setInterval(fetchTodayData, 10000);
     setInterval(fetchLast30MinData, 10000);
+
+    // 날짜 선택기 초기화 - 오늘 날짜로 설정
+    const now = new Date();
+    const today = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
+
+    document.getElementById('start-date').value = today;
+    document.getElementById('end-date').value = today;
+
+    document.getElementById('auto-update-check').addEventListener('change', function() {
+      if (this.checked && document.getElementById('end-date').value === today) {
+        fetchCustomDateData();
+      }
+    });
   });
 
   // 메인 탭 전환 함수
@@ -373,6 +529,9 @@
     } else if (tabName === 'last30min') {
       document.querySelector('.main-tab:nth-child(2)').classList.add('active');
       document.getElementById('last30min-content').classList.add('active');
+    } else if (tabName === 'custom-date') {
+      document.querySelector('.main-tab:nth-child(3)').classList.add('active');
+      document.getElementById('custom-date-content').classList.add('active');
     }
   }
 
@@ -587,6 +746,97 @@
     const timeString = now.toLocaleTimeString();
     document.getElementById(elementId).textContent = `마지막 업데이트: ${timeString}`;
   }
+
+  // 날짜 유효성 검사
+  function validateDates() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      alert('🚨 시작일이 종료일보다 늦을 수 없어요!');
+      document.getElementById('end-date').value = startDate;
+    }
+  }
+
+  // 날짜 지정 데이터 가져오기
+  function fetchCustomDateData() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    if (!startDate || !endDate) {
+      alert('❓ 시작일과 종료일을 모두 선택해주세요!');
+      return;
+    }
+
+    // API 요청
+    fetch(`/api/custom-date-pageviews?startDate=${startDate}&endDate=${endDate}`)
+    .then(response => response.json())
+    .then(data => {
+      // 활성 사용자 업데이트
+      document.getElementById('custom-date-active-users').textContent = data.activeUsers;
+      updateTime('custom-date-update-time');
+
+      // 테이블 업데이트
+      updatePageViewsTable(data.pageViews, 'custom-date-page-title-views');
+      updatePrefixViewsTable(data.pageViews, 'custom-date-prefix1-views', 1);
+      updatePrefixViewsTable(data.pageViews, 'custom-date-prefix2-views', 2);
+      updatePrefixViewsTable(data.pageViews, 'custom-date-prefix3-views', 3);
+
+    })
+    .catch(error => console.error('날짜 지정 데이터 가져오기 실패:', error));
+  }
+
+  // 자동 업데이트 설정
+  let customDateInterval;
+  function setupAutoUpdate() {
+
+    console.log('setupAutoUpdate 호출됨(사용 안함)');
+    // 기존 인터벌 제거
+    if (customDateInterval) {
+      clearInterval(customDateInterval);
+    }
+
+    // 오늘 날짜 포함 확인 및 자동 업데이트 체크박스 확인
+    const endDate = document.getElementById('end-date').value;
+    const autoUpdate = document.getElementById('auto-update-check').checked;
+    const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 YYYY-MM-DD 형식
+
+    if (endDate === today && autoUpdate) {
+      // 10초마다 업데이트
+      customDateInterval = setInterval(fetchCustomDateData, 10000);
+    }
+  }
+
+  document.getElementById('auto-update-check').addEventListener('change', function() {
+    console.log('체크박스 상태 변경: ', this.checked);
+
+    // 이전 타이머 초기화
+    if (customDateInterval) {
+      clearInterval(customDateInterval);
+      customDateInterval = null;
+    }
+
+    if (this.checked) {
+      // 체크했을 때 일단 바로 데이터 가져오기
+      fetchCustomDateData();
+
+      // 현재 시스템 날짜 가져오기 (더 정확한 방법)
+      const now = new Date();
+      const today = now.getFullYear() + '-' +
+          String(now.getMonth() + 1).padStart(2, '0') + '-' +
+          String(now.getDate()).padStart(2, '0');
+
+      const endDate = document.getElementById('end-date').value;
+      console.log('⭐정확한 날짜 비교:', endDate, today, endDate === today);
+
+      if (endDate === today) {
+        console.log('🔄 10초 자동 업데이트 설정 성공!!');
+        // 10초마다 자동 업데이트 설정
+        customDateInterval = setInterval(fetchCustomDateData, 10000);
+      }
+    }
+  });
+
 </script>
 </body>
 </html>

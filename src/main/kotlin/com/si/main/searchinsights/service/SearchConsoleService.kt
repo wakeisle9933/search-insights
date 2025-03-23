@@ -272,4 +272,60 @@ class SearchConsoleService (
         }
     }
 
+    fun fetchCustomDateAnalyticsWithActiveUsers(startDate: String, endDate: String): Map<String, Any> {
+        val client = getAnalyticsSerivce()
+
+        try {
+            // 활성 사용자 가져오기
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+            }.build()
+
+            val activeUsers = client.runReport(request).rowsList
+                .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+
+            // 페이지뷰 가져오기
+            val pageViewsRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews").build()
+                    desc = true
+                })
+            }.build()
+
+            val pageViews = client.runReport(pageViewsRequest).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value,
+                    pagePath = row.getDimensionValues(1).value,
+                    pageViews = row.getMetricValues(0).value.toDouble()
+                )
+            }
+
+            return mapOf(
+                "activeUsers" to activeUsers,
+                "pageViews" to pageViews
+            )
+        } catch (e: Exception) {
+            logger.error("Custom date analytics fetch error", e)
+            return mapOf(
+                "activeUsers" to 0,
+                "pageViews" to emptyList<PageViewInfo>()
+            )
+        } finally {
+            client.close()
+        }
+    }
+
 }
