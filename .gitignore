@@ -47,3 +47,4 @@ docker_command
 repomix-output.txt
 repomix-output.xml
 web.xml
+wp_categories_data.json
