@@ -43,6 +43,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.google.analytics:google-analytics-data:0.16.0")
     implementation("io.github.microutils:kotlin-logging:2.1.23")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+    implementation("org.springdoc:springdoc-openapi-starter-common:2.3.0")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 }
 
 

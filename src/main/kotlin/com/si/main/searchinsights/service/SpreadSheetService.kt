@@ -20,7 +20,6 @@ import kotlin.math.floor
 
 @Service
 class SpreadSheetService(
-    private val googleTrendsService: GoogleTrendsService,
     @Value("\${domain}")
     private val fullDomain: String,
     @Value("\${base.domain}")
@@ -37,12 +36,13 @@ class SpreadSheetService(
     fun createRawDataSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
         val sheet = workbook.createSheet("Search Console Raw Data")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Summary Data
-        val avgPosition = allRows.map { it.position }.average()
+        val avgPosition = if (allRows.isEmpty()) 0.0 else allRows.map { it.position }.average()
         val totalClicks = allRows.sumOf { it.clicks }
         val totalImpressions = allRows.sumOf { it.impressions }
-        val avgCTR = allRows.map { it.ctr }.average()
+        val avgCTR = if (allRows.isEmpty()) 0.0 else allRows.map { it.ctr }.average()
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -55,10 +55,10 @@ class SpreadSheetService(
         }
 
         val summaryDataRow = sheet.createRow(1)
-        summaryDataRow.createCell(1).setCellValue(avgPosition)
+        summaryDataRow.createCell(1).setCellValue(if (avgPosition.isNaN()) 0.0 else avgPosition)
         summaryDataRow.createCell(2).setCellValue(totalClicks)
         summaryDataRow.createCell(3).setCellValue(totalImpressions)
-        summaryDataRow.createCell(4).setCellValue(avgCTR)
+        summaryDataRow.createCell(4).setCellValue(if (avgCTR.isNaN()) 0.0 else avgCTR)
 
         // Header
         val headerRow = sheet.createRow(3)
@@ -91,11 +91,6 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Link Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
@@ -210,6 +205,7 @@ class SpreadSheetService(
     fun createBacklinkToolSheet(workbook: XSSFWorkbook) {
         val sheet = workbook.createSheet("Backlink Tools")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -238,11 +234,6 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Link Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
@@ -255,6 +246,7 @@ class SpreadSheetService(
     fun createRawAnalyticsDataSheet(workbook: XSSFWorkbook, allRows: List<PageViewInfo>): Sheet  {
         val sheet = workbook.createSheet("Google Analytics Raw Data")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -296,17 +288,20 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Link Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
         // Automatically adjust column widths
         for (i in 0..2) {
             sheet.autoSizeColumn(i)
+            if (i == 0) { // 첫 번째 열 최대 길이 제한
+                val maxWidth = 13 * 1440
+                val currentWidth = sheet.getColumnWidth(i)
+
+                if (currentWidth > maxWidth) {
+                    sheet.setColumnWidth(i, maxWidth)
+                }
+            }
         }
 
         return sheet
@@ -343,6 +338,7 @@ class SpreadSheetService(
     fun createHighImpressionsLowPositionSheet(workbook: XSSFWorkbook, allRows: List<ApiDataRow>): Sheet {
         val sheet = workbook.createSheet("Potential Hits")
         val creationHelper = workbook.creationHelper
+        val linkStyle = createLinkStyle(workbook)
 
         // Header Style
         val headerStyle = createHeaderStyle(workbook)
@@ -377,60 +373,22 @@ class SpreadSheetService(
             linkCell.hyperlink = hyperlink
 
             // Hyperlink Style
-            val linkStyle = workbook.createCellStyle()
-            val linkFont = workbook.createFont()
-            linkFont.underline = Font.U_SINGLE
-            linkFont.color = IndexedColors.BLUE.index
-            linkStyle.setFont(linkFont)
             linkCell.cellStyle = linkStyle
         }
 
         // Automatically adjust column widths
         for (i in 0..5) {
             sheet.autoSizeColumn(i)
-            if (i == 0) {
-                val maxWidth = 12000
-                if (sheet.getColumnWidth(i) > maxWidth) {
+            if (i == 0) {  // Query 열인 경우
+                val maxWidth = 5 * 1440  // 최대 너비 설정
+                val currentWidth = sheet.getColumnWidth(i)
+                // 현재 너비가 최대 너비보다 크면 최대 너비로 제한
+                if (currentWidth > maxWidth) {
                     sheet.setColumnWidth(i, maxWidth)
                 }
+                // 현재 너비가 최대 너비보다 작으면 현재 너비 유지 (자동 조정된 값)
             }
         }
-
-        return sheet
-    }
-
-    fun createGoogleTrendsSheet(workbook: XSSFWorkbook): Sheet {
-        val sheet = workbook.createSheet("Google Trends")
-        val headerStyle = createHeaderStyle(workbook)
-
-        // Rank Column Style
-        val centerStyle = workbook.createCellStyle()
-        centerStyle.alignment = HorizontalAlignment.CENTER
-
-        // Header
-        val headerRow = sheet.createRow(0)
-        val headers = listOf("Rank", "Keyword")
-        headers.forEachIndexed { index, header ->
-            val cell = headerRow.createCell(index)
-            cell.setCellValue(header)
-            cell.cellStyle = headerStyle
-        }
-
-        // Get Google Trends
-        val trends = googleTrendsService.fetchTrendingSearches()
-
-        // Set data
-        trends.forEachIndexed { index, keyword ->
-            val row = sheet.createRow(index + 1)
-            val rankCell = row.createCell(0)
-            rankCell.setCellValue((index + 1).toDouble())
-            rankCell.cellStyle = centerStyle  // Centre alignment
-            row.createCell(1).setCellValue(keyword)
-        }
-
-        // Column widths setting
-        sheet.setColumnWidth(0, 10 * 128)
-        sheet.autoSizeColumn(1)
 
         return sheet
     }
@@ -481,7 +439,7 @@ class SpreadSheetService(
 
     private fun <T> groupByPrefixGeneric(allRows: List<T>, wordCount: Int, keyExtractor: (T) -> String): Map<String, List<T>> {
         return allRows.groupBy { row ->
-            val words = keyExtractor(row).split(" ")
+            val words = keyExtractor(row).lowercase().split(" ")
             when {
                 wordCount == 1 -> words.firstOrNull() ?: ""
                 words.size >= wordCount -> words.take(wordCount).joinToString(" ")
@@ -507,6 +465,15 @@ class SpreadSheetService(
         style.bottomBorderColor = IndexedColors.BLACK.index
 
         return style
+    }
+
+    private fun createLinkStyle(workbook: XSSFWorkbook): XSSFCellStyle {
+        val linkStyle = workbook.createCellStyle()
+        val linkFont = workbook.createFont()
+        linkFont.underline = Font.U_SINGLE
+        linkFont.color = IndexedColors.BLUE.index
+        linkStyle.setFont(linkFont)
+        return linkStyle
     }
 
 }

@@ -7,15 +7,12 @@ import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
 import com.si.main.searchinsights.util.DateUtils
 import org.springframework.boot.CommandLineRunner
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import java.time.DayOfWeek
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @SpringBootApplication
 class SearchInsightsApplication(
@@ -69,12 +66,12 @@ class SearchInsightsApplication(
         }
 
         // 2시간 후 종료
-        val scheduler = Executors.newSingleThreadScheduledExecutor()
-        scheduler.schedule({
-            logger.info("Search Insights Shut down!")
-            SpringApplication.exit(context, { 0 })
-            scheduler.shutdown()
-        }, 2, TimeUnit.HOURS)
+//        val scheduler = Executors.newSingleThreadScheduledExecutor()
+//        scheduler.schedule({
+//            logger.info("Search Insights Shut down!")
+//            SpringApplication.exit(context, { 0 })
+//            scheduler.shutdown()
+//        }, 2, TimeUnit.HOURS)
     }
 }
 

@@ -134,7 +134,6 @@ class SearchConsoleService (
         val workbook = XSSFWorkbook()
         spreadSheetService.createRawDataSheet(workbook, allRows)
         spreadSheetService.createHighImpressionsLowPositionSheet(workbook, allRows)
-        spreadSheetService.createGoogleTrendsSheet(workbook)
         spreadSheetService.createPrefixSummarySheet(workbook, allRows)
         spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
         spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)
@@ -153,6 +152,180 @@ class SearchConsoleService (
         workbook.close()
 
         return outputStream
+    }
+
+    fun fetchRealTimeAnalyticsData(): List<PageViewInfo> {
+        return getAnalyticsSerivce().use { client ->
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = "today"  // 오늘 데이터!
+                    this.endDate = "today"    // 오늘까지!
+                })
+
+                // 기존 코드 그대로 유지
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("activeUsers").build()
+                    desc = true
+                })
+            }.build()
+
+            // 결과 처리 (기존 코드와 동일)
+            try {
+                client.runReport(request).rowsList.map { row ->
+                    PageViewInfo(
+                        pageTitle = row.getDimensionValues(0).value,  // pageTitle
+                        pagePath = row.getDimensionValues(1).value,   // pagePath
+                        pageViews = row.getMetricValues(0).value.toDouble()
+                    )
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    fun fetchRealTimeAnalyticsWithActiveUsers(): Map<String, Any> {
+        val activeUsers = getAnalyticsSerivce().use { client ->
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = "today"
+                    this.endDate = "today"
+                })
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+            }.build()
+
+            try {
+                client.runReport(request).rowsList.firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+            } catch (e: Exception) {
+                logger.error("Analytics active users fetch error", e)
+                0
+            }
+        }
+
+        return mapOf(
+            "activeUsers" to activeUsers,
+            "pageViews" to fetchRealTimeAnalyticsData()
+        )
+    }
+
+    fun fetchLast30MinAnalyticsWithActiveUsers(): Map<String, Any> {
+        return getAnalyticsSerivce().use { client ->
+            // 최근 29분 활성 사용자 가져오기 (29분이 최대)
+            val activeUsersRequest = RunRealtimeReportRequest.newBuilder()
+                .setProperty("properties/$propId")
+                .addMetrics(Metric.newBuilder().setName("activeUsers"))
+                .addMinuteRanges(
+                    MinuteRange.newBuilder()
+                        .setStartMinutesAgo(29)
+                        .setEndMinutesAgo(0)
+                )
+                .build()
+
+            val activeUsers = try {
+                client.runRealtimeReport(activeUsersRequest).rowsList
+                    .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+            } catch (e: Exception) {
+                logger.error("최근 30분 활성 사용자 데이터 가져오기 실패", e)
+                0
+            }
+
+            // 최근 29분 페이지뷰 가져오기
+            val pageViewsRequest = RunRealtimeReportRequest.newBuilder()
+                .setProperty("properties/$propId")
+                .addMinuteRanges(
+                    MinuteRange.newBuilder()
+                        .setStartMinutesAgo(29)
+                        .setEndMinutesAgo(0)
+                )
+                .addDimensions(Dimension.newBuilder().setName("unifiedScreenName"))
+                .addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                .addOrderBys(
+                    OrderBy.newBuilder()
+                        .setMetric(OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews"))
+                        .setDesc(true)
+                )
+                .build()
+
+            val pageViews = try {
+                client.runRealtimeReport(pageViewsRequest).rowsList.map { row ->
+                    PageViewInfo(
+                        pageTitle = row.getDimensionValues(0).value, // unifiedScreenName을 pageTitle에 넣기
+                        pagePath = "", // 경로는 없지만 객체 구조 유지
+                        pageViews = row.getMetricValues(0).value.toDouble()
+                    )
+                }
+            } catch (e: Exception) {
+                logger.error("최근 30분 페이지뷰 데이터 가져오기 실패", e)
+                emptyList<PageViewInfo>()
+            }
+
+            mapOf(
+                "activeUsers" to activeUsers,
+                "pageViews" to pageViews
+            )
+        }
+    }
+
+    fun fetchCustomDateAnalyticsWithActiveUsers(startDate: String, endDate: String): Map<String, Any> {
+        val client = getAnalyticsSerivce()
+
+        try {
+            // 활성 사용자 가져오기
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+            }.build()
+
+            val activeUsers = client.runReport(request).rowsList
+                .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+
+            // 페이지뷰 가져오기
+            val pageViewsRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews").build()
+                    desc = true
+                })
+            }.build()
+
+            val pageViews = client.runReport(pageViewsRequest).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value,
+                    pagePath = row.getDimensionValues(1).value,
+                    pageViews = row.getMetricValues(0).value.toDouble()
+                )
+            }
+
+            return mapOf(
+                "activeUsers" to activeUsers,
+                "pageViews" to pageViews
+            )
+        } catch (e: Exception) {
+            logger.error("Custom date analytics fetch error", e)
+            return mapOf(
+                "activeUsers" to 0,
+                "pageViews" to emptyList<PageViewInfo>()
+            )
+        } finally {
+            client.close()
+        }
     }
 
 }

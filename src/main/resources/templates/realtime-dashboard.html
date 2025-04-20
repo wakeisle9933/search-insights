@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 대시보드 - Search Insights</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1a73e8;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    .dashboard-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .dashboard-title {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .active-users {
+      font-size: 24px;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+    .update-time {
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+    }
+    .progress-bar {
+      background-color: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    .progress-value {
+      background-color: #1a73e8;
+      height: 8px;
+      border-radius: 4px;
+    }
+
+    /* 메인 탭 스타일링 */
+    .main-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    .main-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      background-color: #f8f8f8;
+      margin-right: 5px;
+      transition: all 0.3s ease;
+    }
+    .main-tab:hover {
+      background-color: #e6f7ff;
+    }
+    .main-tab.active {
+      background-color: #1a73e8;
+      color: white;
+      font-weight: bold;
+      transform: translateY(-3px);
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* 서브 탭 스타일링 */
+    .sub-tabs {
+      display: flex;
+      margin-bottom: 15px;
+      margin-top: 10px;
+    }
+    .sub-tab {
+      padding: 8px 15px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background-color: #f8f8f8;
+      margin-right: 8px;
+      font-size: 0.9em;
+      transition: all 0.2s ease;
+    }
+    .sub-tab:hover {
+      background-color: #e6f7ff;
+    }
+    .sub-tab.active {
+      background-color: #4285f4;
+      color: white;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    .sub-tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+    .sub-tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 귀여운 아이콘들 */
+    .heart-icon {
+      color: #ff4081;
+      margin-right: 5px;
+    }
+
+    .date-selector {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      gap: 10px;
+    }
+
+    .date-selector input[type="date"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .fetch-btn {
+      padding: 8px 15px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .fetch-btn:hover {
+      background-color: #1558b3;
+      transform: translateY(-2px);
+    }
+
+    .auto-update-check {
+      margin-left: 15px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .category-icon {
+      color: #9C27B0;
+      margin-right: 5px;
+    }
+
+    /* 동기화 버튼 스타일 */
+    .sync-button {
+      background-color: #9C27B0;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      box-shadow: 0 3px 5px rgba(156, 39, 176, 0.3);
+    }
+
+    .sync-button:hover {
+      background-color: #7B1FA2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 8px rgba(156, 39, 176, 0.5);
+    }
+
+    /* 동기화 상태 알림 배너 */
+    .sync-banner {
+      background-color: #E1BEE7;
+      color: #4A148C;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: none;
+      align-items: center;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .sync-banner.visible {
+      display: flex;
+      justify-content: center;
+    }
+
+    .sync-button-icon {
+      margin-right: 5px;
+    }
+
+    .full-sync-button {
+      background-color: #FF5722;
+      margin-left: 10px;
+    }
+
+    .full-sync-button:hover {
+      background-color: #E64A19;
+    }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>😎 실시간 대시보드</h1>
+
+  <!-- 메인 탭 -->
+  <div class="main-tabs">
+    <div class="main-tab active" onclick="showMainTab('today')">🌞 오늘 전체</div>
+    <div class="main-tab" onclick="showMainTab('last30min')">⚡ 최근 30분</div>
+    <div class="main-tab" onclick="showMainTab('custom-date')">📆 날짜 지정</div>
+  </div>
+
+  <!-- 오늘 전체 탭 컨텐츠 -->
+  <div id="today-content" class="tab-content active">
+    <div class="dashboard-box">
+      <div style="display: flex; justify-content: space-between;">
+        <!-- 왼쪽 구역 (빨간색 부분) -->
+        <div style="width: 18%;">
+          <div class="dashboard-title">🔎 오늘 전체 활성 사용자</div>
+          <div class="active-users" id="today-active-users">0</div>
+        </div>
+
+        <!-- 오른쪽 구역 (주황색 부분) -->
+        <div style="width: 78%;">
+          <div class="dashboard-title" style="margin-top: 0;">🔢 오늘 전체 조회수</div>
+          <div class="active-users" id="today-total-pageviews">0</div>
+        </div>
+      </div>
+
+      <div class="update-time" id="today-update-time">마지막 업데이트: -</div>
+    </div>
+
+    <!-- 서브 탭 (오늘 전체) -->
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="showSubTab('today', 'full')">📊 전체 제목</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'prefix1')">1️⃣ 접두어 (1단어)</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'prefix2')">2️⃣ 접두어 (2단어)</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'prefix3')">3️⃣ 접두어 (3단어)</div>
+      <div class="sub-tab" onclick="showSubTab('today', 'category')">📑 카테고리별</div>
+      <button class="sync-button" onclick="syncWordPressCategories(false)">
+        <span class="sync-button-icon">🔄</span> 카테고리 추가 동기화
+      </button>
+      <button class="sync-button full-sync-button" onclick="syncWordPressCategories(true)">
+        <span class="sync-button-icon">🔁</span> 카테고리 전체 초기화
+      </button>
+    </div>
+
+    <!-- 전체 제목 테이블 (오늘) -->
+    <div id="today-full-content" class="sub-tab-content active">
+      <div class="dashboard-box">
+        <div class="dashboard-title">📈 페이지 제목별 조회수 (오늘)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>페이지 제목</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-page-title-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 1단어 테이블 (오늘) -->
+    <div id="today-prefix1-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (1단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-prefix1-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 2단어 테이블 (오늘) -->
+    <div id="today-prefix2-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (2단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-prefix2-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 3단어 테이블 (오늘) -->
+    <div id="today-prefix3-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (3단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-prefix3-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="today-category-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div id="sync-banner-today" class="sync-banner">🔄 아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!</div>
+        <div class="dashboard-title">📑 카테고리별 조회수 (오늘)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>카테고리</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="today-category-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- 최근 30분 탭 컨텐츠 -->
+  <div id="last30min-content" class="tab-content">
+    <div class="dashboard-box">
+      <div style="display: flex; justify-content: space-between;">
+        <!-- 왼쪽 구역 -->
+        <div style="width: 18%;">
+          <div class="dashboard-title">🔥 최근 30분 활성 사용자</div>
+          <div class="active-users" id="last30min-active-users">0</div>
+        </div>
+
+        <!-- 오른쪽 구역 -->
+        <div style="width: 78%;">
+          <div class="dashboard-title" style="margin-top: 0;">🔢 최근 30분 전체 조회수</div>
+          <div class="active-users" id="last30min-total-pageviews">0</div>
+        </div>
+      </div>
+
+      <div class="update-time" id="last30min-update-time">마지막 업데이트: -</div>
+    </div>
+
+    <!-- 서브 탭 (최근 30분) -->
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="showSubTab('last30min', 'full')">📊 전체 제목</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'prefix1')">1️⃣ 접두어 (1단어)</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'prefix2')">2️⃣ 접두어 (2단어)</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'prefix3')">3️⃣ 접두어 (3단어)</div>
+      <div class="sub-tab" onclick="showSubTab('last30min', 'category')">📑 카테고리별</div>
+    </div>
+
+    <!-- 전체 제목 테이블 (최근 30분) -->
+    <div id="last30min-full-content" class="sub-tab-content active">
+      <div class="dashboard-box">
+        <div class="dashboard-title">📈 페이지 제목별 조회수 (최근 30분)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>페이지 제목</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-page-title-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 1단어 테이블 (최근 30분) -->
+    <div id="last30min-prefix1-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (1단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-prefix1-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 2단어 테이블 (최근 30분) -->
+    <div id="last30min-prefix2-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (2단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-prefix2-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 3단어 테이블 (최근 30분) -->
+    <div id="last30min-prefix3-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (3단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-prefix3-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="last30min-category-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div id="sync-banner-last30min" class="sync-banner">🔄 아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!</div>
+        <div class="dashboard-title">📑 카테고리별 조회수 (최근 30분)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>카테고리</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="last30min-category-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 날짜 지정 탭 컨텐츠 -->
+  <div id="custom-date-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="date-selector">
+        <input type="date" id="start-date" onchange="validateDates()">
+        <span>~</span>
+        <input type="date" id="end-date" onchange="validateDates()">
+        <button onclick="fetchCustomDateData()" class="fetch-btn">🔍 조회하기</button>
+        <div class="auto-update-check">
+          <input type="checkbox" id="auto-update-check">
+          <label for="auto-update-check">오늘 포함시 자동 업데이트</label>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+        <!-- 왼쪽 구역 -->
+        <div style="width: 18%;">
+          <div class="dashboard-title">📅 지정 기간 활성 사용자</div>
+          <div class="active-users" id="custom-date-active-users">0</div>
+        </div>
+
+        <!-- 오른쪽 구역 -->
+        <div style="width: 78%;">
+          <div class="dashboard-title" style="margin-top: 0;">🔢 지정 기간 전체 조회수</div>
+          <div class="active-users" id="custom-date-total-pageviews">0</div>
+        </div>
+      </div>
+
+      <div class="update-time" id="custom-date-update-time">마지막 업데이트: -</div>
+    </div>
+
+    <!-- 서브 탭 (날짜 지정) -->
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="showSubTab('custom-date', 'full')">📊 전체 제목</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'prefix1')">1️⃣ 접두어 (1단어)</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'prefix2')">2️⃣ 접두어 (2단어)</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'prefix3')">3️⃣ 접두어 (3단어)</div>
+      <div class="sub-tab" onclick="showSubTab('custom-date', 'category')">📑 카테고리별</div>
+    </div>
+
+    <!-- 전체 제목 테이블 (날짜 지정) -->
+    <div id="custom-date-full-content" class="sub-tab-content active">
+      <div class="dashboard-box">
+        <div class="dashboard-title">📈 페이지 제목별 조회수 (지정 기간)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>페이지 제목</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-page-title-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 1단어 테이블 (날짜 지정) -->
+    <div id="custom-date-prefix1-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (1단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-prefix1-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 2단어 테이블 (날짜 지정) -->
+    <div id="custom-date-prefix2-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (2단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-prefix2-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 접두어 3단어 테이블 (날짜 지정) -->
+    <div id="custom-date-prefix3-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">🔤 접두어별 조회수 (3단어)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>접두어</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-prefix3-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 카테고리별 테이블 (날짜 지정) 추가 -->
+    <div id="custom-date-category-content" class="sub-tab-content">
+      <div class="dashboard-box">
+        <div id="sync-banner-custom-date" class="sync-banner">🔄 아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!</div>
+        <div class="dashboard-title">📑 카테고리별 조회수 (지정 기간)</div>
+        <table>
+          <thead>
+          <tr>
+            <th>카테고리</th>
+            <th>조회수</th>
+            <th>비율</th>
+          </tr>
+          </thead>
+          <tbody id="custom-date-category-views">
+          <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 페이지 로드시 처음 데이터 가져오기
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchTodayData();
+    fetchLast30MinData();
+
+    // 10초마다 데이터 갱신
+    setInterval(fetchTodayData, 10000);
+    setInterval(fetchLast30MinData, 10000);
+
+    // 날짜 선택기 초기화 - 오늘 날짜로 설정
+    const now = new Date();
+    const today = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
+
+    document.getElementById('start-date').value = today;
+    document.getElementById('end-date').value = today;
+
+    document.getElementById('auto-update-check').addEventListener('change', function() {
+      if (this.checked && document.getElementById('end-date').value === today) {
+        fetchCustomDateData();
+      }
+    });
+
+    // 동기화 상태 확인
+    checkSyncStatus();
+  });
+
+  // 동기화 상태 확인 함수
+  function checkSyncStatus() {
+    fetch('/api/realtime-pageviews')
+    .then(response => response.json())
+    .then(data => {
+      const hasCategories = data.categoryViews && Object.keys(data.categoryViews).length > 0;
+
+      // 각 탭의 배너 표시/숨김 설정
+      document.getElementById('sync-banner-today').classList.toggle('visible', !hasCategories);
+      document.getElementById('sync-banner-last30min').classList.toggle('visible', !hasCategories);
+      document.getElementById('sync-banner-custom-date').classList.toggle('visible', !hasCategories);
+    })
+    .catch(error => console.error('동기화 상태 확인 실패:', error));
+  }
+
+  // 카테고리별 조회수 테이블 업데이트
+  function updateCategoryViewsTable(categoryViews, tableId) {
+    const tableBody = document.getElementById(tableId);
+    tableBody.innerHTML = '';
+
+    // 동기화 배너 표시 여부 설정
+    const mainTab = tableId.split('-')[0]; // "today", "last30min" 또는 "custom-date" 추출
+    const bannerId = "sync-banner-" + mainTab;
+    const syncBanner = document.getElementById(bannerId);
+
+    if (!categoryViews || Object.keys(categoryViews).length === 0) {
+      if (syncBanner) {
+        syncBanner.classList.add('visible');
+      } else {
+        console.warn(`찾을 수 없는 배너야! ID: "${bannerId}"`);
+      }
+
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.setAttribute('colspan', '3');
+      cell.textContent = '데이터가 없거나 아직 카테고리가 동기화되지 않았어요! 🥺';
+      cell.style.textAlign = 'center';
+      row.appendChild(cell);
+      tableBody.appendChild(row);
+      return;
+    }
+
+    // 데이터가 있으면 배너 숨기기
+    if (syncBanner) {
+      syncBanner.classList.remove('visible');
+    }
+
+    // 총 조회수 계산
+    const totalViews = Object.values(categoryViews).reduce((sum, views) => sum + views, 0);
+
+    // 배열로 변환하여 정렬 (조회수 기준 내림차순)
+    const sortedCategories = Object.entries(categoryViews)
+    .sort((a, b) => b[1] - a[1]);
+
+    // 테이블에 데이터 추가
+    sortedCategories.forEach(([category, views]) => {
+      const row = document.createElement('tr');
+
+      // 카테고리 셀
+      const categoryCell = document.createElement('td');
+      categoryCell.textContent = category;
+      row.appendChild(categoryCell);
+
+      // 조회수 셀
+      const viewsCell = document.createElement('td');
+      viewsCell.textContent = Math.round(views);
+      row.appendChild(viewsCell);
+
+      // 비율 셀 (프로그레스 바)
+      const ratioCell = document.createElement('td');
+      const percentage = totalViews > 0 ? (views / totalViews * 100) : 0;
+
+      const progressContainer = document.createElement('div');
+      progressContainer.style.display = 'flex';
+      progressContainer.style.alignItems = 'center';
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.style.width = '100px';
+
+      const progressValue = document.createElement('div');
+      progressValue.className = 'progress-value';
+      progressValue.style.width = `${percentage}%`;
+      progressValue.style.backgroundColor = '#9C27B0'; // 카테고리는 보라색으로 구분
+
+      const percentText = document.createElement('span');
+      percentText.textContent = `${percentage.toFixed(1)}%`;
+
+      progressBar.appendChild(progressValue);
+      progressContainer.appendChild(progressBar);
+      progressContainer.appendChild(percentText);
+      ratioCell.appendChild(progressContainer);
+
+      row.appendChild(ratioCell);
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 메인 탭 전환 함수
+  function showMainTab(tabName) {
+    // 모든 메인 탭과 탭 컨텐츠를 비활성화
+    document.querySelectorAll('.main-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+
+    // 선택한 메인 탭과 해당 컨텐츠를 활성화
+    if (tabName === 'today') {
+      document.querySelector('.main-tab:nth-child(1)').classList.add('active');
+      document.getElementById('today-content').classList.add('active');
+    } else if (tabName === 'last30min') {
+      document.querySelector('.main-tab:nth-child(2)').classList.add('active');
+      document.getElementById('last30min-content').classList.add('active');
+    } else if (tabName === 'custom-date') {
+      document.querySelector('.main-tab:nth-child(3)').classList.add('active');
+      document.getElementById('custom-date-content').classList.add('active');
+    }
+  }
+
+  // 서브 탭 전환 함수
+  function showSubTab(mainTab, subTab) {
+    // 해당 메인 탭 내의 모든 서브 탭과 서브 탭 컨텐츠를 비활성화
+    const subTabs = document.querySelectorAll(`#${mainTab}-content .sub-tab`);
+    const subContents = document.querySelectorAll(`#${mainTab}-content .sub-tab-content`);
+
+    subTabs.forEach(tab => {
+      tab.classList.remove('active');
+    });
+    subContents.forEach(content => {
+      content.classList.remove('active');
+    });
+
+    // 선택한 서브 탭 활성화 (indexOf로 찾기)
+    const tabTypes = ['full', 'prefix1', 'prefix2', 'prefix3', 'category'];
+    const tabIndex = tabTypes.indexOf(subTab);
+    if (tabIndex >= 0) {
+      subTabs[tabIndex].classList.add('active');
+      document.getElementById(`${mainTab}-${subTab}-content`).classList.add('active');
+    }
+  }
+
+  function fetchTodayData() {
+    fetch('/api/realtime-pageviews')
+    .then(response => response.json())
+    .then(data => {
+      // 활성 사용자 및 전체 페이지뷰 업데이트
+      document.getElementById('today-active-users').textContent = data.activeUsers;
+
+      // 전체 조회수 계산 및 표시
+      const totalPageViews = data.pageViews.reduce((sum, item) => sum + item.pageViews, 0);
+      document.getElementById('today-total-pageviews').textContent = Math.round(totalPageViews);
+
+      updateTime('today-update-time');
+
+      // 전체 테이블 업데이트
+      updatePageViewsTable(data.pageViews, 'today-page-title-views');
+
+      // 접두어별 테이블 업데이트
+      updatePrefixViewsTable(data.pageViews, 'today-prefix1-views', 1);
+      updatePrefixViewsTable(data.pageViews, 'today-prefix2-views', 2);
+      updatePrefixViewsTable(data.pageViews, 'today-prefix3-views', 3);
+
+      // 카테고리별 테이블 업데이트
+      updateCategoryViewsTable(data.categoryViews, 'today-category-views');
+    })
+    .catch(error => console.error('오늘 데이터 가져오기 실패:', error));
+  }
+
+  function fetchLast30MinData() {
+    fetch('/api/last30min-pageviews')
+    .then(response => response.json())
+    .then(data => {
+      // 활성 사용자 및 전체 페이지뷰 업데이트
+      document.getElementById('last30min-active-users').textContent = data.activeUsers;
+
+      // 전체 조회수 계산 및 표시
+      const totalPageViews = data.pageViews.reduce((sum, item) => sum + item.pageViews, 0);
+      document.getElementById('last30min-total-pageviews').textContent = Math.round(totalPageViews);
+
+      updateTime('last30min-update-time');
+
+      // 전체 테이블 업데이트
+      updatePageViewsTable(data.pageViews, 'last30min-page-title-views');
+
+      // 접두어별 테이블 업데이트
+      updatePrefixViewsTable(data.pageViews, 'last30min-prefix1-views', 1);
+      updatePrefixViewsTable(data.pageViews, 'last30min-prefix2-views', 2);
+      updatePrefixViewsTable(data.pageViews, 'last30min-prefix3-views', 3);
+
+      // 카테고리별 테이블 업데이트
+      updateCategoryViewsTable(data.categoryViews, 'last30min-category-views');
+    })
+    .catch(error => console.error('최근 30분 데이터 가져오기 실패:', error));
+  }
+
+  // 전체 페이지 제목별 조회수 테이블 업데이트
+  function updatePageViewsTable(data, tableId) {
+    const tableBody = document.getElementById(tableId);
+    tableBody.innerHTML = '';
+
+    // 총 조회수 계산
+    const totalViews = data.reduce((sum, item) => sum + item.pageViews, 0);
+
+    // 데이터 정렬 (조회수 기준 내림차순)
+    data.sort((a, b) => b.pageViews - a.pageViews);
+
+    // 테이블에 데이터 추가
+    data.forEach(item => {
+      const row = document.createElement('tr');
+
+      // 페이지 제목 셀
+      const titleCell = document.createElement('td');
+      titleCell.textContent = item.pageTitle || '(제목 없음)';
+      row.appendChild(titleCell);
+
+      // 조회수 셀
+      const viewsCell = document.createElement('td');
+      viewsCell.textContent = Math.round(item.pageViews);
+      row.appendChild(viewsCell);
+
+      // 비율 셀 (프로그레스 바)
+      const ratioCell = document.createElement('td');
+      const percentage = totalViews > 0 ? (item.pageViews / totalViews * 100) : 0;
+
+      const progressContainer = document.createElement('div');
+      progressContainer.style.display = 'flex';
+      progressContainer.style.alignItems = 'center';
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.style.width = '100px';
+
+      const progressValue = document.createElement('div');
+      progressValue.className = 'progress-value';
+      progressValue.style.width = `${percentage}%`;
+
+      const percentText = document.createElement('span');
+      percentText.textContent = `${percentage.toFixed(1)}%`;
+
+      progressBar.appendChild(progressValue);
+      progressContainer.appendChild(progressBar);
+      progressContainer.appendChild(percentText);
+      ratioCell.appendChild(progressContainer);
+
+      row.appendChild(ratioCell);
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 접두어(Prefix)별 조회수 테이블 업데이트
+  function updatePrefixViewsTable(data, tableId, wordCount) {
+    const tableBody = document.getElementById(tableId);
+    tableBody.innerHTML = '';
+
+    // 페이지 제목을 접두어로 그룹화
+    const prefixGroups = groupByPrefix(data, wordCount);
+
+    // 총 조회수 계산
+    const totalViews = data.reduce((sum, item) => sum + item.pageViews, 0);
+
+    // 정렬된 접두어 배열 (조회수 기준 내림차순)
+    const sortedPrefixes = Object.keys(prefixGroups).sort((a, b) => {
+      const sumA = prefixGroups[a].reduce((sum, item) => sum + item.pageViews, 0);
+      const sumB = prefixGroups[b].reduce((sum, item) => sum + item.pageViews, 0);
+      return sumB - sumA;
+    });
+
+    // 테이블에 데이터 추가
+    sortedPrefixes.forEach(prefix => {
+      const items = prefixGroups[prefix];
+      const prefixTotalViews = items.reduce((sum, item) => sum + item.pageViews, 0);
+
+      const row = document.createElement('tr');
+
+      // 접두어 셀
+      const prefixCell = document.createElement('td');
+      prefixCell.textContent = prefix;
+      row.appendChild(prefixCell);
+
+      // 조회수 셀
+      const viewsCell = document.createElement('td');
+      viewsCell.textContent = Math.round(prefixTotalViews);
+      row.appendChild(viewsCell);
+
+      // 비율 셀 (프로그레스 바)
+      const ratioCell = document.createElement('td');
+      const percentage = totalViews > 0 ? (prefixTotalViews / totalViews * 100) : 0;
+
+      const progressContainer = document.createElement('div');
+      progressContainer.style.display = 'flex';
+      progressContainer.style.alignItems = 'center';
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.style.width = '100px';
+
+      const progressValue = document.createElement('div');
+      progressValue.className = 'progress-value';
+      progressValue.style.width = `${percentage}%`;
+
+      const percentText = document.createElement('span');
+      percentText.textContent = `${percentage.toFixed(1)}%`;
+
+      progressBar.appendChild(progressValue);
+      progressContainer.appendChild(progressBar);
+      progressContainer.appendChild(percentText);
+      ratioCell.appendChild(progressContainer);
+
+      row.appendChild(ratioCell);
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 페이지 제목을 접두어로 그룹화하는 함수
+  function groupByPrefix(data, wordCount) {
+    const groups = {};
+
+    data.forEach(item => {
+      const title = (item.pageTitle || '(제목 없음)').toLowerCase();
+      const words = title.split(' ');
+
+      let prefix;
+      if (wordCount === 1) {
+        prefix = words.length > 0 ? words[0] : '';
+      } else if (words.length >= wordCount) {
+        prefix = words.slice(0, wordCount).join(' ');
+      } else {
+        prefix = title; // 단어 수가 부족한 경우 전체 제목을 사용
+      }
+
+      if (prefix) {
+        if (!groups[prefix]) {
+          groups[prefix] = [];
+        }
+        groups[prefix].push(item);
+      }
+    });
+
+    return groups;
+  }
+
+  function updateTime(elementId) {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    document.getElementById(elementId).textContent = `마지막 업데이트: ${timeString}`;
+  }
+
+  // 날짜 유효성 검사
+  function validateDates() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      alert('🚨 시작일이 종료일보다 늦을 수 없어요!');
+      document.getElementById('end-date').value = startDate;
+    }
+  }
+
+  // 날짜 지정 데이터 가져오기
+  function fetchCustomDateData() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    if (!startDate || !endDate) {
+      alert('❓ 시작일과 종료일을 모두 선택해주세요!');
+      return;
+    }
+
+    // API 요청
+    fetch(`/api/custom-date-pageviews?startDate=${startDate}&endDate=${endDate}`)
+    .then(response => response.json())
+    .then(data => {
+      // 활성 사용자 업데이트
+      document.getElementById('custom-date-active-users').textContent = data.activeUsers;
+
+      // 전체 조회수 계산 및 표시
+      const totalPageViews = data.pageViews.reduce((sum, item) => sum + item.pageViews, 0);
+      document.getElementById('custom-date-total-pageviews').textContent = Math.round(totalPageViews);
+
+      updateTime('custom-date-update-time');
+
+      // 테이블 업데이트
+      updatePageViewsTable(data.pageViews, 'custom-date-page-title-views');
+      updatePrefixViewsTable(data.pageViews, 'custom-date-prefix1-views', 1);
+      updatePrefixViewsTable(data.pageViews, 'custom-date-prefix2-views', 2);
+      updatePrefixViewsTable(data.pageViews, 'custom-date-prefix3-views', 3);
+
+      // 카테고리별 테이블 업데이트 추가
+      updateCategoryViewsTable(data.categoryViews, 'custom-date-category-views');
+    })
+    .catch(error => console.error('날짜 지정 데이터 가져오기 실패:', error));
+  }
+
+  // 자동 업데이트 설정
+  let customDateInterval;
+  function setupAutoUpdate() {
+
+    console.log('setupAutoUpdate 호출됨(사용 안함)');
+    // 기존 인터벌 제거
+    if (customDateInterval) {
+      clearInterval(customDateInterval);
+    }
+
+    // 오늘 날짜 포함 확인 및 자동 업데이트 체크박스 확인
+    const endDate = document.getElementById('end-date').value;
+    const autoUpdate = document.getElementById('auto-update-check').checked;
+    const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 YYYY-MM-DD 형식
+
+    if (endDate === today && autoUpdate) {
+      // 10초마다 업데이트
+      customDateInterval = setInterval(fetchCustomDateData, 10000);
+    }
+  }
+
+  document.getElementById('auto-update-check').addEventListener('change', function() {
+    console.log('체크박스 상태 변경: ', this.checked);
+
+    // 이전 타이머 초기화
+    if (customDateInterval) {
+      clearInterval(customDateInterval);
+      customDateInterval = null;
+    }
+
+    if (this.checked) {
+      // 체크했을 때 일단 바로 데이터 가져오기
+      fetchCustomDateData();
+
+      // 현재 시스템 날짜 가져오기 (더 정확한 방법)
+      const now = new Date();
+      const today = now.getFullYear() + '-' +
+          String(now.getMonth() + 1).padStart(2, '0') + '-' +
+          String(now.getDate()).padStart(2, '0');
+
+      const endDate = document.getElementById('end-date').value;
+      console.log('⭐정확한 날짜 비교:', endDate, today, endDate === today);
+
+      if (endDate === today) {
+        console.log('🔄 10초 자동 업데이트 설정 성공!!');
+        // 10초마다 자동 업데이트 설정
+        customDateInterval = setInterval(fetchCustomDateData, 10000);
+      }
+    }
+  });
+
+  // 워드프레스 카테고리 동기화 함수 추가 (개선 버전)
+  function syncWordPressCategories(forceFullSync = false) {
+    const syncButton = document.querySelector('.sync-button');
+    const fullSyncButton = document.querySelector('.full-sync-button');
+    const originalText = syncButton.innerHTML;
+    const originalFullSyncText = fullSyncButton.innerHTML;
+
+    // 모든 동기화 배너를 표시합니다
+    document.querySelectorAll('.sync-banner').forEach(banner => {
+      banner.textContent = forceFullSync ?
+          '⏳ 전체 카테고리 동기화 중... 시간이 조금 걸릴 수 있어요!' :
+          '⏳ 카테고리 동기화 중... 조금만 기다려주세요!';
+      banner.classList.add('visible');
+    });
+
+    // 버튼 텍스트 변경 및 비활성화
+    syncButton.innerHTML = '<span class="sync-button-icon">⏳</span> 동기화 중...';
+    syncButton.disabled = true;
+    fullSyncButton.innerHTML = '<span class="sync-button-icon">⏳</span> 동기화 중...';
+    fullSyncButton.disabled = true;
+
+    // API 호출 URL 수정 (forceFullSync 파라미터 추가)
+    fetch(`/api/sync-wordpress-categories${forceFullSync ? '?forceFullSync=true' : ''}`)
+    .then(response => response.json())
+    .then(data => {
+      // 모든 동기화 배너 업데이트
+      document.querySelectorAll('.sync-banner').forEach(banner => {
+        banner.textContent = '✅ 동기화 완료! 카테고리 데이터가 최신 상태예요! 💝';
+
+        // 3초 후에 배너 숨기기
+        setTimeout(() => {
+          banner.classList.remove('visible');
+        }, 3000);
+      });
+
+      // 동기화 후 데이터 다시 가져오기
+      fetchTodayData();
+      fetchLast30MinData();
+
+      // 버튼 복원
+      syncButton.innerHTML = originalText;
+      syncButton.disabled = false;
+      fullSyncButton.innerHTML = originalFullSyncText;
+      fullSyncButton.disabled = false;
+    })
+    .catch(error => {
+      console.error('카테고리 동기화 실패:', error);
+
+      // 모든 동기화 배너 업데이트
+      document.querySelectorAll('.sync-banner').forEach(banner => {
+        banner.textContent = '❌ 동기화 실패! 다시 시도해주세요! 😢';
+      });
+
+      // 버튼 복원
+      syncButton.innerHTML = originalText;
+      syncButton.disabled = false;
+      fullSyncButton.innerHTML = originalFullSyncText;
+      fullSyncButton.disabled = false;
+    });
+  }
+
+</script>
+</body>
+</html>
