@@ -79,7 +79,7 @@ class SearchConsoleService (
                 .setRowLimit(rowLimit)
                 .setStartRow(startRow)
             val execute = service.searchanalytics().query(domain, request).execute()
-
+            logger.info("GSC rows: ${execute.rows?.size} date=$startDate")
             execute.rows?.let { allRows.addAll(it) } // null safe
             startRow += rowLimit
         } while (execute.rows?.size == rowLimit)

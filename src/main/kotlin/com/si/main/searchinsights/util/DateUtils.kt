@@ -35,7 +35,7 @@ object DateUtils {
     }
 
     fun getLastDayOfPreviousMonth(): String {
-        return LocalDate.now().minusMonths(1).withDayOfMonth(LocalDate.now().lengthOfMonth()).format(formatter)
+        return LocalDate.now().withDayOfMonth(1).minusDays(1).format(formatter)
     }
 
 }
