@@ -241,6 +241,56 @@
       background-color: #E64A19;
     }
 
+    /* 카테고리 필터 스타일 */
+    .category-filter-container {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-left: 15px;
+    }
+
+    .category-filter-container.visible {
+      display: flex;
+    }
+    
+    /* 처음 로드시 전체 제목 탭의 드롭다운 표시 */
+    #today-full-category-filter {
+      display: flex;
+    }
+    
+    #custom-date-full-category-filter {
+      display: flex;
+    }
+
+    .category-dropdown {
+      padding: 8px 15px;
+      border: 2px solid #9C27B0;
+      border-radius: 20px;
+      background-color: white;
+      color: #9C27B0;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s ease;
+      min-width: 150px;
+    }
+
+    .category-dropdown:hover {
+      background-color: #9C27B0;
+      color: white;
+    }
+
+    .category-dropdown:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+    }
+
+    .category-label {
+      color: #9C27B0;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
   </style>
 </head>
 <body>
@@ -292,7 +342,15 @@
     <!-- 전체 제목 테이블 (오늘) -->
     <div id="today-full-content" class="sub-tab-content active">
       <div class="dashboard-box">
-        <div class="dashboard-title">📈 페이지 제목별 조회수 (오늘)</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="dashboard-title">📈 페이지 제목별 조회수 (오늘)</div>
+          <div class="category-filter-container" id="today-full-category-filter">
+            <span class="category-label">카테고리 선택:</span>
+            <select class="category-dropdown" id="today-full-category-select" onchange="filterByCategoryInFullTab('today', this.value)">
+              <option value="">전체 카테고리</option>
+            </select>
+          </div>
+        </div>
         <table>
           <thead>
           <tr>
@@ -544,7 +602,15 @@
     <!-- 전체 제목 테이블 (날짜 지정) -->
     <div id="custom-date-full-content" class="sub-tab-content active">
       <div class="dashboard-box">
-        <div class="dashboard-title">📈 페이지 제목별 조회수 (지정 기간)</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="dashboard-title">📈 페이지 제목별 조회수 (지정 기간)</div>
+          <div class="category-filter-container" id="custom-date-full-category-filter">
+            <span class="category-label">카테고리 선택:</span>
+            <select class="category-dropdown" id="custom-date-full-category-select" onchange="filterByCategoryInFullTab('custom-date', this.value)">
+              <option value="">전체 카테고리</option>
+            </select>
+          </div>
+        </div>
         <table>
           <thead>
           <tr>
@@ -647,6 +713,8 @@
 <script>
   let todayIntervalId = null;
   let last30minIntervalId = null;
+  let wpCategoryData = null; // 워드프레스 카테고리 데이터 저장
+  let currentPageViewsData = {}; // 현재 페이지뷰 데이터 저장
 
   // 페이지 로드시 처음 데이터 가져오기
   document.addEventListener('DOMContentLoaded', function() {
@@ -671,6 +739,9 @@
 
     // 동기화 상태 확인
     checkSyncStatus();
+    
+    // 워드프레스 카테고리 데이터 로드
+    loadWpCategoryData();
   });
 
   // 오늘 데이터 인터벌 시작 함수
@@ -712,9 +783,16 @@
       const hasCategories = data.categoryViews && Object.keys(data.categoryViews).length > 0;
 
       // 각 탭의 배너 표시/숨김 설정
-      document.getElementById('sync-banner-today').classList.toggle('visible', !hasCategories);
-      document.getElementById('sync-banner-last30min').classList.toggle('visible', !hasCategories);
-      document.getElementById('sync-banner-custom-date').classList.toggle('visible', !hasCategories);
+      const todayBanner = document.getElementById('sync-banner-today');
+      const customDateBanner = document.getElementById('sync-banner-custom-date');
+      
+      if (todayBanner) {
+        todayBanner.classList.toggle('visible', !hasCategories);
+      }
+      // last30min 탭에는 카테고리 기능이 없으므로 제거
+      if (customDateBanner) {
+        customDateBanner.classList.toggle('visible', !hasCategories);
+      }
     })
     .catch(error => console.error('동기화 상태 확인 실패:', error));
   }
@@ -874,12 +952,25 @@
       subTabs[tabIndex].classList.add('active');
       document.getElementById(`${mainTab}-${subTab}-content`).classList.add('active');
     }
+    
+    // 전체 제목 탭의 카테고리 필터 드롭다운 표시/숨김
+    const fullCategoryFilter = document.getElementById(`${mainTab}-full-category-filter`);
+    if (fullCategoryFilter) {
+      if (subTab === 'full') {
+        fullCategoryFilter.classList.add('visible');
+      } else {
+        fullCategoryFilter.classList.remove('visible');
+      }
+    }
   }
 
   function fetchTodayData() {
     fetch('/api/realtime-pageviews')
     .then(response => response.json())
     .then(data => {
+      // 데이터 저장
+      currentPageViewsData.today = data.pageViews;
+      
       // 활성 사용자 및 전체 페이지뷰 업데이트
       document.getElementById('today-active-users').textContent = data.activeUsers;
 
@@ -1114,6 +1205,9 @@
     fetch(`/api/custom-date-pageviews?startDate=${startDate}&endDate=${endDate}`)
     .then(response => response.json())
     .then(data => {
+      // 데이터 저장
+      currentPageViewsData.customDate = data.pageViews;
+      
       // 활성 사용자 업데이트
       document.getElementById('custom-date-active-users').textContent = data.activeUsers;
 
@@ -1186,6 +1280,156 @@
     }
   });
 
+  // 워드프레스 카테고리 데이터 로드 함수
+  function loadWpCategoryData() {
+    fetch('/wp_categories_data.json')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('카테고리 데이터를 찾을 수 없어요!');
+      }
+      return response.json();
+    })
+    .then(data => {
+      wpCategoryData = data;
+      
+      // 드롭다운에 카테고리 옵션 추가
+      const todayFullSelect = document.getElementById('today-full-category-select');
+      const customDateFullSelect = document.getElementById('custom-date-full-category-select');
+      
+      if (!data.categories) {
+        console.error('카테고리 데이터가 비어있어요!');
+        return;
+      }
+      
+      // 포스트가 있는 카테고리만 필터링
+      const categoriesWithPosts = new Set();
+      Object.values(data.posts).forEach(categoryIds => {
+        if (categoryIds && Array.isArray(categoryIds)) {
+          categoryIds.forEach(catId => categoriesWithPosts.add(catId.toString()));
+        }
+      });
+      
+      // 포스트가 있는 카테고리만 정렬 (이름 기준)
+      const sortedCategories = Object.entries(data.categories)
+        .filter(([id, name]) => categoriesWithPosts.has(id))
+        .sort((a, b) => a[1].localeCompare(b[1]));
+      
+      // 드롭다운에 옵션 추가
+      sortedCategories.forEach(([id, name]) => {
+        // HTML 엔티티 디코딩
+        const decodedName = name.replace(/&amp;/g, '&');
+        
+        // 오늘 전체 탭 드롭다운
+        const option1 = document.createElement('option');
+        option1.value = id;
+        option1.textContent = decodedName;
+        if (todayFullSelect) todayFullSelect.appendChild(option1);
+        
+        // 날짜 지정 탭 드롭다운
+        const option2 = document.createElement('option');
+        option2.value = id;
+        option2.textContent = decodedName;
+        if (customDateFullSelect) customDateFullSelect.appendChild(option2);
+      });
+    })
+    .catch(error => {
+      console.error('카테고리 데이터 로드 실패:', error);
+    });
+  }
+
+  // URL에서 포스트 ID 추출 함수
+  function extractPostId(pagePath) {
+    // /?p=59696 형식
+    let match = pagePath.match(/[?&]p=(\d+)/);
+    if (match) return match[1];
+    
+    // /12345/ 형식 (WordPress Pretty Permalink)
+    match = pagePath.match(/^\/(\d+)\/?$/);
+    if (match) return match[1];
+    
+    // /posts/12345/ 또는 /p/12345/ 같은 형식도 처리
+    match = pagePath.match(/\/(\d+)\/?$/);
+    if (match) return match[1];
+    
+    return null;
+  }
+
+  // 전체 제목 탭에서 카테고리별 필터링 함수
+  function filterByCategoryInFullTab(mainTab, categoryId) {
+    // 필터링 안 함 (전체 카테고리 선택)
+    if (!categoryId) {
+      // 원본 데이터로 복원
+      if (mainTab === 'today' && currentPageViewsData.today) {
+        updatePageViewsTable(currentPageViewsData.today, 'today-page-title-views');
+      } else if (mainTab === 'custom-date' && currentPageViewsData.customDate) {
+        updatePageViewsTable(currentPageViewsData.customDate, 'custom-date-page-title-views');
+      }
+      return;
+    }
+    
+    // 필터링된 데이터 생성
+    let filteredData = [];
+    let sourceData = null;
+    
+    if (mainTab === 'today' && currentPageViewsData.today) {
+      sourceData = currentPageViewsData.today;
+    } else if (mainTab === 'custom-date' && currentPageViewsData.customDate) {
+      sourceData = currentPageViewsData.customDate;
+    }
+    
+    if (sourceData && wpCategoryData) {
+      filteredData = sourceData.filter(item => {
+        const postId = extractPostId(item.pagePath);
+        if (!postId) return false;
+        
+        const postCategories = wpCategoryData.posts[postId];
+        return postCategories && postCategories.includes(parseInt(categoryId));
+      });
+    }
+    
+    // 필터링된 데이터로 테이블 업데이트
+    updatePageViewsTable(filteredData, `${mainTab}-page-title-views`);
+  }
+
+  // 카테고리별 필터링 함수
+  function filterByCategory(mainTab, categoryId) {
+    // 드롭다운 표시 여부 결정
+    const filterContainer = document.getElementById(`${mainTab}-category-filter`);
+    
+    if (!categoryId) {
+      // 전체 카테고리 선택시 원본 데이터로 복원
+      if (mainTab === 'today' && currentPageViewsData.today) {
+        updatePageViewsTable(currentPageViewsData.today, 'today-category-views');
+      } else if (mainTab === 'custom-date' && currentPageViewsData.customDate) {
+        updatePageViewsTable(currentPageViewsData.customDate, 'custom-date-category-views');
+      }
+      return;
+    }
+    
+    // 필터링된 데이터 생성
+    let filteredData = [];
+    let sourceData = null;
+    
+    if (mainTab === 'today' && currentPageViewsData.today) {
+      sourceData = currentPageViewsData.today;
+    } else if (mainTab === 'custom-date' && currentPageViewsData.customDate) {
+      sourceData = currentPageViewsData.customDate;
+    }
+    
+    if (sourceData && wpCategoryData) {
+      filteredData = sourceData.filter(item => {
+        const postId = extractPostId(item.pagePath);
+        if (!postId) return false;
+        
+        const postCategories = wpCategoryData.posts[postId];
+        return postCategories && postCategories.includes(parseInt(categoryId));
+      });
+    }
+    
+    // 필터링된 데이터로 테이블 업데이트
+    updatePageViewsTable(filteredData, `${mainTab}-category-views`);
+  }
+
   // 워드프레스 카테고리 동기화 함수 추가 (개선 버전)
   function syncWordPressCategories(forceFullSync = false) {
     const syncButton = document.querySelector('.sync-button');
@@ -1224,6 +1468,9 @@
       // 동기화 후 데이터 다시 가져오기
       fetchTodayData();
       fetchLast30MinData();
+      
+      // 카테고리 데이터 다시 로드
+      loadWpCategoryData();
 
       // 버튼 복원
       syncButton.innerHTML = originalText;
