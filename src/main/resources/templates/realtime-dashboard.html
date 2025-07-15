@@ -1282,7 +1282,7 @@
 
   // 워드프레스 카테고리 데이터 로드 함수
   function loadWpCategoryData() {
-    fetch('/wp_categories_data.json')
+    fetch('/api/wp-categories-data')
     .then(response => {
       if (!response.ok) {
         throw new Error('카테고리 데이터를 찾을 수 없어요!');
@@ -1291,10 +1291,18 @@
     })
     .then(data => {
       wpCategoryData = data;
-      
+
       // 드롭다운에 카테고리 옵션 추가
       const todayFullSelect = document.getElementById('today-full-category-select');
       const customDateFullSelect = document.getElementById('custom-date-full-category-select');
+      
+      // 기존 옵션 초기화 (전체 카테고리 옵션은 유지)
+      if (todayFullSelect) {
+        todayFullSelect.innerHTML = '<option value="">전체 카테고리</option>';
+      }
+      if (customDateFullSelect) {
+        customDateFullSelect.innerHTML = '<option value="">전체 카테고리</option>';
+      }
       
       if (!data.categories) {
         console.error('카테고리 데이터가 비어있어요!');

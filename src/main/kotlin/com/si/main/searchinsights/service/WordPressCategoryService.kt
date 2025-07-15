@@ -16,7 +16,7 @@ class WordPressCategoryService(
     private val logger = logger()
     private val restTemplate = RestTemplate()
     private val objectMapper = ObjectMapper()
-    private val categoryDataFile = "wp_categories_data.json"
+    private val categoryDataFile = "src/main/resources/static/wp_categories_data.json"
     private val postDataFolder = File("wp_posts_data").apply { mkdirs() }
 
     // 카테고리 및 포스트 데이터 구조
