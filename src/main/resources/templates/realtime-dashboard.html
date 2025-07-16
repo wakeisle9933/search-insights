@@ -829,6 +829,22 @@
       syncBanner.classList.remove('visible');
     }
 
+    // 카테고리별 포스트 개수 계산
+    const categoryPostCounts = {};
+    if (wpCategoryData && wpCategoryData.posts && wpCategoryData.categories) {
+      // 각 포스트가 속한 카테고리를 순회하면서 카운트
+      Object.entries(wpCategoryData.posts).forEach(([postId, categoryIds]) => {
+        if (categoryIds && Array.isArray(categoryIds)) {
+          categoryIds.forEach(catId => {
+            const categoryName = wpCategoryData.categories[catId];
+            if (categoryName) {
+              categoryPostCounts[categoryName] = (categoryPostCounts[categoryName] || 0) + 1;
+            }
+          });
+        }
+      });
+    }
+
     // 총 조회수 계산
     const totalViews = Object.values(categoryViews).reduce((sum, views) => sum + views, 0);
 
@@ -845,9 +861,10 @@
       numCell.textContent = index + 1; // 1부터 시작하는 순번
       row.appendChild(numCell);
 
-      // 카테고리 셀
+      // 카테고리 셀 (포스트 개수 포함)
       const categoryCell = document.createElement('td');
-      categoryCell.textContent = category;
+      const postCount = categoryPostCounts[category] || 0;
+      categoryCell.textContent = `${category} (${postCount})`;
       row.appendChild(categoryCell);
 
       // 조회수 셀
