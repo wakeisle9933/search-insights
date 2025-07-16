@@ -980,8 +980,21 @@
 
       updateTime('today-update-time');
 
-      // 전체 테이블 업데이트
-      updatePageViewsTable(data.pageViews, 'today-page-title-views');
+      // 현재 활성화된 서브탭 확인
+      const activeSubTab = document.querySelector('#today-content .sub-tab.active');
+      const isFullTabActive = activeSubTab && activeSubTab.textContent.includes('전체 제목');
+      
+      // 카테고리 필터 상태 확인
+      const selectedCategory = document.getElementById('today-full-category-select')?.value;
+      
+      // 전체 제목 탭이 활성화되어 있고 카테고리가 선택되어 있으면 필터링된 데이터 표시
+      if (isFullTabActive && selectedCategory) {
+        // 필터링 적용
+        filterByCategoryInFullTab('today', selectedCategory);
+      } else {
+        // 필터링이 없으면 전체 데이터 표시
+        updatePageViewsTable(data.pageViews, 'today-page-title-views');
+      }
 
       // 접두어별 테이블 업데이트
       updatePrefixViewsTable(data.pageViews, 'today-prefix1-views', 1);
@@ -1217,8 +1230,23 @@
 
       updateTime('custom-date-update-time');
 
-      // 테이블 업데이트
-      updatePageViewsTable(data.pageViews, 'custom-date-page-title-views');
+      // 현재 활성화된 서브탭 확인
+      const activeSubTab = document.querySelector('#custom-date-content .sub-tab.active');
+      const isFullTabActive = activeSubTab && activeSubTab.textContent.includes('전체 제목');
+      
+      // 카테고리 필터 상태 확인
+      const selectedCategory = document.getElementById('custom-date-full-category-select')?.value;
+      
+      // 전체 제목 탭이 활성화되어 있고 카테고리가 선택되어 있으면 필터링된 데이터 표시
+      if (isFullTabActive && selectedCategory) {
+        // 필터링 적용
+        filterByCategoryInFullTab('custom-date', selectedCategory);
+      } else {
+        // 필터링이 없으면 전체 데이터 표시
+        updatePageViewsTable(data.pageViews, 'custom-date-page-title-views');
+      }
+      
+      // 접두어별 테이블 업데이트
       updatePrefixViewsTable(data.pageViews, 'custom-date-prefix1-views', 1);
       updatePrefixViewsTable(data.pageViews, 'custom-date-prefix2-views', 2);
       updatePrefixViewsTable(data.pageViews, 'custom-date-prefix3-views', 3);

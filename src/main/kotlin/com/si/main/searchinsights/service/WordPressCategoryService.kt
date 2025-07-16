@@ -3,6 +3,7 @@ package com.si.main.searchinsights.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.si.main.searchinsights.extension.logger
+import kotlinx.coroutines.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
@@ -125,47 +126,55 @@ class WordPressCategoryService(
     }
 
     /**
-     * 새로운 워드프레스 포스트만 가져오기 (증분 업데이트)
+     * 새로운 워드프레스 포스트만 가져오기 (증분 업데이트) - 순차 처리 버전
      */
     private fun fetchNewPosts() {
         try {
-            logger.info("🚀 최신 포스트 확인 시작! 페이지당 100개씩 가져올게요~")
+            logger.info("🚀 최신 포스트 확인 시작! 순서대로 확인할게요~")
 
             var page = 1
-            var fetchedPosts: List<JsonNode>
             var newPostsCount = 0
             var foundExistingPost = false
 
-            do {
+            while (!foundExistingPost) {
                 val url = "${domain.removeSuffix("/")}/wp-json/wp/v2/posts?per_page=100&page=$page"
-                logger.info("✨ ${page}번째 페이지 요청 중...")
-                fetchedPosts = restTemplate.getForObject(url, Array<JsonNode>::class.java)?.toList() ?: emptyList()
-                logger.info("📝 ${page}번째 페이지: ${fetchedPosts.size}개 포스트 가져옴!")
-
-                // 이미 처리한 포스트를 만나면 중단하는 로직
-                for (post in fetchedPosts) {
-                    val postId = post.get("id").asInt()
-
-                    // 이미 데이터베이스에 있는 포스트를 만나면
-                    if (postCategories.containsKey(postId)) {
-                        foundExistingPost = true
-                        logger.info("🛑 포스트 ID $postId 는 이미 있어요! 여기서 중단할게요.")
+                
+                try {
+                    val fetchedPosts = restTemplate.getForObject(url, Array<JsonNode>::class.java)?.toList() ?: emptyList()
+                    
+                    if (fetchedPosts.isEmpty()) {
+                        logger.info("📄 더 이상 포스트가 없어요!")
                         break
                     }
-
-                    val categoryIds = post.get("categories").map { it.asInt() }
-                    postCategories[postId] = categoryIds
-
-                    if (postId > lastFetchedPostId) {
-                        lastFetchedPostId = postId
+                    
+                    logger.info("📝 ${page}번째 페이지: ${fetchedPosts.size}개 포스트 확인 중...")
+                    
+                    for (post in fetchedPosts) {
+                        val postId = post.get("id").asInt()
+                        
+                        // 이미 데이터베이스에 있는 포스트를 만나면
+                        if (postCategories.containsKey(postId)) {
+                            foundExistingPost = true
+                            logger.info("🛑 포스트 ID $postId 는 이미 있어요! 여기서 중단할게요.")
+                            break
+                        }
+                        
+                        val categoryIds = post.get("categories").map { it.asInt() }
+                        postCategories[postId] = categoryIds
+                        
+                        if (postId > lastFetchedPostId) {
+                            lastFetchedPostId = postId
+                        }
+                        
+                        newPostsCount++
                     }
-
-                    newPostsCount++
+                    
+                    page++
+                } catch (e: Exception) {
+                    logger.error("⚠️ ${page}번째 페이지 가져오기 실패", e)
+                    break
                 }
-
-                page++
-                // 이미 처리한 포스트를 만났거나, 페이지의 크기가 100보다 작은 경우(마지막 페이지) 중단
-            } while (!foundExistingPost && fetchedPosts.isNotEmpty() && fetchedPosts.size == 100)
+            }
 
             logger.info("📝 새 포스트 ${newPostsCount}개 가져오기 완료! 이제 총 ${postCategories.size}개 포스트 정보 보유 중!")
         } catch (e: Exception) {

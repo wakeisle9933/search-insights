@@ -31,6 +31,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
     implementation("com.google.http-client:google-http-client-gson:1.41.5")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.4.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
