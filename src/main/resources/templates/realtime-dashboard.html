@@ -291,6 +291,175 @@
       font-size: 0.9em;
     }
 
+    /* 기간 비교 모드 스타일 */
+    .period-comparison-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .period-box {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .period-box.period-a {
+      border-color: #2196F3;
+      background-color: #E3F2FD;
+    }
+
+    .period-box.period-b {
+      border-color: #FF9800;
+      background-color: #FFF3E0;
+    }
+
+    .period-title {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 10px;
+    }
+
+    .vs-symbol {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #666;
+    }
+
+    .compare-btn {
+      padding: 10px 20px;
+      background-color: #9C27B0;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: all 0.3s;
+      margin-left: 20px;
+    }
+
+    .compare-btn:hover {
+      background-color: #7B1FA2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(156, 39, 176, 0.3);
+    }
+
+    .increase {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    .decrease {
+      color: #F44336;
+      font-weight: bold;
+    }
+
+    .unchanged {
+      color: #666;
+    }
+
+    .change-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 5px;
+    }
+
+    .change-badge.increase {
+      background-color: #C8E6C9;
+    }
+
+    .change-badge.decrease {
+      background-color: #FFCDD2;
+    }
+
+    .smart-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 15px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background-color: white;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      background-color: #f5f5f5;
+      border-color: #9C27B0;
+    }
+
+    .filter-btn.active {
+      background-color: #9C27B0;
+      color: white;
+      border-color: #9C27B0;
+    }
+
+    .expandable-row {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .expandable-row:hover {
+      background-color: #f5f5f5;
+    }
+
+    .detail-row {
+      display: none;
+      background-color: #fafafa;
+    }
+
+    .detail-row.visible {
+      display: table-row;
+    }
+
+    .detail-content {
+      padding: 10px 20px;
+    }
+
+    /* 빠른 날짜 선택 버튼 스타일 */
+    .quick-date-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .quick-date-btn {
+      padding: 5px 12px;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      background-color: white;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: all 0.2s;
+    }
+
+    .quick-date-btn:hover {
+      background-color: #E1BEE7;
+      border-color: #9C27B0;
+      color: #6A1B9A;
+    }
+
+    .quick-date-label {
+      font-size: 0.85em;
+      color: #666;
+      font-weight: bold;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
   </style>
 </head>
 <body>
@@ -302,6 +471,7 @@
     <div class="main-tab active" onclick="showMainTab('today')">🌞 오늘 전체</div>
     <div class="main-tab" onclick="showMainTab('last30min')">⚡ 최근 30분</div>
     <div class="main-tab" onclick="showMainTab('custom-date')">📆 날짜 지정</div>
+    <div class="main-tab" onclick="showMainTab('comparison')">⚔️ 기간 비교</div>
   </div>
 
   <!-- 오늘 전체 탭 컨텐츠 -->
@@ -707,6 +877,107 @@
         </table>
       </div>
     </div>
+
+  </div>
+
+  <!-- 기간 비교 탭 컨텐츠 -->
+  <div id="comparison-content" class="tab-content">
+      <div class="dashboard-box">
+        <div class="dashboard-title">⚔️ 기간 비교 분석</div>
+        <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 15px;">
+          📌 기간 A(이전)에서 기간 B(최근)로의 변화를 분석해요! 상승/하락 트렌드를 한눈에 확인하세요.
+        </div>
+        
+        <!-- 기간 선택 UI -->
+        <div class="period-comparison-container">
+          <div class="period-box period-a">
+            <div class="period-title">📅 기간 A (이전)</div>
+            <input type="date" id="period-a-start" onchange="validatePeriodDates('a')">
+            <span>~</span>
+            <input type="date" id="period-a-end" onchange="validatePeriodDates('a')">
+          </div>
+          
+          <div class="vs-symbol">⚔️</div>
+          
+          <div class="period-box period-b">
+            <div class="period-title">📅 기간 B (최근)</div>
+            <input type="date" id="period-b-start" onchange="validatePeriodDates('b')">
+            <span>~</span>
+            <input type="date" id="period-b-end" onchange="validatePeriodDates('b')">
+          </div>
+          
+          <button onclick="fetchComparisonData()" class="compare-btn">🔍 비교하기</button>
+        </div>
+
+        <!-- 빠른 날짜 선택 버튼 -->
+        <div style="margin-top: 15px; margin-bottom: 20px;">
+          <span class="quick-date-label">빠른 선택:</span>
+          <div class="quick-date-buttons" style="display: inline-flex; margin-left: 10px;">
+            <button class="quick-date-btn" onclick="setQuickDateRange(1)">오늘</button>
+            <button class="quick-date-btn" onclick="setQuickDateRange(3)">3일</button>
+            <button class="quick-date-btn" onclick="setQuickDateRange(7)">7일</button>
+            <button class="quick-date-btn" onclick="setQuickDateRange(14)">2주</button>
+            <button class="quick-date-btn" onclick="setQuickDateRange(30)">한달</button>
+          </div>
+          <div style="display: inline-flex; align-items: center; margin-left: 20px;">
+            <input type="checkbox" id="exclude-today-check" style="margin-right: 5px;" checked>
+            <label for="exclude-today-check" style="font-size: 0.85em; color: #666; cursor: pointer;">
+              📅 전일 기준 (오늘 제외)
+            </label>
+          </div>
+        </div>
+
+        <!-- 스마트 필터 -->
+        <div class="smart-filter" id="comparison-filters">
+          <button class="filter-btn active" onclick="applyComparisonFilter('all')">전체 보기</button>
+          <button class="filter-btn" onclick="applyComparisonFilter('top-increase')">🔥 TOP 25 상승</button>
+          <button class="filter-btn" onclick="applyComparisonFilter('top-decrease')">💧 TOP 25 하락</button>
+          <button class="filter-btn" onclick="applyComparisonFilter('new-traffic')">🆕 신규 트래픽</button>
+          <button class="filter-btn" onclick="applyComparisonFilter('lost-traffic')">💀 트래픽 소멸</button>
+          <button class="filter-btn" onclick="applyComparisonFilter('rapid-growth')">🚀 급상승 (100%↑)</button>
+        </div>
+
+        <!-- 카테고리별 비교 테이블 -->
+        <div class="dashboard-box" style="margin-top: 20px;">
+          <div class="dashboard-title">📊 카테고리별 비교</div>
+          <table>
+            <thead>
+            <tr>
+              <th>순번</th>
+              <th>카테고리</th>
+              <th>기간 A</th>
+              <th>기간 B</th>
+              <th>변화량</th>
+              <th>변화율</th>
+            </tr>
+            </thead>
+            <tbody id="comparison-category-table">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 상세 포스트 비교 (카테고리 클릭시 표시) -->
+        <div id="comparison-post-detail" class="dashboard-box" style="margin-top: 20px; display: none;">
+          <div class="dashboard-title" id="comparison-post-detail-title">📈 포스트별 상세 비교</div>
+          <table>
+            <thead>
+            <tr>
+              <th>순번</th>
+              <th>포스트 제목</th>
+              <th>기간 A</th>
+              <th>기간 B</th>
+              <th>변화량</th>
+              <th>변화율</th>
+            </tr>
+            </thead>
+            <tbody id="comparison-post-table">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -946,6 +1217,9 @@
           customDateIntervalId = setInterval(fetchCustomDateData, 30000);
         }
       }
+    } else if (tabName === 'comparison') {
+      document.querySelector('.main-tab:nth-child(4)').classList.add('active');
+      document.getElementById('comparison-content').classList.add('active');
     }
   }
 
@@ -1545,6 +1819,370 @@
       fullSyncButton.innerHTML = originalFullSyncText;
       fullSyncButton.disabled = false;
     });
+  }
+
+  // 기간 비교 관련 함수들
+  let comparisonDataCache = {
+    periodA: null,
+    periodB: null,
+    currentFilter: 'all'
+  };
+
+  // 기간 날짜 유효성 검사
+  function validatePeriodDates(period) {
+    const startDate = document.getElementById(`period-${period}-start`).value;
+    const endDate = document.getElementById(`period-${period}-end`).value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      alert(`🚨 기간 ${period.toUpperCase()}의 시작일이 종료일보다 늦을 수 없어요!`);
+      document.getElementById(`period-${period}-end`).value = startDate;
+    }
+  }
+
+  // 빠른 날짜 선택 함수
+  function setQuickDateRange(days) {
+    const today = new Date();
+    const excludeToday = document.getElementById('exclude-today-check').checked;
+    
+    // 전일 기준 체크시 하루 전부터 시작
+    if (excludeToday) {
+      today.setDate(today.getDate() - 1);
+    }
+    
+    // 기간 B 설정 (최근 기간: 오늘부터 지정된 일수 전까지)
+    const periodBEnd = new Date(today);
+    const periodBStart = new Date(today);
+    
+    if (days === 1) {
+      // 오늘만 (또는 어제만)
+      periodBStart.setDate(today.getDate());
+    } else {
+      // 지정된 일수 전
+      periodBStart.setDate(today.getDate() - days + 1);
+    }
+    
+    // 기간 A 설정 (이전 기간: 기간 B 바로 전의 동일한 기간)
+    const periodAEnd = new Date(periodBStart);
+    periodAEnd.setDate(periodAEnd.getDate() - 1);
+    
+    const periodAStart = new Date(periodAEnd);
+    if (days === 1) {
+      periodAStart.setDate(periodAEnd.getDate());
+    } else {
+      periodAStart.setDate(periodAEnd.getDate() - days + 1);
+    }
+    
+    // 날짜 포맷 함수
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    // 입력 필드에 값 설정
+    document.getElementById('period-a-start').value = formatDate(periodAStart);
+    document.getElementById('period-a-end').value = formatDate(periodAEnd);
+    document.getElementById('period-b-start').value = formatDate(periodBStart);
+    document.getElementById('period-b-end').value = formatDate(periodBEnd);
+  }
+
+  // 비교 데이터 가져오기
+  function fetchComparisonData() {
+    const periodAStart = document.getElementById('period-a-start').value;
+    const periodAEnd = document.getElementById('period-a-end').value;
+    const periodBStart = document.getElementById('period-b-start').value;
+    const periodBEnd = document.getElementById('period-b-end').value;
+
+    if (!periodAStart || !periodAEnd || !periodBStart || !periodBEnd) {
+      alert('❓ 모든 기간을 선택해주세요!');
+      return;
+    }
+
+    // 로딩 표시
+    const categoryTable = document.getElementById('comparison-category-table');
+    categoryTable.innerHTML = '<tr><td colspan="6" style="text-align: center;">⏳ 데이터를 가져오는 중...</td></tr>';
+
+    // 두 기간의 데이터를 병렬로 가져오기
+    Promise.all([
+      fetch(`/api/custom-date-pageviews?startDate=${periodAStart}&endDate=${periodAEnd}`).then(r => r.json()),
+      fetch(`/api/custom-date-pageviews?startDate=${periodBStart}&endDate=${periodBEnd}`).then(r => r.json())
+    ])
+    .then(([dataA, dataB]) => {
+      comparisonDataCache.periodA = dataA;
+      comparisonDataCache.periodB = dataB;
+      
+      // 카테고리별 비교 데이터 생성 및 표시
+      updateComparisonCategoryTable();
+    })
+    .catch(error => {
+      console.error('비교 데이터 가져오기 실패:', error);
+      categoryTable.innerHTML = '<tr><td colspan="6" style="text-align: center;">❌ 데이터 가져오기 실패!</td></tr>';
+    });
+  }
+
+  // 카테고리별 비교 테이블 업데이트
+  function updateComparisonCategoryTable() {
+    if (!comparisonDataCache.periodA || !comparisonDataCache.periodB || !wpCategoryData) {
+      return;
+    }
+
+    const categoryDataA = comparisonDataCache.periodA.categoryViews || {};
+    const categoryDataB = comparisonDataCache.periodB.categoryViews || {};
+
+    // 모든 카테고리 수집
+    const allCategories = new Set([
+      ...Object.keys(categoryDataA),
+      ...Object.keys(categoryDataB)
+    ]);
+
+    // 카테고리별 비교 데이터 생성
+    let comparisonData = Array.from(allCategories).map(category => {
+      const viewsA = categoryDataA[category] || 0;
+      const viewsB = categoryDataB[category] || 0;
+      const change = viewsB - viewsA;
+      const changeRate = viewsA > 0 ? ((viewsB - viewsA) / viewsA * 100) : (viewsB > 0 ? 100 : 0);
+
+      return {
+        category,
+        viewsA: Math.round(viewsA),
+        viewsB: Math.round(viewsB),
+        change,
+        changeRate
+      };
+    });
+
+    // 필터 적용
+    comparisonData = applyFilterToData(comparisonData, comparisonDataCache.currentFilter);
+
+    // 테이블 업데이트
+    const tableBody = document.getElementById('comparison-category-table');
+    tableBody.innerHTML = '';
+
+    if (comparisonData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">😢 조건에 맞는 데이터가 없어요!</td></tr>';
+      return;
+    }
+
+    comparisonData.forEach((item, index) => {
+      const row = document.createElement('tr');
+      row.className = 'expandable-row';
+      row.onclick = () => showCategoryDetail(item.category);
+
+      // 순번
+      const numCell = document.createElement('td');
+      numCell.textContent = index + 1;
+      row.appendChild(numCell);
+
+      // 카테고리명
+      const categoryCell = document.createElement('td');
+      categoryCell.innerHTML = `${item.category} <small style="color: #666;">(클릭하여 상세보기)</small>`;
+      row.appendChild(categoryCell);
+
+      // 기간 A
+      const viewsACell = document.createElement('td');
+      viewsACell.textContent = item.viewsA.toLocaleString();
+      row.appendChild(viewsACell);
+
+      // 기간 B
+      const viewsBCell = document.createElement('td');
+      viewsBCell.textContent = item.viewsB.toLocaleString();
+      row.appendChild(viewsBCell);
+
+      // 변화량
+      const changeCell = document.createElement('td');
+      if (item.change > 0) {
+        changeCell.innerHTML = `<span class="increase">+${item.change.toLocaleString()}↑</span>`;
+      } else if (item.change < 0) {
+        changeCell.innerHTML = `<span class="decrease">${item.change.toLocaleString()}↓</span>`;
+      } else {
+        changeCell.innerHTML = '<span class="unchanged">0</span>';
+      }
+      row.appendChild(changeCell);
+
+      // 변화율
+      const changeRateCell = document.createElement('td');
+      if (item.changeRate > 0) {
+        changeRateCell.innerHTML = `<span class="change-badge increase">+${item.changeRate.toFixed(1)}%</span>`;
+      } else if (item.changeRate < 0) {
+        changeRateCell.innerHTML = `<span class="change-badge decrease">${item.changeRate.toFixed(1)}%</span>`;
+      } else {
+        changeRateCell.innerHTML = '<span class="unchanged">0%</span>';
+      }
+      row.appendChild(changeRateCell);
+
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 필터 적용 함수
+  function applyFilterToData(data, filterType) {
+    switch (filterType) {
+      case 'top-increase':
+        return data
+          .filter(item => item.change > 0)
+          .sort((a, b) => b.change - a.change)
+          .slice(0, 25);
+      
+      case 'top-decrease':
+        return data
+          .filter(item => item.change < 0)
+          .sort((a, b) => a.change - b.change)
+          .slice(0, 25);
+      
+      case 'new-traffic':
+        // 거의 없었는데(10 이하) 많아진 경우(100 이상)
+        return data.filter(item => item.viewsA <= 10 && item.viewsB >= 100);
+      
+      case 'lost-traffic':
+        // 많았는데(100 이상) 거의 없어진 경우(10 이하)
+        return data.filter(item => item.viewsA >= 100 && item.viewsB <= 10);
+      
+      case 'rapid-growth':
+        return data.filter(item => item.changeRate >= 100);
+      
+      default:
+        return data.sort((a, b) => b.change - a.change);
+    }
+  }
+
+  // 필터 버튼 클릭 처리
+  function applyComparisonFilter(filterType) {
+    comparisonDataCache.currentFilter = filterType;
+    
+    // 버튼 스타일 업데이트
+    document.querySelectorAll('#comparison-filters .filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // 테이블 업데이트
+    updateComparisonCategoryTable();
+  }
+
+  // 카테고리 상세 보기
+  function showCategoryDetail(categoryName) {
+    if (!comparisonDataCache.periodA || !comparisonDataCache.periodB || !wpCategoryData) {
+      return;
+    }
+
+    // 해당 카테고리의 카테고리 ID 찾기
+    let categoryId = null;
+    Object.entries(wpCategoryData.categories).forEach(([id, name]) => {
+      if (name.replace(/&amp;/g, '&') === categoryName) {
+        categoryId = id;
+      }
+    });
+
+    if (!categoryId) return;
+
+    // 해당 카테고리의 포스트들 필터링
+    const postsInCategory = Object.entries(wpCategoryData.posts)
+      .filter(([postId, categoryIds]) => categoryIds && categoryIds.includes(parseInt(categoryId)))
+      .map(([postId]) => postId);
+
+    // 포스트별 조회수 데이터 수집
+    const postDataA = {};
+    const postDataB = {};
+
+    comparisonDataCache.periodA.pageViews.forEach(page => {
+      const postId = extractPostId(page.pagePath);
+      if (postId && postsInCategory.includes(postId)) {
+        postDataA[postId] = {
+          title: page.pageTitle,
+          views: page.pageViews
+        };
+      }
+    });
+
+    comparisonDataCache.periodB.pageViews.forEach(page => {
+      const postId = extractPostId(page.pagePath);
+      if (postId && postsInCategory.includes(postId)) {
+        postDataB[postId] = {
+          title: page.pageTitle,
+          views: page.pageViews
+        };
+      }
+    });
+
+    // 모든 포스트 수집
+    const allPostIds = new Set([...Object.keys(postDataA), ...Object.keys(postDataB)]);
+    
+    // 포스트별 비교 데이터 생성
+    const postComparison = Array.from(allPostIds).map(postId => {
+      const dataA = postDataA[postId] || { title: '(제목 없음)', views: 0 };
+      const dataB = postDataB[postId] || { title: dataA.title, views: 0 };
+      const change = dataB.views - dataA.views;
+      const changeRate = dataA.views > 0 ? ((dataB.views - dataA.views) / dataA.views * 100) : (dataB.views > 0 ? 100 : 0);
+
+      return {
+        title: dataB.title || dataA.title,
+        viewsA: Math.round(dataA.views),
+        viewsB: Math.round(dataB.views),
+        change,
+        changeRate
+      };
+    }).sort((a, b) => b.change - a.change);
+
+    // 상세 테이블 표시
+    const detailBox = document.getElementById('comparison-post-detail');
+    const detailTitle = document.getElementById('comparison-post-detail-title');
+    const tableBody = document.getElementById('comparison-post-table');
+
+    detailTitle.textContent = `📈 "${categoryName}" 카테고리 포스트별 상세 비교`;
+    detailBox.style.display = 'block';
+    
+    tableBody.innerHTML = '';
+    postComparison.forEach((post, index) => {
+      const row = document.createElement('tr');
+
+      // 순번
+      const numCell = document.createElement('td');
+      numCell.textContent = index + 1;
+      row.appendChild(numCell);
+
+      // 포스트 제목
+      const titleCell = document.createElement('td');
+      titleCell.textContent = post.title;
+      row.appendChild(titleCell);
+
+      // 기간 A
+      const viewsACell = document.createElement('td');
+      viewsACell.textContent = post.viewsA.toLocaleString();
+      row.appendChild(viewsACell);
+
+      // 기간 B
+      const viewsBCell = document.createElement('td');
+      viewsBCell.textContent = post.viewsB.toLocaleString();
+      row.appendChild(viewsBCell);
+
+      // 변화량
+      const changeCell = document.createElement('td');
+      if (post.change > 0) {
+        changeCell.innerHTML = `<span class="increase">+${post.change.toLocaleString()}↑</span>`;
+      } else if (post.change < 0) {
+        changeCell.innerHTML = `<span class="decrease">${post.change.toLocaleString()}↓</span>`;
+      } else {
+        changeCell.innerHTML = '<span class="unchanged">0</span>';
+      }
+      row.appendChild(changeCell);
+
+      // 변화율
+      const changeRateCell = document.createElement('td');
+      if (post.changeRate > 0) {
+        changeRateCell.innerHTML = `<span class="change-badge increase">+${post.changeRate.toFixed(1)}%</span>`;
+      } else if (post.changeRate < 0) {
+        changeRateCell.innerHTML = `<span class="change-badge decrease">${post.changeRate.toFixed(1)}%</span>`;
+      } else {
+        changeRateCell.innerHTML = '<span class="unchanged">0%</span>';
+      }
+      row.appendChild(changeRateCell);
+
+      tableBody.appendChild(row);
+    });
+
+    // 스크롤
+    detailBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
 </script>
