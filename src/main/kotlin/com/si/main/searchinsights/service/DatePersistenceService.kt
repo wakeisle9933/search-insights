@@ -11,7 +11,7 @@ class DatePersistenceService {
 
     fun readLastRunDate(): LocalDate? {
         return if (Files.exists(lastRunFile)) {
-            LocalDate.parse(Files.readString(lastRunFile))
+            LocalDate.parse(Files.readString(lastRunFile).trim())
         } else {
             null
         }
