@@ -168,6 +168,9 @@ function applyComparisonFilter(filterType) {
   });
   event.target.classList.add('active');
   
+  // 상세 비교 창 닫기
+  closeComparisonDetail();
+  
   comparisonDataCache.currentFilter = filterType;
   
   if (comparisonDataCache.periodA && comparisonDataCache.periodB) {

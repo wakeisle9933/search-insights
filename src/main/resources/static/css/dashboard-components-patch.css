@@ -1,0 +1,80 @@
+/* 기간 비교 탭 추가 스타일 패치 */
+
+/* 기간 박스 내부 날짜 입력 필드 */
+.period-box input[type="date"] {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #a1a1aa !important;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+.period-box input[type="date"]:focus {
+  border-color: rgba(33, 150, 243, 0.3) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1) !important;
+}
+
+/* 기간 B의 날짜 입력 필드는 약간 다른 색상 */
+.period-box.period-b input[type="date"]:focus {
+  border-color: rgba(255, 152, 0, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.1) !important;
+}
+
+/* 물결표(~) 스타일 */
+.period-box span {
+  color: #71717a !important;
+  margin: 0 8px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* 설명 텍스트 어둡게 */
+.dashboard-box > div[style*="color: #666"] {
+  color: #71717a !important;
+}
+
+/* 기간 비교 컨테이너 내부 텍스트 */
+.period-comparison-container {
+  color: #a1a1aa;
+}
+
+/* 빠른 선택 레이블 */
+.quick-date-label {
+  color: #71717a !important;
+  opacity: 0.9;
+}
+
+/* 전일 기준 체크박스 레이블 */
+label[for="exclude-today-check"] {
+  color: #71717a !important;
+}
+
+/* 카테고리 비교 테이블의 클릭 안내 텍스트 */
+td small {
+  color: #52525b !important;
+  opacity: 0.8;
+}
+
+/* 진짜 조회수 숫자들의 번쩍임 제거 */
+#today-active-users,
+#today-total-pageviews,
+#last30min-active-users, 
+#last30min-total-pageviews,
+#custom-date-active-users,
+#custom-date-total-pageviews {
+  text-shadow: none !important;
+}
+
+/* 대시보드 제목의 인라인 스타일 오버라이드 */
+.dashboard-title[style*="margin-top: 0;"] {
+  color: #a1a1aa !important;
+}
+
+/* 활성 탭의 버튼 효과 억제 */
+.fetch-btn:active::before,
+.sync-button:active::before,
+.compare-btn:active::before {
+  display: none !important;
+}

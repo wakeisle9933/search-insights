@@ -39,9 +39,9 @@
 .period-box {
   flex: 1;
   padding: 15px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  background-color: #f9f9f9;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .period-box.period-a {
@@ -63,16 +63,18 @@
 }
 
 .period-title {
-  font-weight: bold;
-  font-size: 1.1em;
+  font-weight: 600;
+  font-size: 1em;
   margin-bottom: 10px;
-  color: #ffffff;
+  color: #a1a1aa;
+  opacity: 0.9;
 }
 
 .vs-symbol {
-  font-size: 1.5em;
+  font-size: 1.3em;
   font-weight: bold;
-  color: #666;
+  color: #52525b;
+  opacity: 0.8;
 }
 
 /* 변화 표시 스타일 */
