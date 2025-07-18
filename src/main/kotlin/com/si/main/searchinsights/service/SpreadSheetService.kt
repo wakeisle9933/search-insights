@@ -38,11 +38,17 @@ class SpreadSheetService(
         val creationHelper = workbook.creationHelper
         val linkStyle = createLinkStyle(workbook)
 
-        // Summary Data
-        val avgPosition = if (allRows.isEmpty()) 0.0 else allRows.map { it.position }.average()
-        val totalClicks = allRows.sumOf { it.clicks }
-        val totalImpressions = allRows.sumOf { it.impressions }
-        val avgCTR = if (allRows.isEmpty()) 0.0 else allRows.map { it.ctr }.average()
+        // Remove duplicate queries - keep only the one with highest impressions
+        val uniqueRows = allRows.groupBy { it.getKeys()[0] }  // group by query
+            .map { (_, rows) -> 
+                rows.maxByOrNull { it.impressions } ?: rows.first()  // get row with max impressions
+            }
+
+        // Summary Data - use deduplicated data
+        val avgPosition = if (uniqueRows.isEmpty()) 0.0 else uniqueRows.map { it.position }.average()
+        val totalClicks = uniqueRows.sumOf { it.clicks }
+        val totalImpressions = uniqueRows.sumOf { it.impressions }
+        val avgCTR = if (uniqueRows.isEmpty()) 0.0 else uniqueRows.map { it.ctr }.average()
 
         // Summary Header
         val headerStyle = createHeaderStyle(workbook)
@@ -74,8 +80,8 @@ class SpreadSheetService(
         sheet.setColumnWidth(3, 2 * 1440)
         sheet.setColumnWidth(5, 5 * 1440)
 
-        // Data
-        allRows.forEachIndexed { index, row ->
+        // Data - use deduplicated data
+        uniqueRows.forEachIndexed { index, row ->
             val dataRow = sheet.createRow(index + 4)
             dataRow.createCell(0).setCellValue(row.getKeys()[0])
             dataRow.createCell(1).setCellValue(floor(row.position * 100) / 100)
@@ -352,8 +358,12 @@ class SpreadSheetService(
             cell.cellStyle = headerStyle
         }
 
-        // Data Filtering, Sorting
+        // Data Filtering, Sorting and Remove duplicates
         val filteredRows = allRows.filter { it.position > 3.0 }
+            .groupBy { it.getKeys()[0] }  // group by query
+            .map { (_, rows) -> 
+                rows.maxByOrNull { it.impressions } ?: rows.first()  // get row with max impressions
+            }
             .sortedByDescending { it.impressions }
 
         filteredRows.forEachIndexed { index, row ->
