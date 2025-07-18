@@ -22,7 +22,7 @@ function updatePageViewsTable(data, tableId) {
 
     // 페이지 제목 셀
     const titleCell = document.createElement('td');
-    titleCell.textContent = item.pageTitle || '(제목 없음)';
+    titleCell.textContent = item.pageTitle || (window.t ? window.t('messages.noTitle') : '(제목 없음)');
     row.appendChild(titleCell);
 
     // 조회수 셀
@@ -146,7 +146,8 @@ function updateCategoryViewsTable(categoryViews, tableId) {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
     cell.setAttribute('colspan', '4');
-    cell.textContent = '데이터가 없거나 아직 카테고리가 동기화되지 않았어요! 🥺';
+    const noDataText = window.t ? window.t('messages.noData') : '데이터가 없거나 아직 카테고리가 동기화되지 않았어요!';
+    cell.textContent = noDataText + ' 🥺';
     cell.style.textAlign = 'center';
     row.appendChild(cell);
     tableBody.appendChild(row);
@@ -277,7 +278,7 @@ function updateComparisonCategoryTable(dataA, dataB, filterType = 'all') {
   tableBody.innerHTML = '';
 
   if (comparisonData.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">😢 조건에 맞는 데이터가 없어요!</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">😢 ' + (window.t ? window.t('errors.noMatchingData') : '조건에 맞는 데이터가 없어요!') + '</td></tr>';
     return;
   }
 
@@ -293,7 +294,7 @@ function updateComparisonCategoryTable(dataA, dataB, filterType = 'all') {
 
     // 카테고리명
     const categoryCell = document.createElement('td');
-    categoryCell.innerHTML = `${item.category} <small style="color: #666;">(클릭하여 상세보기)</small>`;
+    categoryCell.innerHTML = `${item.category} <small style="color: #666;">${window.t ? window.t('ui.clickForDetail') : '(클릭하여 상세보기)'}</small>`;
     row.appendChild(categoryCell);
 
     // 기간 A
@@ -431,7 +432,8 @@ function showCategoryDetail(categoryName) {
   
   // 포스트별 비교 데이터 생성
   const postComparison = Array.from(allPostIds).map(postId => {
-    const dataA = postDataA[postId] || { title: '(제목 없음)', views: 0 };
+    const noTitleText = window.t ? window.t('messages.noTitle') : '(제목 없음)';
+    const dataA = postDataA[postId] || { title: noTitleText, views: 0 };
     const dataB = postDataB[postId] || { title: dataA.title, views: 0 };
     const change = dataB.views - dataA.views;
     const changeRate = dataA.views > 0 ? ((dataB.views - dataA.views) / dataA.views * 100) : (dataB.views > 0 ? 100 : 0);
@@ -450,7 +452,7 @@ function showCategoryDetail(categoryName) {
   const detailTitle = document.getElementById('comparison-post-detail-title');
   const tableBody = document.getElementById('comparison-post-table');
 
-  detailTitle.textContent = `📈 "${categoryName}" 카테고리 포스트별 상세 비교`;
+  detailTitle.textContent = '📈 ' + (window.t ? window.tTemplate('ui.categoryPostDetail', {category: categoryName}) : `"${categoryName}" 카테고리 포스트별 상세 비교`);
   detailBox.style.display = 'block';
   
   tableBody.innerHTML = '';

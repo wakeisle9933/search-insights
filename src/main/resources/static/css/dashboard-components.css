@@ -239,6 +239,7 @@
   align-items: center;
   gap: 10px;
   margin-left: 15px;
+  margin-top: -8px;
 }
 
 .category-filter-container.visible {
@@ -380,6 +381,13 @@
   margin-bottom: 20px;
 }
 
+/* 헤더 컨트롤 */
+.header-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 /* 테마 토글 버튼 */
 .theme-toggle {
   background: rgba(255, 255, 255, 0.1);
@@ -423,4 +431,60 @@ body.light-theme .theme-toggle:hover {
   background: rgba(0, 0, 0, 0.08);
   border-color: rgba(0, 0, 0, 0.25);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 언어 선택 셀렉트박스 */
+.language-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+  color: #e4e4e7;
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+  outline: none;
+  min-width: 140px;
+}
+
+.language-select:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.language-select:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.language-select option {
+  background: #1a1a1a;
+  color: #e4e4e7;
+  padding: 5px;
+}
+
+/* 라이트 테마일 때 언어 셀렉트박스 */
+body.light-theme .language-select {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #374151;
+}
+
+body.light-theme .language-select:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .language-select:focus {
+  border-color: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .language-select option {
+  background: white;
+  color: #374151;
 }

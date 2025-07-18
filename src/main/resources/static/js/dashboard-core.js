@@ -49,6 +49,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // 테마 초기화
   initTheme();
   
+  // 언어 초기화
+  if (window.updateAllTranslations) {
+    window.updateAllTranslations();
+  }
+  
+  // 날짜 입력 필드 언어 설정
+  updateDateInputLanguage();
+  
   // 페이지 로드 시 첫 번째 탭(오늘 전체) 활성화
   fetchTodayData();
   startTodayInterval();
@@ -81,8 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
 // 시간 업데이트 함수
 function updateTime(elementId) {
   const now = new Date();
-  const timeString = now.toLocaleTimeString();
-  document.getElementById(elementId).textContent = `마지막 업데이트: ${timeString}`;
+  // 현재 언어에 맞는 로케일 설정
+  const locale = window.getCurrentLanguage ? 
+    (window.getCurrentLanguage() === 'ko' ? 'ko-KR' : 
+     window.getCurrentLanguage() === 'en' ? 'en-US' : 'zh-CN') : 'ko-KR';
+  const timeString = now.toLocaleTimeString(locale);
+  const lastUpdateText = window.t ? window.t('labels.lastUpdate') : '마지막 업데이트';
+  document.getElementById(elementId).innerHTML = `<span data-i18n="labels.lastUpdate">${lastUpdateText}</span>: ${timeString}`;
 }
 
 // 날짜 유효성 검사
@@ -91,7 +104,7 @@ function validateDates() {
   const endDate = document.getElementById('end-date').value;
 
   if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-    alert('🚨 시작일이 종료일보다 늦을 수 없어요!');
+    alert('🚨 ' + (window.t ? window.t('errors.dateRangeInvalid') : '시작일이 종료일보다 늦을 수 없어요!'));
     document.getElementById('end-date').value = startDate;
   }
 }
@@ -102,7 +115,7 @@ function validatePeriodDates(period) {
   const endDate = document.getElementById(`period-${period}-end`).value;
 
   if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-    alert(`🚨 기간 ${period.toUpperCase()}의 시작일이 종료일보다 늦을 수 없어요!`);
+    alert('🚨 ' + (window.t ? window.tTemplate('errors.periodDateInvalid', {period: period.toUpperCase()}) : `기간 ${period.toUpperCase()}의 시작일이 종료일보다 늦을 수 없어요!`));
     document.getElementById(`period-${period}-end`).value = startDate;
   }
 }
@@ -124,12 +137,30 @@ function extractPostId(pagePath) {
   return null;
 }
 
+// 날짜 입력 필드 언어 설정 함수
+function updateDateInputLanguage() {
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'ko';
+  
+  dateInputs.forEach(input => {
+    // 언어에 따른 lang 속성 설정
+    if (currentLang === 'en') {
+      input.setAttribute('lang', 'en-US');
+    } else if (currentLang === 'zh') {
+      input.setAttribute('lang', 'zh-CN');
+    } else {
+      input.setAttribute('lang', 'ko-KR');
+    }
+  });
+}
+
 // 페이지 제목을 접두어로 그룹화하는 함수
 function groupByPrefix(data, wordCount) {
   const groups = {};
 
   data.forEach(item => {
-    const title = (item.pageTitle || '(제목 없음)').toLowerCase();
+    const noTitleText = window.t ? window.t('messages.noTitle') : '(제목 없음)';
+    const title = (item.pageTitle || noTitleText).toLowerCase();
     const words = title.split(' ');
 
     let prefix;
@@ -151,6 +182,24 @@ function groupByPrefix(data, wordCount) {
 
   return groups;
 }
+
+// 현재 콘텐츠 새로고침 함수
+window.refreshCurrentContent = function() {
+  // 모든 업데이트 시간 요소를 다시 업데이트
+  const updateTimeElements = [
+    'today-update-time',
+    'last30min-update-time', 
+    'custom-date-update-time'
+  ];
+  
+  // 각 요소가 존재하면 시간을 다시 업데이트 (AM/PM 변경을 위해)
+  updateTimeElements.forEach(elementId => {
+    const element = document.getElementById(elementId);
+    if (element && element.innerHTML) {
+      updateTime(elementId);
+    }
+  });
+};
 
 // 자동 업데이트 리스너 초기화
 function initAutoUpdateListener() {

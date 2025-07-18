@@ -56,6 +56,7 @@ tr:hover td {
   background: rgba(255, 255, 255, 0.8);
   color: #374151;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .main-tab:hover {
@@ -261,11 +262,28 @@ label:hover {
   background: rgba(8, 145, 178, 0.4);
 }
 
+/* 카테고리 관련 스타일 */
+.category-label {
+  color: #7c3aed;
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.category-filter-container {
+  align-items: center;
+}
+
 /* 카테고리 드롭다운 */
 .category-dropdown {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(183, 148, 246, 0.4);
   color: #7c3aed;
+  padding: 8px 20px;
+  height: auto;
+  line-height: 1.2;
 }
 
 .category-dropdown:hover {

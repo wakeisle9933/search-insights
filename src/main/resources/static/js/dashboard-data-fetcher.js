@@ -41,7 +41,7 @@ function fetchTodayData() {
     // 카테고리별 테이블 업데이트
     updateCategoryViewsTable(data.categoryViews, 'today-category-views');
   })
-  .catch(error => console.error('오늘 데이터 가져오기 실패:', error));
+  .catch(error => console.error((window.t ? window.t('console.todayDataFetchFailed') : '오늘 데이터 가져오기 실패') + ':', error));
 }
 
 // 최근 30분 데이터 가져오기
@@ -66,7 +66,7 @@ function fetchLast30MinData() {
     updatePrefixViewsTable(data.pageViews, 'last30min-prefix2-views', 2);
     updatePrefixViewsTable(data.pageViews, 'last30min-prefix3-views', 3);
   })
-  .catch(error => console.error('최근 30분 데이터 가져오기 실패:', error));
+  .catch(error => console.error((window.t ? window.t('console.last30minDataFetchFailed') : '최근 30분 데이터 가져오기 실패') + ':', error));
 }
 
 // 날짜 지정 데이터 가져오기
@@ -75,7 +75,7 @@ function fetchCustomDateData() {
   const endDate = document.getElementById('end-date').value;
 
   if (!startDate || !endDate) {
-    alert('❓ 시작일과 종료일을 모두 선택해주세요!');
+    alert('❓ ' + (window.t ? window.t('errors.selectAllDates') : '시작일과 종료일을 모두 선택해주세요!'));
     return;
   }
 
@@ -119,7 +119,7 @@ function fetchCustomDateData() {
     // 카테고리별 테이블 업데이트
     updateCategoryViewsTable(data.categoryViews, 'custom-date-category-views');
   })
-  .catch(error => console.error('날짜 지정 데이터 가져오기 실패:', error));
+  .catch(error => console.error((window.t ? window.t('console.customDateDataFetchFailed') : '날짜 지정 데이터 가져오기 실패') + ':', error));
 }
 
 // 기간 비교 데이터 가져오기
@@ -133,7 +133,7 @@ function fetchComparisonData() {
   const periodBEnd = document.getElementById('period-b-end').value;
   
   if (!periodAStart || !periodAEnd || !periodBStart || !periodBEnd) {
-    alert('❓ 두 기간의 시작일과 종료일을 모두 선택해주세요!');
+    alert('❓ ' + (window.t ? window.t('errors.selectBothPeriods') : '두 기간의 시작일과 종료일을 모두 선택해주세요!'));
     return;
   }
   
@@ -157,7 +157,7 @@ function fetchComparisonData() {
     document.querySelector('#comparison-filters .filter-btn').classList.add('active');
     comparisonDataCache.currentFilter = 'all';
   })
-  .catch(error => console.error('비교 데이터 가져오기 실패:', error));
+  .catch(error => console.error((window.t ? window.t('console.comparisonDataFetchFailed') : '비교 데이터 가져오기 실패') + ':', error));
 }
 
 // 비교 필터 적용

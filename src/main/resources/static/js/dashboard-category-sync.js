@@ -18,7 +18,7 @@ function checkSyncStatus() {
       customDateBanner.classList.toggle('visible', !hasCategories);
     }
   })
-  .catch(error => console.error('동기화 상태 확인 실패:', error));
+  .catch(error => console.error((window.t ? window.t('console.syncStatusCheckFailed') : '동기화 상태 확인 실패') + ':', error));
 }
 
 // 워드프레스 카테고리 데이터 로드 함수
@@ -26,7 +26,7 @@ function loadWpCategoryData() {
   fetch('/api/wp-categories-data')
   .then(response => {
     if (!response.ok) {
-      throw new Error('카테고리 데이터를 찾을 수 없어요!');
+      throw new Error(window.t ? window.t('errors.categoryDataNotFound') : '카테고리 데이터를 찾을 수 없어요!');
     }
     return response.json();
   })
@@ -38,15 +38,17 @@ function loadWpCategoryData() {
     const customDateFullSelect = document.getElementById('custom-date-full-category-select');
     
     // 기존 옵션 초기화 (전체 카테고리 옵션은 유지)
+    const allCategoriesText = window.t ? window.t('labels.allCategories') : '전체 카테고리';
+    
     if (todayFullSelect) {
-      todayFullSelect.innerHTML = '<option value="">전체 카테고리</option>';
+      todayFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
     }
     if (customDateFullSelect) {
-      customDateFullSelect.innerHTML = '<option value="">전체 카테고리</option>';
+      customDateFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
     }
     
     if (!data.categories) {
-      console.error('카테고리 데이터가 비어있어요!');
+      console.error(window.t ? window.t('errors.categoryDataEmpty') : '카테고리 데이터가 비어있어요!');
       return;
     }
     
@@ -82,7 +84,7 @@ function loadWpCategoryData() {
     });
   })
   .catch(error => {
-    console.error('카테고리 데이터 로드 실패:', error);
+    console.error((window.t ? window.t('console.categoryDataLoadFailed') : '카테고리 데이터 로드 실패') + ':', error);
   });
 }
 
@@ -95,16 +97,18 @@ function syncWordPressCategories(forceFullSync = false) {
 
   // 모든 동기화 배너를 표시
   document.querySelectorAll('.sync-banner').forEach(banner => {
-    banner.textContent = forceFullSync ?
-        '⏳ 전체 카테고리 동기화 중... 시간이 조금 걸릴 수 있어요!' :
-        '⏳ 카테고리 동기화 중... 조금만 기다려주세요!';
+    const syncingText = forceFullSync ?
+        (window.t ? window.t('messages.syncInProgressFull') : '전체 카테고리 동기화 중... 시간이 조금 걸릴 수 있어요!') :
+        (window.t ? window.t('messages.syncInProgressDetail') : '카테고리 동기화 중... 조금만 기다려주세요!');
+    banner.textContent = '⏳ ' + syncingText;
     banner.classList.add('visible');
   });
 
   // 버튼 텍스트 변경 및 비활성화
-  syncButton.innerHTML = '<span class="sync-button-icon">⏳</span> 동기화 중...';
+  const syncingBtnText = window.t ? window.t('messages.syncInProgress') : '동기화 중...';
+  syncButton.innerHTML = `<span class="sync-button-icon">⏳</span> ${syncingBtnText}`;
   syncButton.disabled = true;
-  fullSyncButton.innerHTML = '<span class="sync-button-icon">⏳</span> 동기화 중...';
+  fullSyncButton.innerHTML = `<span class="sync-button-icon">⏳</span> ${syncingBtnText}`;
   fullSyncButton.disabled = true;
 
   // API 호출 URL (forceFullSync 파라미터 추가)
@@ -113,7 +117,8 @@ function syncWordPressCategories(forceFullSync = false) {
   .then(data => {
     // 모든 동기화 배너 업데이트
     document.querySelectorAll('.sync-banner').forEach(banner => {
-      banner.textContent = '✅ 동기화 완료! 카테고리 데이터가 최신 상태예요! 💝';
+      const syncCompleteText = window.t ? window.t('messages.syncComplete') : '동기화 완료! 카테고리 데이터가 최신 상태예요!';
+      banner.textContent = '✅ ' + syncCompleteText + ' 💝';
 
       // 3초 후에 배너 숨기기
       setTimeout(() => {
@@ -137,11 +142,12 @@ function syncWordPressCategories(forceFullSync = false) {
     fullSyncButton.disabled = false;
   })
   .catch(error => {
-    console.error('카테고리 동기화 실패:', error);
+    console.error((window.t ? window.t('console.categorySyncFailed') : '카테고리 동기화 실패') + ':', error);
 
     // 모든 동기화 배너 업데이트
     document.querySelectorAll('.sync-banner').forEach(banner => {
-      banner.textContent = '❌ 동기화 실패! 다시 시도해주세요! 😢';
+      const syncFailedText = window.t ? window.t('messages.syncFailed') : '동기화 실패! 다시 시도해주세요!';
+      banner.textContent = '❌ ' + syncFailedText + ' 😢';
     });
 
     // 버튼 복원
