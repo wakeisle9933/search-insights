@@ -36,6 +36,13 @@
 }
 
 /* 기간 비교 스타일 */
+.period-comparison-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
 .period-box {
   flex: 1;
   padding: 15px;

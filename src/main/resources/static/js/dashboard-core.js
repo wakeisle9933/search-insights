@@ -14,8 +14,41 @@ let comparisonDataCache = {
   currentFilter: 'all'
 };
 
+// 테마 관리
+let currentTheme = localStorage.getItem('theme') || 'dark';
+
+function initTheme() {
+  if (currentTheme === 'light') {
+    document.body.classList.add('light-theme');
+    document.getElementById('theme-stylesheet').href = '/css/dashboard-light-theme.css';
+    document.querySelector('.theme-icon').textContent = '☀️';
+  } else {
+    document.body.classList.remove('light-theme');
+    document.getElementById('theme-stylesheet').href = '/css/dashboard-dark-theme.css';
+    document.querySelector('.theme-icon').textContent = '🌙';
+  }
+}
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', currentTheme);
+  
+  if (currentTheme === 'light') {
+    document.body.classList.add('light-theme');
+    document.getElementById('theme-stylesheet').href = '/css/dashboard-light-theme.css';
+    document.querySelector('.theme-icon').textContent = '☀️';
+  } else {
+    document.body.classList.remove('light-theme');
+    document.getElementById('theme-stylesheet').href = '/css/dashboard-dark-theme.css';
+    document.querySelector('.theme-icon').textContent = '🌙';
+  }
+}
+
 // 페이지 로드시 처음 데이터 가져오기
 document.addEventListener('DOMContentLoaded', function() {
+  // 테마 초기화
+  initTheme();
+  
   // 페이지 로드 시 첫 번째 탭(오늘 전체) 활성화
   fetchTodayData();
   startTodayInterval();

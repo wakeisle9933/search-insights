@@ -8,6 +8,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   animation: fadeIn 0.8s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -23,10 +24,7 @@ body {
 }
 
 h1 {
-  background: linear-gradient(135deg, #00d4ff 0%, #b794f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #e4e4e7;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 15px;
   font-weight: 600;

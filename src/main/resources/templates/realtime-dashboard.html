@@ -6,13 +6,19 @@
   
   <!-- CSS 파일들 -->
   <link rel="stylesheet" th:href="@{/css/dashboard-main.css}">
-  <link rel="stylesheet" th:href="@{/css/dashboard-dark-theme.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard-dark-theme.css}" id="theme-stylesheet">
   <link rel="stylesheet" th:href="@{/css/dashboard-components.css}">
   <link rel="stylesheet" th:href="@{/css/dashboard-components-patch.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard-light-theme-patch.css}">
 </head>
 <body>
 <div class="container">
-  <h1><span style="color: #e4e4e7; -webkit-text-fill-color: initial;">😎</span> 실시간 대시보드</h1>
+  <div class="header-wrapper">
+    <h1>😎 실시간 대시보드</h1>
+    <button class="theme-toggle" onclick="toggleTheme()" title="테마 변경">
+      <span class="theme-icon">🌙</span>
+    </button>
+  </div>
 
   <!-- 메인 탭 -->
   <div class="main-tabs">
@@ -449,7 +455,7 @@
   <!-- 기간 비교 탭 컨텐츠 -->
   <div id="comparison-content" class="tab-content">
       <div class="dashboard-box">
-        <div class="dashboard-title"><span style="color: #e4e4e7; -webkit-text-fill-color: initial;">⚔️</span> 기간 비교 분석</div>
+        <div class="dashboard-title">⚔️ 기간 비교 분석</div>
         <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 15px;">
           📌 기간 A(이전)에서 기간 B(최근)로의 변화를 분석해요! 상승/하락 트렌드를 한눈에 확인하세요.
         </div>
