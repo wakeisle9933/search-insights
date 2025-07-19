@@ -408,7 +408,7 @@ function showCategoryDetail(categoryName) {
   const postDataB = {};
 
   comparisonDataCache.periodA.pageViews.forEach(page => {
-    const postId = extractPostId(page.pagePath);
+    const postId = window.extractPostId ? window.extractPostId(page.pagePath) : null;
     if (postId && postsInCategory.includes(postId)) {
       postDataA[postId] = {
         title: page.pageTitle,
@@ -418,7 +418,7 @@ function showCategoryDetail(categoryName) {
   });
 
   comparisonDataCache.periodB.pageViews.forEach(page => {
-    const postId = extractPostId(page.pagePath);
+    const postId = window.extractPostId ? window.extractPostId(page.pagePath) : null;
     if (postId && postsInCategory.includes(postId)) {
       postDataB[postId] = {
         title: page.pageTitle,

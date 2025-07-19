@@ -10,12 +10,16 @@ function checkSyncStatus() {
     // 각 탭의 배너 표시/숨김 설정
     const todayBanner = document.getElementById('sync-banner-today');
     const customDateBanner = document.getElementById('sync-banner-custom-date');
+    const dailyDetailBanner = document.getElementById('sync-banner-daily-detail');
     
     if (todayBanner) {
       todayBanner.classList.toggle('visible', !hasCategories);
     }
     if (customDateBanner) {
       customDateBanner.classList.toggle('visible', !hasCategories);
+    }
+    if (dailyDetailBanner) {
+      dailyDetailBanner.classList.toggle('visible', !hasCategories);
     }
   })
   .catch(error => console.error((window.t ? window.t('console.syncStatusCheckFailed') : '동기화 상태 확인 실패') + ':', error));
@@ -32,10 +36,12 @@ function loadWpCategoryData() {
   })
   .then(data => {
     wpCategoryData = data;
+    window.wpCategoryData = data;
 
     // 드롭다운에 카테고리 옵션 추가
     const todayFullSelect = document.getElementById('today-full-category-select');
     const customDateFullSelect = document.getElementById('custom-date-full-category-select');
+    const dailyDetailFullSelect = document.getElementById('daily-detail-full-category-select');
     
     // 기존 옵션 초기화 (전체 카테고리 옵션은 유지)
     const allCategoriesText = window.t ? window.t('labels.allCategories') : '전체 카테고리';
@@ -45,6 +51,9 @@ function loadWpCategoryData() {
     }
     if (customDateFullSelect) {
       customDateFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
+    }
+    if (dailyDetailFullSelect) {
+      dailyDetailFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
     }
     
     if (!data.categories) {
@@ -81,6 +90,12 @@ function loadWpCategoryData() {
       option2.value = id;
       option2.textContent = decodedName;
       if (customDateFullSelect) customDateFullSelect.appendChild(option2);
+      
+      // 일간 차트 상세 탭 드롭다운
+      const option3 = document.createElement('option');
+      option3.value = id;
+      option3.textContent = decodedName;
+      if (dailyDetailFullSelect) dailyDetailFullSelect.appendChild(option3);
     });
   })
   .catch(error => {

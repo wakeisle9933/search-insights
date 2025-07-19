@@ -55,7 +55,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // 날짜 입력 필드 언어 설정
-  updateDateInputLanguage();
+  if (window.updateDateInputLanguage) {
+    window.updateDateInputLanguage();
+  }
   
   // 페이지 로드 시 첫 번째 탭(오늘 전체) 활성화
   fetchTodayData();
@@ -137,22 +139,6 @@ function extractPostId(pagePath) {
   return null;
 }
 
-// 날짜 입력 필드 언어 설정 함수
-function updateDateInputLanguage() {
-  const dateInputs = document.querySelectorAll('input[type="date"]');
-  const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'ko';
-  
-  dateInputs.forEach(input => {
-    // 언어에 따른 lang 속성 설정
-    if (currentLang === 'en') {
-      input.setAttribute('lang', 'en-US');
-    } else if (currentLang === 'zh') {
-      input.setAttribute('lang', 'zh-CN');
-    } else {
-      input.setAttribute('lang', 'ko-KR');
-    }
-  });
-}
 
 // 페이지 제목을 접두어로 그룹화하는 함수
 function groupByPrefix(data, wordCount) {
@@ -204,8 +190,6 @@ window.refreshCurrentContent = function() {
 // 자동 업데이트 리스너 초기화
 function initAutoUpdateListener() {
   document.getElementById('auto-update-check').addEventListener('change', function() {
-    console.log('체크박스 상태 변경: ', this.checked);
-
     // 이전 타이머 초기화
     if (customDateInterval) {
       clearInterval(customDateInterval);
@@ -223,10 +207,8 @@ function initAutoUpdateListener() {
           String(now.getDate()).padStart(2, '0');
 
       const endDate = document.getElementById('end-date').value;
-      console.log('⭐정확한 날짜 비교:', endDate, today, endDate === today);
 
       if (endDate === today) {
-        console.log('🔄 10초 자동 업데이트 설정 성공!!');
         // 10초마다 자동 업데이트 설정
         customDateInterval = setInterval(fetchCustomDateData, 10000);
       }

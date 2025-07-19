@@ -13,6 +13,11 @@ function showMainTab(tabName) {
   // 일단 모든 인터벌 중지
   stopTodayInterval();
   stopLast30minInterval();
+  
+  // 일간 차트 인터벌도 중지
+  if (typeof stopDailyChartInterval === 'function') {
+    stopDailyChartInterval();
+  }
 
   // 선택한 메인 탭과 해당 컨텐츠를 활성화
   if (tabName === 'today') {
@@ -47,12 +52,55 @@ function showMainTab(tabName) {
   } else if (tabName === 'comparison') {
     document.querySelector('.main-tab:nth-child(4)').classList.add('active');
     document.getElementById('comparison-content').classList.add('active');
+  } else if (tabName === 'daily-chart') {
+    document.querySelector('.main-tab:nth-child(5)').classList.add('active');
+    document.getElementById('daily-chart-content').classList.add('active');
+    // 일간 차트는 수동 조회로 변경 - 자동 조회하지 않음
+    if (typeof initDailyChartTab === 'function') {
+      initDailyChartTab(); // 날짜 필드 초기화만
+    }
   }
 }
 
 // 서브 탭 전환 함수
 function showSubTab(mainTab, subTab) {
-  // 해당 메인 탭 내의 모든 서브 탭과 서브 탭 컨텐츠를 비활성화
+  // daily-detail의 경우 특별 처리
+  if (mainTab === 'daily-detail') {
+    const detailBox = document.getElementById('daily-chart-detail');
+    const subTabs = detailBox.querySelectorAll('.sub-tab');
+    const subContents = detailBox.querySelectorAll('.sub-tab-content');
+    
+    subTabs.forEach(tab => {
+      tab.classList.remove('active');
+    });
+    subContents.forEach(content => {
+      content.classList.remove('active');
+    });
+    
+    // 선택한 서브 탭 활성화
+    const tabTypes = ['full', 'prefix1', 'prefix2', 'prefix3', 'category'];
+    const tabIndex = tabTypes.indexOf(subTab);
+    if (tabIndex >= 0 && tabIndex < subTabs.length) {
+      subTabs[tabIndex].classList.add('active');
+      const content = document.getElementById(`${mainTab}-${subTab}-content`);
+      if (content) {
+        content.classList.add('active');
+      }
+    }
+    
+    // 전체 제목 탭의 카테고리 필터 드롭다운 표시/숨김
+    const fullCategoryFilter = document.getElementById(`${mainTab}-full-category-filter`);
+    if (fullCategoryFilter) {
+      if (subTab === 'full') {
+        fullCategoryFilter.classList.add('visible');
+      } else {
+        fullCategoryFilter.classList.remove('visible');
+      }
+    }
+    return;
+  }
+  
+  // 기존 메인 탭들의 처리
   const subTabs = document.querySelectorAll(`#${mainTab}-content .sub-tab`);
   const subContents = document.querySelectorAll(`#${mainTab}-content .sub-tab-content`);
 

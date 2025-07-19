@@ -9,7 +9,8 @@ const translations = {
       today: "오늘 전체",
       last30min: "최근 30분",
       customDate: "날짜 지정",
-      comparison: "기간 비교"
+      comparison: "기간 비교",
+      dailyChart: "일간 차트"
     },
     
     // 서브 탭
@@ -29,7 +30,8 @@ const translations = {
       last30minPageviews: "최근 30분 전체 조회수",
       customActiveUsers: "지정 기간 활성 사용자",
       customPageviews: "지정 기간 전체 조회수",
-      comparisonAnalysis: "기간 비교 분석"
+      comparisonAnalysis: "기간 비교 분석",
+      dailyChart: "일간 차트 분석"
     },
     
     // 섹션 제목
@@ -81,7 +83,15 @@ const translations = {
       excludeToday: "전일 기준 (오늘 제외)",
       lastUpdate: "마지막 업데이트",
       periodA: "기간 A (이전)",
-      periodB: "기간 B (최근)"
+      periodB: "기간 B (최근)",
+      selectPeriod: "기간 선택:",
+      autoRefresh: "자동 새로고침 (10초)"
+    },
+    
+    // 차트 라벨
+    chartLabels: {
+      activeUsers: "활성 사용자",
+      totalPageviews: "전체 조회수"
     },
     
     // 빠른 선택 버튼
@@ -118,7 +128,11 @@ const translations = {
       invalidDateRange: "시작일이 종료일보다 늦을 수 없어요!",
       periodInvalidDate: "기간 {period}의 시작일이 종료일보다 늦을 수 없어요!",
       comparisonDesc: "기간 A(이전)에서 기간 B(최근)로의 변화를 분석해요! 상승/하락 트렌드를 한눈에 확인하세요.",
-      categoryDetailTitle: "{category} 카테고리 포스트별 상세 비교"
+      categoryDetailTitle: "{category} 카테고리 포스트별 상세 비교",
+      dailyChartDesc: "일별 방문자 추이를 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.",
+      loadingChart: "차트 데이터를 불러오는 중...",
+      loadingData: "데이터를 불러오는 중...",
+      selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!"
     },
     
     // 기타
@@ -134,7 +148,8 @@ const translations = {
       selectBothPeriods: "두 기간의 시작일과 종료일을 모두 선택해주세요!",
       noMatchingData: "조건에 맞는 데이터가 없어요!",
       categoryDataNotFound: "카테고리 데이터를 찾을 수 없어요!",
-      categoryDataEmpty: "카테고리 데이터가 비어있어요!"
+      categoryDataEmpty: "카테고리 데이터가 비어있어요!",
+      loadDetailFailed: "상세 데이터를 불러오는데 실패했습니다."
     },
     
     // 콘솔 에러 메시지
@@ -151,7 +166,8 @@ const translations = {
     // UI 텍스트
     ui: {
       clickForDetail: "(클릭하여 상세보기)",
-      categoryPostDetail: "{category} 카테고리 포스트별 상세 비교"
+      categoryPostDetail: "{category} 카테고리 포스트별 상세 비교",
+      dailyChartDetail: "상세 분석"
     }
   },
   
@@ -164,7 +180,8 @@ const translations = {
       today: "Today",
       last30min: "Last 30 min",
       customDate: "Custom Date",
-      comparison: "Period Compare"
+      comparison: "Period Compare",
+      dailyChart: "Daily Chart"
     },
     
     // Sub tabs
@@ -184,7 +201,8 @@ const translations = {
       last30minPageviews: "Last 30min Total Pageviews",
       customActiveUsers: "Custom Period Active Users",
       customPageviews: "Custom Period Total Pageviews",
-      comparisonAnalysis: "Period Comparison Analysis"
+      comparisonAnalysis: "Period Comparison Analysis",
+      dailyChart: "Daily Chart Analysis"
     },
     
     // Section titles
@@ -236,7 +254,15 @@ const translations = {
       excludeToday: "Exclude Today",
       lastUpdate: "Last Update",
       periodA: "Period A (Previous)",
-      periodB: "Period B (Recent)"
+      periodB: "Period B (Recent)",
+      selectPeriod: "Select Period:",
+      autoRefresh: "Auto Refresh (10s)"
+    },
+    
+    // Chart labels
+    chartLabels: {
+      activeUsers: "Active Users",
+      totalPageviews: "Total Pageviews"
     },
     
     // Quick date buttons
@@ -273,7 +299,11 @@ const translations = {
       invalidDateRange: "Start date cannot be later than end date!",
       periodInvalidDate: "Period {period} start date cannot be later than end date!",
       comparisonDesc: "Analyze changes from Period A (previous) to Period B (recent)! Check trends at a glance.",
-      categoryDetailTitle: "{category} Category Post Detail Comparison"
+      categoryDetailTitle: "{category} Category Post Detail Comparison",
+      dailyChartDesc: "Check daily visitor trends at a glance! Click on specific dates in the chart to view detailed data.",
+      loadingChart: "Loading chart data...",
+      loadingData: "Loading data...",
+      selectDateRange: "Please select dates and click the search button!"
     },
     
     // Misc
@@ -289,7 +319,8 @@ const translations = {
       selectBothPeriods: "Please select dates for both periods!",
       noMatchingData: "No matching data found!",
       categoryDataNotFound: "Category data not found!",
-      categoryDataEmpty: "Category data is empty!"
+      categoryDataEmpty: "Category data is empty!",
+      loadDetailFailed: "Failed to load detailed data."
     },
     
     // Console error messages
@@ -306,7 +337,8 @@ const translations = {
     // UI text
     ui: {
       clickForDetail: "(Click for details)",
-      categoryPostDetail: "{category} Category Post Detail Comparison"
+      categoryPostDetail: "{category} Category Post Detail Comparison",
+      dailyChartDetail: "Detailed Analysis"
     }
   },
   
@@ -319,7 +351,8 @@ const translations = {
       today: "今日全部",
       last30min: "最近30分钟",
       customDate: "日期指定",
-      comparison: "期间比较"
+      comparison: "期间比较",
+      dailyChart: "日间图表"
     },
     
     // 子标签
@@ -339,7 +372,8 @@ const translations = {
       last30minPageviews: "最近30分钟总浏览量",
       customActiveUsers: "指定期间活跃用户",
       customPageviews: "指定期间总浏览量",
-      comparisonAnalysis: "期间比较分析"
+      comparisonAnalysis: "期间比较分析",
+      dailyChart: "日间图表分析"
     },
     
     // 部分标题
@@ -391,7 +425,15 @@ const translations = {
       excludeToday: "排除今天",
       lastUpdate: "最后更新",
       periodA: "期间 A (之前)",
-      periodB: "期间 B (最近)"
+      periodB: "期间 B (最近)",
+      selectPeriod: "选择期间:",
+      autoRefresh: "自动刷新 (10秒)"
+    },
+    
+    // 图表标签
+    chartLabels: {
+      activeUsers: "活跃用户",
+      totalPageviews: "总浏览量"
     },
     
     // 快速日期按钮
@@ -428,7 +470,11 @@ const translations = {
       invalidDateRange: "开始日期不能晚于结束日期!",
       periodInvalidDate: "期间 {period} 的开始日期不能晚于结束日期!",
       comparisonDesc: "分析从期间 A (之前) 到期间 B (最近) 的变化! 一目了然地查看趋势。",
-      categoryDetailTitle: "{category} 分类文章详细比较"
+      categoryDetailTitle: "{category} 分类文章详细比较",
+      dailyChartDesc: "一目了然地查看每日访客趋势! 点击图表中的特定日期可查看详细数据。",
+      loadingChart: "正在加载图表数据...",
+      loadingData: "正在加载数据...",
+      selectDateRange: "请选择日期并点击查询按钮!"
     },
     
     // 其他
@@ -444,7 +490,8 @@ const translations = {
       selectBothPeriods: "请为两个期间选择日期！",
       noMatchingData: "没有符合条件的数据！",
       categoryDataNotFound: "找不到分类数据！",
-      categoryDataEmpty: "分类数据为空！"
+      categoryDataEmpty: "分类数据为空！",
+      loadDetailFailed: "加载详细数据失败。"
     },
     
     // 控制台错误消息
@@ -461,7 +508,8 @@ const translations = {
     // UI 文本
     ui: {
       clickForDetail: "(点击查看详情)",
-      categoryPostDetail: "{category} 分类文章详细比较"
+      categoryPostDetail: "{category} 分类文章详细比较",
+      dailyChartDetail: "详细分析"
     }
   }
 };
@@ -507,6 +555,17 @@ function changeLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('language', lang);
     updateAllTranslations();
+    
+    // 일간 차트가 그려져 있으면 다시 그리기
+    if (typeof window.renderDailyChart === 'function' && window.dailyChart && window.dailyChartData && window.dailyChartData.dates && window.dailyChartData.dates.length > 0) {
+      if (document.getElementById('daily-chart-content') && document.getElementById('daily-chart-content').classList.contains('active')) {
+        try {
+          window.renderDailyChart();
+        } catch (error) {
+          // 에러 발생 시 조용히 무시
+        }
+      }
+    }
   }
 }
 
@@ -600,3 +659,48 @@ function cycleLanguage() {
   const nextIndex = (currentIndex + 1) % languages.length;
   changeLanguage(languages[nextIndex]);
 }
+
+// 날짜 입력 필드 언어 설정 함수
+function updateDateInputLanguage() {
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  const currentLang = getCurrentLanguage();
+  
+  dateInputs.forEach(input => {
+    // 언어에 따른 lang 속성 설정
+    if (currentLang === 'en') {
+      input.setAttribute('lang', 'en-US');
+    } else if (currentLang === 'zh') {
+      input.setAttribute('lang', 'zh-CN');
+    } else {
+      input.setAttribute('lang', 'ko-KR');
+    }
+  });
+}
+
+// window 객체에 함수 등록
+window.t = t;
+window.tTemplate = tTemplate;
+window.changeLanguage = changeLanguage;
+window.updateAllTranslations = updateAllTranslations;
+window.updateDateInputLanguage = updateDateInputLanguage;
+window.getCurrentLanguage = getCurrentLanguage;
+window.cycleLanguage = cycleLanguage;
+
+// 페이지 로드 시 번역 자동 적용
+document.addEventListener('DOMContentLoaded', function() {
+  // 저장된 언어 설정 복원
+  const savedLang = localStorage.getItem('language');
+  if (savedLang) {
+    currentLanguage = savedLang;
+    const langSelect = document.querySelector('.language-select');
+    if (langSelect) {
+      langSelect.value = savedLang;
+    }
+  }
+  updateAllTranslations();
+  
+  // 날짜 입력 필드 언어 설정
+  if (typeof updateDateInputLanguage === 'function') {
+    updateDateInputLanguage();
+  }
+});

@@ -209,7 +209,7 @@ function filterByCategory(mainTab, categoryId) {
   
   if (sourceData && wpCategoryData) {
     filteredData = sourceData.filter(item => {
-      const postId = extractPostId(item.pagePath);
+      const postId = window.extractPostId ? window.extractPostId(item.pagePath) : null;
       if (!postId) return false;
       
       const postCategories = wpCategoryData.posts[postId];
@@ -223,6 +223,12 @@ function filterByCategory(mainTab, categoryId) {
 
 // 전체 제목 탭에서 카테고리별 필터링 함수
 function filterByCategoryInFullTab(mainTab, categoryId) {
+  // daily-detail의 경우 별도 처리
+  if (mainTab === 'daily-detail') {
+    window.filterDailyDetailByCategory(categoryId);
+    return;
+  }
+  
   // 필터링 안 함 (전체 카테고리 선택)
   if (!categoryId) {
     // 원본 데이터로 복원
@@ -246,7 +252,7 @@ function filterByCategoryInFullTab(mainTab, categoryId) {
   
   if (sourceData && wpCategoryData) {
     filteredData = sourceData.filter(item => {
-      const postId = extractPostId(item.pagePath);
+      const postId = window.extractPostId ? window.extractPostId(item.pagePath) : null;
       if (!postId) return false;
       
       const postCategories = wpCategoryData.posts[postId];

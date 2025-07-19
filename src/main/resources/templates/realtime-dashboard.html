@@ -33,6 +33,7 @@
     <div class="main-tab" onclick="showMainTab('last30min')" data-i18n="mainTabs.last30min">⚡ 최근 30분</div>
     <div class="main-tab" onclick="showMainTab('custom-date')" data-i18n="mainTabs.customDate">📆 날짜 지정</div>
     <div class="main-tab" onclick="showMainTab('comparison')" data-i18n="mainTabs.comparison">⚔️ 기간 비교</div>
+    <div class="main-tab" onclick="showMainTab('daily-chart')" data-i18n="mainTabs.dailyChart">📈 일간 차트</div>
   </div>
 
   <!-- 오늘 전체 탭 컨텐츠 -->
@@ -561,8 +562,221 @@
       </div>
     </div>
   </div>
+
+  <!-- 일간 차트 탭 컨텐츠 -->
+  <div id="daily-chart-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="dashboard-title" data-i18n="dashboardTitles.dailyChart">📈 일간 차트 분석</div>
+      <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 15px;">
+        <span data-i18n="messages.dailyChartDesc">📌 일별 방문자 추이를 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.</span>
+      </div>
+      
+      <!-- 날짜 선택 영역 -->
+      <div class="date-selector">
+        <input type="date" id="chart-start-date" onchange="validateChartDates()" placeholder="YYYY-MM-DD">
+        <span>~</span>
+        <input type="date" id="chart-end-date" onchange="validateChartDates()" placeholder="YYYY-MM-DD">
+        <button onclick="fetchDailyChartData()" class="fetch-btn">🔍 <span data-i18n="buttons.fetch">조회하기</span></button>
+      </div>
+      
+      <!-- 빠른 날짜 선택 버튼 -->
+      <div style="margin-top: 10px; margin-bottom: 15px;">
+        <span class="quick-date-label" data-i18n="labels.quickSelect">빠른 선택:</span>
+        <div class="quick-date-buttons" style="display: inline-flex; margin-left: 10px;">
+          <button class="quick-date-btn" onclick="setChartDateRange(7, false)" data-i18n="quickDates.days7">7일</button>
+          <button class="quick-date-btn" onclick="setChartDateRange(14, false)" data-i18n="quickDates.weeks2">2주</button>
+          <button class="quick-date-btn" onclick="setChartDateRange(30, false)" data-i18n="quickDates.month1">한달</button>
+        </div>
+        <div style="display: inline-flex; align-items: center; margin-left: 20px;">
+          <input type="checkbox" id="chart-exclude-today" style="margin-right: 5px;">
+          <label for="chart-exclude-today" style="font-size: 0.85em; color: #666; cursor: pointer;" data-i18n="labels.excludeToday">
+            📅 전일 기준 (오늘 제외)
+          </label>
+        </div>
+      </div>
+      
+      <!-- 차트 컨테이너 -->
+      <div id="chart-container" style="position: relative; height: 400px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02);">
+        <canvas id="daily-chart-canvas" style="display: none;"></canvas>
+        
+        <!-- 초기 메시지 -->
+        <div id="chart-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+          <div style="text-align: center;">
+            <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
+            <div data-i18n="messages.selectDateRange">날짜를 선택하고 조회하기 버튼을 클릭해주세요!</div>
+          </div>
+        </div>
+        
+        <!-- 로딩 인디케이터 -->
+        <div id="chart-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px;">
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+            <div style="text-align: center;">
+              <div class="loading-spinner"></div>
+              <div style="margin-top: 10px; color: #e0e0e0;" data-i18n="messages.loadingChart">차트 데이터를 불러오는 중...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 업데이트 시간 -->
+      <div class="update-time" id="daily-chart-update-time"><span data-i18n="labels.lastUpdate">마지막 업데이트</span>: -</div>
+    </div>
+    
+    <!-- 날짜별 상세 데이터 (날짜 클릭시 표시) -->
+    <div id="daily-chart-detail" style="margin-top: 20px; display: none;">
+      <div class="dashboard-box">
+        <div class="dashboard-title-with-close">
+          <div class="dashboard-title" id="daily-chart-detail-title">📈 날짜별 상세 분석</div>
+          <span class="close-button" onclick="closeDailyChartDetail()">×</span>
+        </div>
+        
+        <!-- 요약 정보 -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+          <div style="width: 22%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🔎 활성 사용자</div>
+            <div class="active-users" id="daily-detail-active-users" style="font-size: 2.5em;">0</div>
+          </div>
+          <div style="width: 74%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🔢 전체 조회수</div>
+            <div class="active-users" id="daily-detail-total-pageviews" style="font-size: 2.5em;">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 서브 탭 (일간 차트 상세) -->
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="showSubTab('daily-detail', 'full')" data-i18n="subTabs.allTitles">📊 전체 제목</div>
+        <div class="sub-tab" onclick="showSubTab('daily-detail', 'prefix1')" data-i18n="subTabs.prefix1">1️⃣ 접두어 (1단어)</div>
+        <div class="sub-tab" onclick="showSubTab('daily-detail', 'prefix2')" data-i18n="subTabs.prefix2">2️⃣ 접두어 (2단어)</div>
+        <div class="sub-tab" onclick="showSubTab('daily-detail', 'prefix3')" data-i18n="subTabs.prefix3">3️⃣ 접두어 (3단어)</div>
+        <div class="sub-tab" onclick="showSubTab('daily-detail', 'category')" data-i18n="subTabs.byCategory">📑 카테고리별</div>
+      </div>
+      
+      <!-- 전체 제목 테이블 (일간 차트 상세) -->
+      <div id="daily-detail-full-content" class="sub-tab-content active">
+        <div class="dashboard-box">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; padding-top: 3px;">
+            <div class="dashboard-title" id="daily-detail-full-title">📈 페이지 제목별 조회수</div>
+            <div class="category-filter-container" id="daily-detail-full-category-filter">
+              <span class="category-label" data-i18n="labels.categorySelect">카테고리 선택:</span>
+              <select class="category-dropdown" id="daily-detail-full-category-select" onchange="filterByCategoryInFullTab('daily-detail', this.value)">
+                <option value="" data-i18n="labels.allCategories">전체 카테고리</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.pageTitle">페이지 제목</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="daily-detail-page-title-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 1단어 테이블 (일간 차트 상세) -->
+      <div id="daily-detail-prefix1-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix1">🔤 접두어별 조회수 (1단어)</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.prefix">접두어</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="daily-detail-prefix1-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 2단어 테이블 (일간 차트 상세) -->
+      <div id="daily-detail-prefix2-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix2">🔤 접두어별 조회수 (2단어)</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.prefix">접두어</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="daily-detail-prefix2-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 3단어 테이블 (일간 차트 상세) -->
+      <div id="daily-detail-prefix3-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix3">🔤 접두어별 조회수 (3단어)</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.prefix">접두어</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="daily-detail-prefix3-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 카테고리별 테이블 (일간 차트 상세) -->
+      <div id="daily-detail-category-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div id="sync-banner-daily-detail" class="sync-banner">🔄 아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!</div>
+          <div class="dashboard-title">📑 카테고리별 조회수</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th>카테고리</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="daily-detail-category-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 로딩 인디케이터 -->
+      <div id="daily-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+          <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+
+<!-- Chart.js 라이브러리 추가 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <!-- JavaScript 파일들 -->
 <script th:src="@{/js/dashboard-i18n.js}"></script>
@@ -571,6 +785,7 @@
 <script th:src="@{/js/dashboard-data-fetcher.js}"></script>
 <script th:src="@{/js/dashboard-table-renderer.js}"></script>
 <script th:src="@{/js/dashboard-category-sync.js}"></script>
+<script th:src="@{/js/dashboard-daily-chart.js}"></script>
 
 </body>
 </html>
