@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext
 import java.time.DayOfWeek
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlinx.coroutines.*
 
 @SpringBootApplication
 class SearchInsightsApplication(
@@ -30,33 +31,86 @@ class SearchInsightsApplication(
         val lastRunDate = datePersistenceService.readLastRunDate()
 
         if (lastRunDate != today) {
-            val excelFile = searchConsoleService.createExcelFile(searchConsoleService.fetchSearchAnalyticsData(), searchConsoleService.fetchAnalyticsData(), ReportFrequency.DAILY)
-            mailService.sendMail(excelFile, "daily_search_insights.xlsx", ReportFrequency.DAILY)
-
-            // Weekly Report
-            if(today.dayOfWeek == DayOfWeek.WEDNESDAY) {
-                val excelFile = searchConsoleService.createExcelFile(
-                                    searchConsoleService.fetchSearchAnalyticsData(
-                                        DateUtils.getFormattedDateBeforeDays(10)
-                                        ,DateUtils.getFormattedDateBeforeDays(3))
-                                    ,searchConsoleService.fetchAnalyticsData(
-                                        DateUtils.getFormattedDateBeforeDays(10)
-                                        ,DateUtils.getFormattedDateBeforeDays(3))
-                                ,ReportFrequency.WEEKLY)
-                mailService.sendMail(excelFile, "weekly_search_insights.xlsx", ReportFrequency.WEEKLY)
+            // 🚀 일간 리포트 - 병렬로 데이터 가져오기!
+            runBlocking {
+                val (searchData, analyticsData) = coroutineScope {
+                    val searchDeferred = async(Dispatchers.IO) { 
+                        searchConsoleService.fetchSearchAnalyticsData() 
+                    }
+                    val analyticsDeferred = async(Dispatchers.IO) { 
+                        searchConsoleService.fetchAnalyticsData() 
+                    }
+                    Pair(searchDeferred.await(), analyticsDeferred.await())
+                }
+                
+                // 🔍 데이터 체크 - 둘 다 비어있으면 이메일 발송 안 함!
+                if (searchData.isEmpty() && analyticsData.isEmpty()) {
+                    logger.warn("📭 일간 리포트 데이터가 없어서 이메일 발송을 건너뜁니다.")
+                } else {
+                    val excelFile = searchConsoleService.createExcelFile(searchData, analyticsData, ReportFrequency.DAILY)
+                    mailService.sendMail(excelFile, "daily_search_insights.xlsx", ReportFrequency.DAILY)
+                    logger.info("✅ 일간 이메일 발송 완료! Search Console: ${searchData.size}개, Analytics: ${analyticsData.size}개")
+                }
             }
 
-            // Monthly Report
+            // 🚀 주간 리포트 - 병렬 처리!
+            if(today.dayOfWeek == DayOfWeek.WEDNESDAY) {
+                runBlocking {
+                    val (searchData, analyticsData) = coroutineScope {
+                        val searchDeferred = async(Dispatchers.IO) {
+                            searchConsoleService.fetchSearchAnalyticsData(
+                                DateUtils.getFormattedDateBeforeDays(10),
+                                DateUtils.getFormattedDateBeforeDays(3)
+                            )
+                        }
+                        val analyticsDeferred = async(Dispatchers.IO) {
+                            searchConsoleService.fetchAnalyticsData(
+                                DateUtils.getFormattedDateBeforeDays(10),
+                                DateUtils.getFormattedDateBeforeDays(3)
+                            )
+                        }
+                        Pair(searchDeferred.await(), analyticsDeferred.await())
+                    }
+                    
+                    // 🔍 데이터 체크
+                    if (searchData.isEmpty() && analyticsData.isEmpty()) {
+                        logger.warn("💭 주간 리포트 데이터가 없어서 이메일 발송을 건너뜁니다.")
+                    } else {
+                        val excelFile = searchConsoleService.createExcelFile(searchData, analyticsData, ReportFrequency.WEEKLY)
+                        mailService.sendMail(excelFile, "weekly_search_insights.xlsx", ReportFrequency.WEEKLY)
+                        logger.info("✅ 주간 이메일 발송 완료! Search Console: ${searchData.size}개, Analytics: ${analyticsData.size}개")
+                    }
+                }
+            }
+
+            // 🚀 월간 리포트 - 병렬 처리!
             if(today.dayOfMonth == 3) {
-                val excelFile = searchConsoleService.createExcelFile(
-                                    searchConsoleService.fetchSearchAnalyticsData(
-                                        DateUtils.getFirstDayOfPreviousMonth()
-                                        ,DateUtils.getLastDayOfPreviousMonth())
-                                    ,searchConsoleService.fetchAnalyticsData(
-                                        DateUtils.getFirstDayOfPreviousMonth()
-                                        ,DateUtils.getLastDayOfPreviousMonth())
-                                ,ReportFrequency.MONTHLY)
-                mailService.sendMail(excelFile, "monthly_search_insights.xlsx", ReportFrequency.MONTHLY)
+                runBlocking {
+                    val (searchData, analyticsData) = coroutineScope {
+                        val searchDeferred = async(Dispatchers.IO) {
+                            searchConsoleService.fetchSearchAnalyticsData(
+                                DateUtils.getFirstDayOfPreviousMonth(),
+                                DateUtils.getLastDayOfPreviousMonth()
+                            )
+                        }
+                        val analyticsDeferred = async(Dispatchers.IO) {
+                            searchConsoleService.fetchAnalyticsData(
+                                DateUtils.getFirstDayOfPreviousMonth(),
+                                DateUtils.getLastDayOfPreviousMonth()
+                            )
+                        }
+                        Pair(searchDeferred.await(), analyticsDeferred.await())
+                    }
+                    
+                    // 🔍 데이터 체크
+                    if (searchData.isEmpty() && analyticsData.isEmpty()) {
+                        logger.warn("💭 월간 리포트 데이터가 없어서 이메일 발송을 건너뜁니다.")
+                    } else {
+                        val excelFile = searchConsoleService.createExcelFile(searchData, analyticsData, ReportFrequency.MONTHLY)
+                        mailService.sendMail(excelFile, "monthly_search_insights.xlsx", ReportFrequency.MONTHLY)
+                        logger.info("✅ 월간 이메일 발송 을 완료! Search Console: ${searchData.size}개, Analytics: ${analyticsData.size}개")
+                    }
+                }
             }
 
             datePersistenceService.writeLastRunDate(today)

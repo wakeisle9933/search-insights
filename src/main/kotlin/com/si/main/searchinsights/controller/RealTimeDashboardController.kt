@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping
 @Controller
 class RealTimeDashboardController {
 
-    @GetMapping("/dashboard")
+    @GetMapping("/", "/dashboard")
     fun dashboard(): String {
         return "realtime-dashboard" // templates/realtime-dashboard.html 을 찾아줌!
     }
