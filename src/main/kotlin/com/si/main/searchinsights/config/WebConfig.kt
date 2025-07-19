@@ -5,8 +5,10 @@ import org.springframework.http.CacheControl
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.concurrent.TimeUnit
+import org.springframework.scheduling.annotation.EnableAsync
 
 @Configuration
+@EnableAsync  // 🚀 비동기 처리 활성화!
 class WebConfig : WebMvcConfigurer {
     
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {

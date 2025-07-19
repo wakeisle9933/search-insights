@@ -50,7 +50,9 @@ class SearchConsoleControllerTest {
         mockMailService = mockk(relaxed = true)
         mockSearchConsoleService = mockk(relaxed = true)
         controller = SearchConsoleController(mockMailService, mockSearchConsoleService)
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+            .setControllerAdvice(com.si.main.searchinsights.exception.GlobalExceptionHandler())
+            .build()
     }
 
     // ===========================================
@@ -131,8 +133,8 @@ class SearchConsoleControllerTest {
         val expectedToDate = LocalDate.now().minusDays(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val mockExcelFile = createMockExcelData()
         
-        val searchData = emptyList<ApiDataRow>()
-        val analyticsData = emptyList<PageViewInfo>()
+        val searchData = listOf(mockk<ApiDataRow>())
+        val analyticsData = listOf(mockk<PageViewInfo>())
         
         every { mockSearchConsoleService.fetchSearchAnalyticsData(fromDate, expectedToDate) } returns searchData
         every { mockSearchConsoleService.fetchAnalyticsData(fromDate, expectedToDate) } returns analyticsData
@@ -253,29 +255,25 @@ class SearchConsoleControllerTest {
         // Given
         val fromDate = "2024-07-01"
         val toDate = "2024-07-18"
-        val mockExcelFile = createMockExcelData()
         
         val emptySearchData = emptyList<ApiDataRow>()
         val emptyAnalyticsData = emptyList<PageViewInfo>()
         
         every { mockSearchConsoleService.fetchSearchAnalyticsData(fromDate, toDate) } returns emptySearchData
         every { mockSearchConsoleService.fetchAnalyticsData(fromDate, toDate) } returns emptyAnalyticsData
-        every { 
-            mockSearchConsoleService.createExcelFile(emptySearchData, emptyAnalyticsData, ReportFrequency.CUSTOM) 
-        } returns mockExcelFile
-        every { 
-            mockMailService.sendMail(mockExcelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, fromDate, toDate) 
-        } just Runs
 
-        // When & Then
+        // When & Then - 빈 데이터일 때 NO_CONTENT 에러 발생
         mockMvc.perform(get("/email-search-insights-report")
                 .param("fromDate", fromDate)
                 .param("toDate", toDate))
-            .andExpect(status().isOk)
+            .andExpect(status().isNoContent)  // 204 No Content
 
-        // 빈 데이터로도 정상 처리됨을 확인
-        verify(exactly = 1) { 
-            mockSearchConsoleService.createExcelFile(emptySearchData, emptyAnalyticsData, ReportFrequency.CUSTOM) 
+        // 이메일 발송과 엑셀 생성이 호출되지 않았는지 확인
+        verify(exactly = 0) { 
+            mockSearchConsoleService.createExcelFile(any(), any(), any()) 
+        }
+        verify(exactly = 0) { 
+            mockMailService.sendMail(any(), any(), any(), any(), any()) 
         }
     }
 

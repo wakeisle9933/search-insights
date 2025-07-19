@@ -4,6 +4,7 @@ import com.si.main.searchinsights.exception.GlobalExceptionHandler
 import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
 import io.mockk.mockk
+import io.mockk.every
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.apache.commons.io.output.ByteArrayOutputStream
 
 /**
  * SearchConsoleController 예외 처리 테스트
@@ -37,6 +39,11 @@ class SearchConsoleControllerExceptionTest {
     fun setUp() {
         mailService = mockk(relaxed = true)
         searchConsoleService = mockk(relaxed = true)
+        
+        // 기본적으로 데이터가 있는 것으로 설정 (빈 데이터가 아님)
+        every { searchConsoleService.fetchSearchAnalyticsData(any(), any()) } returns listOf(mockk())
+        every { searchConsoleService.fetchAnalyticsData(any(), any()) } returns listOf(mockk())
+        every { searchConsoleService.createExcelFile(any(), any(), any()) } returns ByteArrayOutputStream()
         
         val controller = SearchConsoleController(mailService, searchConsoleService)
         mockMvc = MockMvcBuilders.standaloneSetup(controller)

@@ -35,5 +35,6 @@ enum class ErrorCode(
     
     // Data Processing
     DATA_PARSING_ERROR("SI701", "데이터 파싱 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
-    CATEGORY_SYNC_ERROR("SI702", "카테고리 동기화 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR)
+    CATEGORY_SYNC_ERROR("SI702", "카테고리 동기화 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+    NO_DATA_AVAILABLE("SI703", "선택한 기간에 데이터가 없습니다", HttpStatus.NO_CONTENT)
 }

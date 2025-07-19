@@ -17,6 +17,8 @@ import com.si.main.searchinsights.enum.ErrorCode
 import com.si.main.searchinsights.exception.BusinessException
 import com.si.main.searchinsights.exception.DataProcessingException
 import com.si.main.searchinsights.exception.ExternalApiException
+import kotlinx.coroutines.*
+import kotlin.math.ceil
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -41,32 +43,91 @@ class SearchConsoleService (
     private val logger = logger()
 
 
+    @Cacheable(value = ["searchAnalyticsData"], key = "#startDate + '_' + #endDate")
     fun fetchSearchAnalyticsData(
         startDate: String = DateUtils.getFormattedDateBeforeDays(3),
         endDate: String = startDate
-    ): List<ApiDataRow> {
-        var startRow = 0
-        val rowLimit = 1000 // API Max Limit
+    ): List<ApiDataRow> = runBlocking {
+        fetchSearchAnalyticsDataParallel(startDate, endDate)
+    }
+
+    // 병렬 처리를 위한 새로운 함수! 🚀
+    private suspend fun fetchSearchAnalyticsDataParallel(
+        startDate: String,
+        endDate: String
+    ): List<ApiDataRow> = coroutineScope {
+        val rowLimit = 25000 // 25배 증가!! 🔥
+        
+        // 먼저 전체 데이터 크기 확인
+        val firstBatch = fetchBatch(startDate, endDate, 0, rowLimit)
+        
+        // 전체 데이터가 첫 배치에 다 들어왔으면 바로 반환
+        if (firstBatch.size < rowLimit) {
+            logger.info("전체 데이터 ${firstBatch.size}개 - 한 번에 로드 완료! 🎉")
+            return@coroutineScope firstBatch
+        }
+        
+        // 여러 페이지가 필요한 경우 병렬 처리! 💨
         val allRows = mutableListOf<ApiDataRow>()
-        do {
+        allRows.addAll(firstBatch)
+        
+        var currentBatch = 1
+        val deferreds = mutableListOf<Deferred<List<ApiDataRow>>>()
+        
+        // 최대 4개의 병렬 요청으로 제한 (API 부하 방지)
+        while (true) {
+            val batchJobs = (0 until 4).map { i ->
+                val startRow = (currentBatch + i) * rowLimit
+                async(Dispatchers.IO) {
+                    fetchBatch(startDate, endDate, startRow, rowLimit)
+                }
+            }
+            
+            val results = batchJobs.awaitAll()
+            var hasMore = false
+            
+            results.forEach { batch ->
+                if (batch.isNotEmpty()) {
+                    allRows.addAll(batch)
+                    if (batch.size == rowLimit) hasMore = true
+                }
+            }
+            
+            if (!hasMore) break
+            currentBatch += 4
+        }
+        
+        logger.info("🎊 전체 데이터셋 로드 완료: ${allRows.size}개 (병렬 처리로 초고속 완료!)")
+        allRows
+    }
+    
+    // 단일 배치를 가져오는 헬퍼 함수
+    private suspend fun fetchBatch(
+        startDate: String,
+        endDate: String,
+        startRow: Int,
+        rowLimit: Int
+    ): List<ApiDataRow> = withContext(Dispatchers.IO) {
+        try {
             val request = SearchAnalyticsQueryRequest()
                 .setStartDate(startDate)
                 .setEndDate(endDate)
                 .setDimensions(listOf("query", "page"))
                 .setRowLimit(rowLimit)
                 .setStartRow(startRow)
-            val execute = searchConsoleClient.searchanalytics().query(domain, request).execute()
-            logger.info("GSC rows: ${execute.rows?.size} date=$startDate")
-            execute.rows?.let { allRows.addAll(it) } // null safe
-            startRow += rowLimit
-        } while (execute.rows?.size == rowLimit)
-
-        logger.info("entire dataset: ${allRows.size}")
-        return allRows
+            
+            val response = searchConsoleClient.searchanalytics().query(domain, request).execute()
+            logger.info("GSC 배치 로드: ${response.rows?.size ?: 0}개 (startRow: $startRow, date: $startDate)")
+            response.rows ?: emptyList()
+        } catch (e: Exception) {
+            logger.error("배치 로드 실패 (startRow: $startRow): ${e.message}", e)
+            emptyList()
+        }
     }
 
     // Entire Dimension list
     // https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema?hl=ko
+    @Cacheable(value = ["searchAnalyticsData"], key = "#startDateParam + '_' + #endDateParam + '_' + #limit")
     fun fetchAnalyticsData(
         startDateParam: String? = LocalDate.now().minusDays(3).toString(),
         endDateParam: String? = startDateParam,

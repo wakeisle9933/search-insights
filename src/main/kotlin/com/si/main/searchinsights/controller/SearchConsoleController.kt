@@ -3,6 +3,7 @@ package com.si.main.searchinsights.controller
 import com.si.main.searchinsights.enum.ErrorCode
 import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.exception.BusinessException
+import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
 import io.swagger.v3.oas.annotations.Operation
@@ -24,6 +25,8 @@ class SearchConsoleController(
     private val mailService: MailService,
     private val searchConsoleService: SearchConsoleService,
 ) {
+    
+    private val logger = logger()
 
     @Operation(
         summary = "Search Insight Custom Report 메일 발송",
@@ -76,6 +79,15 @@ class SearchConsoleController(
             Pair(searchDataDeferred.await(), analyticsDataDeferred.await())
         }
 
+        // 🔍 데이터 체크 - 둘 다 비어있으면 이메일 발송 안 함!
+        if (searchAnalyticsData.isEmpty() && analyticsData.isEmpty()) {
+            logger.warn("📭 데이터가 없어서 이메일 발송을 건너뜁니다. (기간: ${dateRange.first} ~ ${dateRange.second})")
+            throw BusinessException(
+                errorCode = ErrorCode.NO_DATA_AVAILABLE,
+                message = "선택한 기간에 데이터가 없습니다. 이메일이 발송되지 않았습니다."
+            )
+        }
+        
         val excelFile = searchConsoleService.createExcelFile(
             searchAnalyticsData,
             analyticsData,
@@ -83,6 +95,7 @@ class SearchConsoleController(
         )
 
         mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, dateRange.first, dateRange.second)
+        logger.info("✅ 이메일 발송 완료! 데이터 수: Search Console ${searchAnalyticsData.size}개, Analytics ${analyticsData.size}개")
     }
     
     private fun validateDateRange(fromDate: String, toDate: String): Pair<String, String> {
