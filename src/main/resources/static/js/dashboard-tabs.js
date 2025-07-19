@@ -46,7 +46,7 @@ function showMainTab(tabName) {
         // 데이터 가져오기
         fetchCustomDateData();
         // 30초마다 자동 업데이트
-        customDateIntervalId = setInterval(fetchCustomDateData, 30000);
+        customDateIntervalId = setInterval(fetchCustomDateData, 60000);
       }
     }
   } else if (tabName === 'comparison') {
@@ -133,7 +133,7 @@ function showSubTab(mainTab, subTab) {
 // 오늘 데이터 인터벌 시작 함수
 function startTodayInterval() {
   if (todayIntervalId === null) {
-    todayIntervalId = setInterval(fetchTodayData, 30000); // 30초
+    todayIntervalId = setInterval(fetchTodayData, 60000); // 60초 (1분)
   }
 }
 
@@ -149,7 +149,7 @@ function stopTodayInterval() {
 function startLast30minInterval() {
   if (last30minIntervalId === null) {
     fetchLast30MinData(); // 먼저 한 번 호출
-    last30minIntervalId = setInterval(fetchLast30MinData, 30000); // 30초
+    last30minIntervalId = setInterval(fetchLast30MinData, 60000); // 60초 (1분)
   }
 }
 
@@ -190,9 +190,6 @@ function setCustomDateRange(days) {
   
   document.getElementById('start-date').value = formatDate(startDate);
   document.getElementById('end-date').value = formatDate(endDate);
-  
-  // 자동으로 데이터 조회
-  fetchCustomDateData();
 }
 
 // 빠른 날짜 선택 함수 (기간 비교 탭용)
@@ -228,9 +225,6 @@ function setQuickDateRange(days) {
   document.getElementById('period-a-end').value = formatDate(periodAEnd);
   document.getElementById('period-b-start').value = formatDate(periodBStart);
   document.getElementById('period-b-end').value = formatDate(periodBEnd);
-  
-  // 자동으로 비교 실행
-  fetchComparisonData();
 }
 
 // 비교 상세 닫기 함수

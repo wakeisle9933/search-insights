@@ -132,7 +132,9 @@ const translations = {
       dailyChartDesc: "일별 방문자 추이를 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.",
       loadingChart: "차트 데이터를 불러오는 중...",
       loadingData: "데이터를 불러오는 중...",
-      selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!"
+      selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!",
+      selectCompareDates: "기간을 선택하고 비교하기 버튼을 클릭해주세요!",
+      comparingData: "데이터를 비교하는 중..."
     },
     
     // 기타
@@ -303,7 +305,9 @@ const translations = {
       dailyChartDesc: "Check daily visitor trends at a glance! Click on specific dates in the chart to view detailed data.",
       loadingChart: "Loading chart data...",
       loadingData: "Loading data...",
-      selectDateRange: "Please select dates and click the search button!"
+      selectDateRange: "Please select dates and click the search button!",
+      selectCompareDates: "Please select periods and click the compare button!",
+      comparingData: "Comparing data..."
     },
     
     // Misc
@@ -474,7 +478,9 @@ const translations = {
       dailyChartDesc: "一目了然地查看每日访客趋势! 点击图表中的特定日期可查看详细数据。",
       loadingChart: "正在加载图表数据...",
       loadingData: "正在加载数据...",
-      selectDateRange: "请选择日期并点击查询按钮!"
+      selectDateRange: "请选择日期并点击查询按钮!",
+      selectCompareDates: "请选择期间并点击比较按钮!",
+      comparingData: "正在比较数据..."
     },
     
     // 其他

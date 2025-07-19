@@ -79,10 +79,22 @@ function fetchCustomDateData() {
     return;
   }
 
+  // 초기 메시지 숨기고 로딩 표시
+  const initialMessage = document.getElementById('custom-date-initial-message');
+  const loadingDiv = document.getElementById('custom-date-loading');
+  const dataContainer = document.getElementById('custom-date-data-container');
+  
+  if (initialMessage) initialMessage.style.display = 'none';
+  if (loadingDiv) loadingDiv.style.display = 'block';
+  if (dataContainer) dataContainer.style.display = 'none';
+
   // API 요청
   fetch(`/api/custom-date-pageviews?startDate=${startDate}&endDate=${endDate}`)
   .then(response => response.json())
   .then(data => {
+    // 로딩 숨기고 데이터 컨테이너 표시
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    if (dataContainer) dataContainer.style.display = 'block';
     // 데이터 저장
     currentPageViewsData.customDate = data.pageViews;
     
@@ -119,7 +131,14 @@ function fetchCustomDateData() {
     // 카테고리별 테이블 업데이트
     updateCategoryViewsTable(data.categoryViews, 'custom-date-category-views');
   })
-  .catch(error => console.error((window.t ? window.t('console.customDateDataFetchFailed') : '날짜 지정 데이터 가져오기 실패') + ':', error));
+  .catch(error => {
+    console.error((window.t ? window.t('console.customDateDataFetchFailed') : '날짜 지정 데이터 가져오기 실패') + ':', error);
+    // 로딩 숨기고 초기 메시지 다시 표시
+    const loadingDiv = document.getElementById('custom-date-loading');
+    const initialMessage = document.getElementById('custom-date-initial-message');
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    if (initialMessage) initialMessage.style.display = 'block';
+  });
 }
 
 // 기간 비교 데이터 가져오기
@@ -137,12 +156,25 @@ function fetchComparisonData() {
     return;
   }
   
+  // 초기 메시지 숨기고 로딩 표시
+  const initialMessage = document.getElementById('comparison-initial-message');
+  const loadingDiv = document.getElementById('comparison-loading');
+  const dataContainer = document.getElementById('comparison-data-container');
+  
+  if (initialMessage) initialMessage.style.display = 'none';
+  if (loadingDiv) loadingDiv.style.display = 'block';
+  if (dataContainer) dataContainer.style.display = 'none';
+  
   // 두 기간의 데이터를 병렬로 가져오기
   Promise.all([
     fetch(`/api/custom-date-pageviews?startDate=${periodAStart}&endDate=${periodAEnd}`).then(r => r.json()),
     fetch(`/api/custom-date-pageviews?startDate=${periodBStart}&endDate=${periodBEnd}`).then(r => r.json())
   ])
   .then(([dataA, dataB]) => {
+    // 로딩 숨기고 데이터 컨테이너 표시
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    if (dataContainer) dataContainer.style.display = 'block';
+    
     // 데이터 캐싱
     comparisonDataCache.periodA = dataA;
     comparisonDataCache.periodB = dataB;
@@ -157,7 +189,12 @@ function fetchComparisonData() {
     document.querySelector('#comparison-filters .filter-btn').classList.add('active');
     comparisonDataCache.currentFilter = 'all';
   })
-  .catch(error => console.error((window.t ? window.t('console.comparisonDataFetchFailed') : '비교 데이터 가져오기 실패') + ':', error));
+  .catch(error => {
+    console.error((window.t ? window.t('console.comparisonDataFetchFailed') : '비교 데이터 가져오기 실패') + ':', error);
+    // 로딩 숨기고 초기 메시지 다시 표시
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    if (initialMessage) initialMessage.style.display = 'block';
+  });
 }
 
 // 비교 필터 적용

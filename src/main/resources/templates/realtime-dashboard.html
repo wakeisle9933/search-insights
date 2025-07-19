@@ -349,6 +349,20 @@
       <div class="sub-tab" onclick="showSubTab('custom-date', 'category')" data-i18n="subTabs.byCategory">📑 카테고리별</div>
     </div>
 
+    <!-- 초기 메시지 (조회 전) -->
+    <div id="custom-date-initial-message" class="dashboard-box" style="padding: 80px 20px; text-align: center;">
+      <div style="font-size: 4em; margin-bottom: 20px;">📊</div>
+      <div style="font-size: 1.2em; color: #666;" data-i18n="messages.selectDateRange">날짜를 선택하고 조회하기 버튼을 클릭해주세요!</div>
+    </div>
+
+    <!-- 로딩 인디케이터 -->
+    <div id="custom-date-loading" class="dashboard-box" style="display: none; padding: 80px 20px; text-align: center;">
+      <div class="loading-spinner" style="margin: 0 auto;"></div>
+      <div style="margin-top: 20px; font-size: 1.1em; color: #666;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
+    </div>
+
+    <!-- 데이터 컨텐츠 영역 (조회 후 표시) -->
+    <div id="custom-date-data-container" style="display: none;">
     <!-- 전체 제목 테이블 (날짜 지정) -->
     <div id="custom-date-full-content" class="sub-tab-content active">
       <div class="dashboard-box">
@@ -457,6 +471,7 @@
         </table>
       </div>
     </div>
+    </div><!-- custom-date-data-container 종료 -->
 
   </div>
 
@@ -507,6 +522,20 @@
           </div>
         </div>
 
+        <!-- 초기 메시지 (비교 전) -->
+        <div id="comparison-initial-message" class="dashboard-box" style="margin-top: 20px; padding: 80px 20px; text-align: center;">
+          <div style="font-size: 4em; margin-bottom: 20px;">⚔️</div>
+          <div style="font-size: 1.2em; color: #666;" data-i18n="messages.selectCompareDates">기간을 선택하고 비교하기 버튼을 클릭해주세요!</div>
+        </div>
+
+        <!-- 로딩 인디케이터 -->
+        <div id="comparison-loading" class="dashboard-box" style="display: none; margin-top: 20px; padding: 80px 20px; text-align: center;">
+          <div class="loading-spinner" style="margin: 0 auto;"></div>
+          <div style="margin-top: 20px; font-size: 1.1em; color: #666;" data-i18n="messages.comparingData">데이터를 비교하는 중...</div>
+        </div>
+
+        <!-- 데이터 컨텐츠 영역 (비교 후 표시) -->
+        <div id="comparison-data-container" style="display: none;">
         <!-- 스마트 필터 -->
         <div class="smart-filter" id="comparison-filters">
           <button class="filter-btn active" onclick="applyComparisonFilter('all')" data-i18n="filters.all">전체 보기</button>
@@ -559,6 +588,7 @@
             </tbody>
           </table>
         </div>
+        </div><!-- comparison-data-container 종료 -->
       </div>
     </div>
   </div>

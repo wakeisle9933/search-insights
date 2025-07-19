@@ -188,9 +188,8 @@ function renderDailyChart() {
           data: dailyChartData.pageViews,
           type: 'line',
           borderColor: 'rgba(255, 99, 132, 1)',
-          backgroundColor: 'rgba(255, 99, 132, 0.1)',
           borderWidth: 2,
-          fill: true,
+          fill: false,
           tension: 0.4,
           yAxisID: 'y-views',
           order: 1
