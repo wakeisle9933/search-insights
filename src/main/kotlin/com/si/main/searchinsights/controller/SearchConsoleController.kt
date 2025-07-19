@@ -1,6 +1,8 @@
 package com.si.main.searchinsights.controller
 
+import com.si.main.searchinsights.enum.ErrorCode
 import com.si.main.searchinsights.enum.ReportFrequency
+import com.si.main.searchinsights.exception.BusinessException
 import com.si.main.searchinsights.service.MailService
 import com.si.main.searchinsights.service.SearchConsoleService
 import io.swagger.v3.oas.annotations.Operation
@@ -57,25 +59,45 @@ class SearchConsoleController(
         val effectiveToDate = toDate ?: defaultDate
 
         // 날짜 유효성 검사
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        try {
-            val parsedFromDate = LocalDate.parse(effectiveFromDate, dateFormatter)
-            val parsedToDate = LocalDate.parse(effectiveToDate, dateFormatter)
-
-            if (parsedFromDate.isAfter(parsedToDate)) {
-                throw IllegalArgumentException("시작일이 종료일보다 늦을 수 없습니다!")
-            }
-        } catch (e: DateTimeParseException) {
-            throw IllegalArgumentException("날짜 형식이 올바르지 않습니다! yyyy-MM-dd 형식으로 입력해주세요!")
-        }
+        val dateRange = validateDateRange(effectiveFromDate, effectiveToDate)
 
         val excelFile = searchConsoleService.createExcelFile(
-            searchConsoleService.fetchSearchAnalyticsData(effectiveFromDate, effectiveToDate),
-            searchConsoleService.fetchAnalyticsData(effectiveFromDate, effectiveToDate),
+            searchConsoleService.fetchSearchAnalyticsData(dateRange.first, dateRange.second),
+            searchConsoleService.fetchAnalyticsData(dateRange.first, dateRange.second),
             ReportFrequency.CUSTOM
         )
 
-        mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, effectiveFromDate, effectiveToDate)
+        mailService.sendMail(excelFile, "search_insights.xlsx", ReportFrequency.CUSTOM, dateRange.first, dateRange.second)
+    }
+    
+    private fun validateDateRange(fromDate: String, toDate: String): Pair<String, String> {
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        
+        val parsedFromDate = try {
+            LocalDate.parse(fromDate, dateFormatter)
+        } catch (e: DateTimeParseException) {
+            throw BusinessException(
+                errorCode = ErrorCode.INVALID_DATE_FORMAT,
+                message = "시작일의 날짜 형식이 올바르지 않습니다: $fromDate"
+            )
+        }
+        
+        val parsedToDate = try {
+            LocalDate.parse(toDate, dateFormatter)
+        } catch (e: DateTimeParseException) {
+            throw BusinessException(
+                errorCode = ErrorCode.INVALID_DATE_FORMAT,
+                message = "종료일의 날짜 형식이 올바르지 않습니다: $toDate"
+            )
+        }
+        
+        if (parsedFromDate.isAfter(parsedToDate)) {
+            throw BusinessException(
+                errorCode = ErrorCode.DATE_RANGE_INVALID
+            )
+        }
+        
+        return Pair(fromDate, toDate)
     }
 
 }

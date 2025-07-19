@@ -13,6 +13,10 @@ import com.si.main.searchinsights.data.PageViewInfo
 import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.util.DateUtils
+import com.si.main.searchinsights.enum.ErrorCode
+import com.si.main.searchinsights.exception.BusinessException
+import com.si.main.searchinsights.exception.DataProcessingException
+import com.si.main.searchinsights.exception.ExternalApiException
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
@@ -38,7 +42,10 @@ class SearchConsoleService (
 
         val credentialStream: InputStream =
             this::class.java.classLoader.getResourceAsStream("credential/search-insights.json")
-                ?: throw FileNotFoundException("Resource not found: credential/search-insights.json")
+                ?: throw BusinessException(
+                    errorCode = ErrorCode.CREDENTIAL_NOT_FOUND,
+                    message = "Google 서비스 계정 인증 파일을 찾을 수 없습니다"
+                )
 
         val credential = GoogleCredentials.fromStream(credentialStream)
             .createScoped(listOf("https://www.googleapis.com/auth/webmasters.readonly"))
@@ -51,7 +58,10 @@ class SearchConsoleService (
     fun getAnalyticsSerivce(): BetaAnalyticsDataClient{
         val credentialStream: InputStream =
             this::class.java.classLoader.getResourceAsStream("credential/search-insights.json")
-                ?: throw FileNotFoundException("Resource not found: credential/search-insights.json")
+                ?: throw BusinessException(
+                    errorCode = ErrorCode.CREDENTIAL_NOT_FOUND,
+                    message = "Google 서비스 계정 인증 파일을 찾을 수 없습니다"
+                )
 
         val credential = GoogleCredentials.fromStream(credentialStream)
             .createScoped(listOf("https://www.googleapis.com/auth/analytics.readonly"))
@@ -125,7 +135,11 @@ class SearchConsoleService (
                 }
             } catch (e: Exception) {
                 logger.error("Analytics Data fetch error", e)
-                emptyList()  // 에러 발생 시 빈 리스트 반환
+                throw ExternalApiException(
+                    errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                    message = "Google Analytics 데이터를 가져오는 중 오류가 발생했습니다",
+                    cause = e
+                )
             }
         }
     }
@@ -184,7 +198,12 @@ class SearchConsoleService (
                     )
                 }
             } catch (e: Exception) {
-                emptyList()
+                logger.error("Real-time analytics fetch error", e)
+                throw ExternalApiException(
+                    errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                    message = "실시간 분석 데이터를 가져오는 중 오류가 발생했습니다",
+                    cause = e
+                )
             }
         }
     }
@@ -204,7 +223,11 @@ class SearchConsoleService (
                 client.runReport(request).rowsList.firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
             } catch (e: Exception) {
                 logger.error("Analytics active users fetch error", e)
-                0
+                throw ExternalApiException(
+                    errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                    message = "활성 사용자 데이터를 가져오는 중 오류가 발생했습니다",
+                    cause = e
+                )
             }
         }
 
