@@ -34,6 +34,7 @@
     <div class="main-tab" onclick="showMainTab('custom-date')" data-i18n="mainTabs.customDate">📆 날짜 지정</div>
     <div class="main-tab" onclick="showMainTab('comparison')" data-i18n="mainTabs.comparison">⚔️ 기간 비교</div>
     <div class="main-tab" onclick="showMainTab('daily-chart')" data-i18n="mainTabs.dailyChart">📈 일간 차트</div>
+    <div class="main-tab" onclick="showMainTab('report-send')" data-i18n="mainTabs.reportSend">📧 리포트 발송</div>
   </div>
 
   <!-- 오늘 전체 탭 컨텐츠 -->
@@ -803,6 +804,112 @@
     </div>
   </div>
 </div>
+
+  <!-- 리포트 발송 탭 컨텐츠 -->
+  <div id="report-send-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="dashboard-title" data-i18n="dashboardTitles.reportSend">📧 Search Insights 리포트 발송</div>
+      <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 20px;">
+        <span data-i18n="messages.reportSendDesc">📌 원하는 기간의 Search Insights 리포트를 이메일로 발송해보세요! Excel 파일로 상세한 분석 데이터를 받아보실 수 있어요.</span>
+        <br>
+        <span style="color: #e74c3c; margin-top: 5px; display: inline-block;" data-i18n="messages.searchConsoleDelay">⚠️ 구글 Search Console 데이터는 최대 3일의 지연이 있습니다. (오늘 날짜 기준 3일 전까지의 데이터만 사용 가능)</span>
+      </div>
+      
+      <!-- 리포트 기간 선택 영역 -->
+      <div class="report-period-selector">
+        <div class="report-period-box">
+          <div class="period-icon">📅</div>
+          <div class="period-content">
+            <div class="period-label" data-i18n="labels.reportPeriod">리포트 기간 선택</div>
+            <div class="date-selector" style="margin-top: 10px;">
+              <input type="date" id="report-start-date" onchange="validateReportDates()" placeholder="YYYY-MM-DD">
+              <span>~</span>
+              <input type="date" id="report-end-date" onchange="validateReportDates()" placeholder="YYYY-MM-DD">
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- 리포트 미리보기 -->
+      <div class="report-preview-box" style="margin-top: 25px;">
+        <div class="preview-header">
+          <span class="preview-title" data-i18n="sectionTitles.reportContents">📋 리포트 포함 내용</span>
+        </div>
+        <div class="preview-content">
+          <div class="preview-item">
+            <span class="preview-icon">📊</span>
+            <span class="preview-text" data-i18n="reportContents.searchAnalytics">검색 성과 분석 (쿼리별, 페이지별, 기기별)</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-icon">🔤</span>
+            <span class="preview-text" data-i18n="reportContents.prefixAnalysis">접두어 분석 (1~3단어)</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-icon">📈</span>
+            <span class="preview-text" data-i18n="reportContents.pageViewAnalysis">페이지뷰 분석 (제목별, 경로별)</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-icon">🔗</span>
+            <span class="preview-text" data-i18n="reportContents.backlinks">백링크 분석</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-icon">📅</span>
+            <span class="preview-text" data-i18n="reportContents.dailyTrends">일간 추이 분석</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 수신자 정보 -->
+      <div class="recipient-info-box" style="margin-top: 25px;">
+        <div class="recipient-header">
+          <span class="recipient-title" data-i18n="sectionTitles.recipientInfo">📬 수신자 정보</span>
+        </div>
+        <div class="recipient-content">
+          <div class="recipient-item">
+            <span class="recipient-icon">✉️</span>
+            <span class="recipient-label" data-i18n="labels.recipient">수신자:</span>
+            <span class="recipient-email" id="recipient-email">loading...</span>
+          </div>
+          <div class="recipient-note">
+            <span class="note-icon">💡</span>
+            <span class="note-text" data-i18n="messages.recipientNote">application.properties에 설정된 이메일 주소로 발송됩니다.</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 발송 버튼 영역 -->
+      <div class="send-button-area" style="margin-top: 30px; text-align: center;">
+        <button id="send-report-btn" class="send-report-button" onclick="sendReport()">
+          <span class="button-icon">🚀</span>
+          <span class="button-text" data-i18n="buttons.sendReport">리포트 발송하기</span>
+        </button>
+      </div>
+      
+      <!-- 발송 상태 표시 영역 -->
+      <div id="report-status" style="display: none; margin-top: 20px;">
+        <!-- 로딩 상태 -->
+        <div id="report-loading" class="status-box loading-status" style="display: none;">
+          <div class="loading-spinner"></div>
+          <div class="status-text" data-i18n="messages.reportSending">리포트를 생성하고 발송 중입니다...</div>
+        </div>
+        
+        <!-- 성공 상태 -->
+        <div id="report-success" class="status-box success-status" style="display: none;">
+          <div class="status-icon">✅</div>
+          <div class="status-text" data-i18n="messages.reportSent">리포트가 성공적으로 발송되었습니다!</div>
+          <div class="status-detail" id="report-success-detail"></div>
+        </div>
+        
+        <!-- 실패 상태 -->
+        <div id="report-error" class="status-box error-status" style="display: none;">
+          <div class="status-icon">❌</div>
+          <div class="status-text" data-i18n="messages.reportFailed">리포트 발송에 실패했습니다.</div>
+          <div class="status-detail" id="report-error-detail"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 <!-- Chart.js 라이브러리 추가 -->

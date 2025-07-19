@@ -215,3 +215,139 @@ function initAutoUpdateListener() {
     }
   });
 }
+
+// 리포트 탭 초기화
+function initReportTab() {
+  // 날짜 필드 초기화 (3일 전 ~ 3일 전)
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3); // 3일 전
+  
+  const formatDate = (date) => {
+    return date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+  };
+  
+  // 날짜 필드가 비어있을 때만 초기값 설정
+  if (!document.getElementById('report-start-date').value) {
+    document.getElementById('report-start-date').value = formatDate(threeDaysAgo);
+    document.getElementById('report-end-date').value = formatDate(threeDaysAgo);
+  }
+  
+  // 수신자 이메일 로드
+  loadRecipientEmail();
+}
+
+// 리포트 날짜 유효성 검사
+function validateReportDates() {
+  const startDate = document.getElementById('report-start-date').value;
+  const endDate = document.getElementById('report-end-date').value;
+
+  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+    alert('🚨 ' + (window.t ? window.t('errors.dateRangeInvalid') : '시작일이 종료일보다 늦을 수 없어요!'));
+    document.getElementById('report-end-date').value = startDate;
+  }
+}
+
+
+// 수신자 이메일 로드
+function loadRecipientEmail() {
+  // 실제로는 API에서 가져와야 하지만, 여기서는 더미 데이터 표시
+  const recipientEmail = document.getElementById('recipient-email');
+  if (recipientEmail) {
+    // TODO: API 엔드포인트에서 실제 수신자 정보 가져오기
+    recipientEmail.textContent = 'admin@example.com';
+  }
+}
+
+// 리포트 발송
+function sendReport() {
+  const startDate = document.getElementById('report-start-date').value;
+  const endDate = document.getElementById('report-end-date').value;
+  
+  if (!startDate || !endDate) {
+    alert('❓ ' + (window.t ? window.t('errors.selectAllDates') : '시작일과 종료일을 모두 선택해주세요!'));
+    return;
+  }
+  
+  // 3일 지연 validation
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const threeDaysAgo = new Date(today);
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+  
+  const endDateObj = new Date(endDate);
+  endDateObj.setHours(0, 0, 0, 0);
+  
+  if (endDateObj > threeDaysAgo) {
+    const maxDateStr = threeDaysAgo.getFullYear() + '-' +
+        String(threeDaysAgo.getMonth() + 1).padStart(2, '0') + '-' +
+        String(threeDaysAgo.getDate()).padStart(2, '0');
+    
+    alert('⚠️ ' + (window.t ? window.tTemplate('errors.searchConsoleDelay', {maxDate: maxDateStr}) : 
+      `구글 Search Console 데이터는 3일의 지연이 있습니다.\n종료일은 ${maxDateStr} 이전이어야 합니다.`));
+    return;
+  }
+  
+  // 버튼 비활성화
+  const sendBtn = document.getElementById('send-report-btn');
+  sendBtn.disabled = true;
+  
+  // 상태 영역 표시
+  const statusArea = document.getElementById('report-status');
+  const loadingDiv = document.getElementById('report-loading');
+  const successDiv = document.getElementById('report-success');
+  const errorDiv = document.getElementById('report-error');
+  
+  // 모든 상태 숨기기
+  successDiv.style.display = 'none';
+  errorDiv.style.display = 'none';
+  
+  // 로딩 표시
+  statusArea.style.display = 'block';
+  loadingDiv.style.display = 'block';
+  
+  // API 호출
+  fetch(`/email-search-insights-report?fromDate=${startDate}&toDate=${endDate}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text();
+    })
+    .then(data => {
+      // 로딩 숨기고 성공 표시
+      loadingDiv.style.display = 'none';
+      successDiv.style.display = 'block';
+      
+      // 성공 메시지에 날짜 정보 표시
+      const successDetail = document.getElementById('report-success-detail');
+      successDetail.textContent = `${startDate} ~ ${endDate} 기간의 리포트가 발송되었습니다.`;
+      
+      // 3초 후 자동으로 상태 숨기기
+      setTimeout(() => {
+        statusArea.style.display = 'none';
+      }, 5000);
+    })
+    .catch(error => {
+      console.error('리포트 발송 실패:', error);
+      
+      // 로딩 숨기고 에러 표시
+      loadingDiv.style.display = 'none';
+      errorDiv.style.display = 'block';
+      
+      // 에러 메시지 표시
+      const errorDetail = document.getElementById('report-error-detail');
+      errorDetail.textContent = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    })
+    .finally(() => {
+      // 버튼 다시 활성화
+      sendBtn.disabled = false;
+    });
+}
+
+// window 객체에 함수 등록
+window.initReportTab = initReportTab;
+window.validateReportDates = validateReportDates;
+window.loadRecipientEmail = loadRecipientEmail;
+window.sendReport = sendReport;

@@ -10,7 +10,8 @@ const translations = {
       last30min: "최근 30분",
       customDate: "날짜 지정",
       comparison: "기간 비교",
-      dailyChart: "일간 차트"
+      dailyChart: "일간 차트",
+      reportSend: "리포트 발송"
     },
     
     // 서브 탭
@@ -31,7 +32,8 @@ const translations = {
       customActiveUsers: "지정 기간 활성 사용자",
       customPageviews: "지정 기간 전체 조회수",
       comparisonAnalysis: "기간 비교 분석",
-      dailyChart: "일간 차트 분석"
+      dailyChart: "일간 차트 분석",
+      reportSend: "Search Insights 리포트 발송"
     },
     
     // 섹션 제목
@@ -44,7 +46,9 @@ const translations = {
       pageviewsByPrefix3: "접두어별 조회수 (3단어)",
       pageviewsByCategory: "카테고리별 조회수",
       categoryComparison: "카테고리별 비교",
-      postDetailComparison: "포스트별 상세 비교"
+      postDetailComparison: "포스트별 상세 비교",
+      reportContents: "리포트 포함 내용",
+      recipientInfo: "수신자 정보"
     },
     
     // 버튼
@@ -54,7 +58,8 @@ const translations = {
       syncCategories: "카테고리 추가 동기화",
       resetCategories: "카테고리 전체 초기화",
       themeToggle: "테마 변경",
-      languageToggle: "언어 변경"
+      languageToggle: "언어 변경",
+      sendReport: "리포트 발송하기"
     },
     
     // 테이블 헤더
@@ -85,7 +90,9 @@ const translations = {
       periodA: "기간 A (이전)",
       periodB: "기간 B (최근)",
       selectPeriod: "기간 선택:",
-      autoRefresh: "자동 새로고침 (10초)"
+      autoRefresh: "자동 새로고침 (10초)",
+      reportPeriod: "리포트 기간 선택",
+      recipient: "수신자:"
     },
     
     // 차트 라벨
@@ -100,7 +107,8 @@ const translations = {
       days3: "3일",
       days7: "7일",
       weeks2: "2주",
-      month1: "한달"
+      month1: "한달",
+      months3: "3개월"
     },
     
     // 필터 버튼
@@ -134,12 +142,27 @@ const translations = {
       loadingData: "데이터를 불러오는 중...",
       selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!",
       selectCompareDates: "기간을 선택하고 비교하기 버튼을 클릭해주세요!",
-      comparingData: "데이터를 비교하는 중..."
+      comparingData: "데이터를 비교하는 중...",
+      reportSendDesc: "원하는 기간의 Search Insights 리포트를 이메일로 발송해보세요! Excel 파일로 상세한 분석 데이터를 받아보실 수 있어요.",
+      recipientNote: "application.properties에 설정된 이메일 주소로 발송됩니다.",
+      reportSending: "리포트를 생성하고 발송 중입니다...",
+      reportSent: "리포트가 성공적으로 발송되었습니다!",
+      reportFailed: "리포트 발송에 실패했습니다.",
+      searchConsoleDelay: "구글 Search Console 데이터는 최대 3일의 지연이 있습니다. (오늘 날짜 기준 3일 전까지의 데이터만 사용 가능)"
     },
     
     // 기타
     misc: {
       dataLoading: "여기에 데이터가 동적으로 삽입됩니다"
+    },
+    
+    // 리포트 내용
+    reportContents: {
+      searchAnalytics: "검색 성과 분석 (쿼리별, 페이지별, 기기별)",
+      prefixAnalysis: "접두어 분석 (1~3단어)",
+      pageViewAnalysis: "페이지뷰 분석 (제목별, 경로별)",
+      backlinks: "백링크 분석",
+      dailyTrends: "일간 추이 분석"
     },
     
     // 에러 메시지
@@ -151,7 +174,8 @@ const translations = {
       noMatchingData: "조건에 맞는 데이터가 없어요!",
       categoryDataNotFound: "카테고리 데이터를 찾을 수 없어요!",
       categoryDataEmpty: "카테고리 데이터가 비어있어요!",
-      loadDetailFailed: "상세 데이터를 불러오는데 실패했습니다."
+      loadDetailFailed: "상세 데이터를 불러오는데 실패했습니다.",
+      searchConsoleDelay: "구글 Search Console 데이터는 3일의 지연이 있습니다.\n종료일은 {maxDate} 이전이어야 합니다."
     },
     
     // 콘솔 에러 메시지
@@ -183,7 +207,8 @@ const translations = {
       last30min: "Last 30 min",
       customDate: "Custom Date",
       comparison: "Period Compare",
-      dailyChart: "Daily Chart"
+      dailyChart: "Daily Chart",
+      reportSend: "Send Report"
     },
     
     // Sub tabs
@@ -204,7 +229,8 @@ const translations = {
       customActiveUsers: "Custom Period Active Users",
       customPageviews: "Custom Period Total Pageviews",
       comparisonAnalysis: "Period Comparison Analysis",
-      dailyChart: "Daily Chart Analysis"
+      dailyChart: "Daily Chart Analysis",
+      reportSend: "Search Insights Report"
     },
     
     // Section titles
@@ -217,7 +243,9 @@ const translations = {
       pageviewsByPrefix3: "Pageviews by Prefix (3 words)",
       pageviewsByCategory: "Pageviews by Category",
       categoryComparison: "Category Comparison",
-      postDetailComparison: "Post Detail Comparison"
+      postDetailComparison: "Post Detail Comparison",
+      reportContents: "Report Contents",
+      recipientInfo: "Recipient Information"
     },
     
     // Buttons
@@ -227,7 +255,8 @@ const translations = {
       syncCategories: "Sync Categories",
       resetCategories: "Reset All Categories",
       themeToggle: "Toggle Theme",
-      languageToggle: "Change Language"
+      languageToggle: "Change Language",
+      sendReport: "Send Report"
     },
     
     // Table headers
@@ -258,7 +287,9 @@ const translations = {
       periodA: "Period A (Previous)",
       periodB: "Period B (Recent)",
       selectPeriod: "Select Period:",
-      autoRefresh: "Auto Refresh (10s)"
+      autoRefresh: "Auto Refresh (10s)",
+      reportPeriod: "Select Report Period",
+      recipient: "Recipient:"
     },
     
     // Chart labels
@@ -273,7 +304,8 @@ const translations = {
       days3: "3 Days",
       days7: "7 Days",
       weeks2: "2 Weeks",
-      month1: "1 Month"
+      month1: "1 Month",
+      months3: "3 Months"
     },
     
     // Filter buttons
@@ -307,12 +339,27 @@ const translations = {
       loadingData: "Loading data...",
       selectDateRange: "Please select dates and click the search button!",
       selectCompareDates: "Please select periods and click the compare button!",
-      comparingData: "Comparing data..."
+      comparingData: "Comparing data...",
+      reportSendDesc: "Send Search Insights reports for your desired period via email! Get detailed analytics data in Excel format.",
+      recipientNote: "Will be sent to the email address configured in application.properties.",
+      reportSending: "Generating and sending report...",
+      reportSent: "Report sent successfully!",
+      reportFailed: "Failed to send report.",
+      searchConsoleDelay: "Google Search Console data has up to 3 days delay. (Only data up to 3 days before today is available)"
     },
     
     // Misc
     misc: {
       dataLoading: "Data will be loaded here dynamically"
+    },
+    
+    // Report contents
+    reportContents: {
+      searchAnalytics: "Search Performance Analysis (by Query, Page, Device)",
+      prefixAnalysis: "Prefix Analysis (1-3 words)",
+      pageViewAnalysis: "Pageview Analysis (by Title, Path)",
+      backlinks: "Backlink Analysis",
+      dailyTrends: "Daily Trend Analysis"
     },
     
     // Error messages
@@ -324,7 +371,8 @@ const translations = {
       noMatchingData: "No matching data found!",
       categoryDataNotFound: "Category data not found!",
       categoryDataEmpty: "Category data is empty!",
-      loadDetailFailed: "Failed to load detailed data."
+      loadDetailFailed: "Failed to load detailed data.",
+      searchConsoleDelay: "Google Search Console data has a 3-day delay.\nEnd date must be before {maxDate}."
     },
     
     // Console error messages
@@ -356,7 +404,8 @@ const translations = {
       last30min: "最近30分钟",
       customDate: "日期指定",
       comparison: "期间比较",
-      dailyChart: "日间图表"
+      dailyChart: "日间图表",
+      reportSend: "发送报告"
     },
     
     // 子标签
@@ -377,7 +426,8 @@ const translations = {
       customActiveUsers: "指定期间活跃用户",
       customPageviews: "指定期间总浏览量",
       comparisonAnalysis: "期间比较分析",
-      dailyChart: "日间图表分析"
+      dailyChart: "日间图表分析",
+      reportSend: "Search Insights 报告发送"
     },
     
     // 部分标题
@@ -390,7 +440,9 @@ const translations = {
       pageviewsByPrefix3: "按前缀统计浏览量 (3个词)",
       pageviewsByCategory: "按分类统计浏览量",
       categoryComparison: "分类比较",
-      postDetailComparison: "文章详细比较"
+      postDetailComparison: "文章详细比较",
+      reportContents: "报告内容",
+      recipientInfo: "收件人信息"
     },
     
     // 按钮
@@ -400,7 +452,8 @@ const translations = {
       syncCategories: "同步分类",
       resetCategories: "重置所有分类",
       themeToggle: "切换主题",
-      languageToggle: "切换语言"
+      languageToggle: "切换语言",
+      sendReport: "发送报告"
     },
     
     // 表格标题
@@ -431,7 +484,9 @@ const translations = {
       periodA: "期间 A (之前)",
       periodB: "期间 B (最近)",
       selectPeriod: "选择期间:",
-      autoRefresh: "自动刷新 (10秒)"
+      autoRefresh: "自动刷新 (10秒)",
+      reportPeriod: "选择报告期间",
+      recipient: "收件人:"
     },
     
     // 图表标签
@@ -446,7 +501,8 @@ const translations = {
       days3: "3天",
       days7: "7天",
       weeks2: "2周",
-      month1: "1个月"
+      month1: "1个月",
+      months3: "3个月"
     },
     
     // 筛选按钮
@@ -480,12 +536,27 @@ const translations = {
       loadingData: "正在加载数据...",
       selectDateRange: "请选择日期并点击查询按钮!",
       selectCompareDates: "请选择期间并点击比较按钮!",
-      comparingData: "正在比较数据..."
+      comparingData: "正在比较数据...",
+      reportSendDesc: "通过电子邮件发送您所需期间的Search Insights报告！以Excel格式获取详细的分析数据。",
+      recipientNote: "将发送到application.properties中配置的电子邮件地址。",
+      reportSending: "正在生成并发送报告...",
+      reportSent: "报告发送成功！",
+      reportFailed: "报告发送失败。",
+      searchConsoleDelay: "谷歌Search Console数据最多有 3 天的延迟。（仅可使用今天之前 3 天的数据）"
     },
     
     // 其他
     misc: {
       dataLoading: "数据将在此处动态加载"
+    },
+    
+    // 报告内容
+    reportContents: {
+      searchAnalytics: "搜索效果分析（按查询、页面、设备）",
+      prefixAnalysis: "前缀分析（1-3个词）",
+      pageViewAnalysis: "页面浏览量分析（按标题、路径）",
+      backlinks: "反向链接分析",
+      dailyTrends: "每日趋势分析"
     },
     
     // 错误消息
@@ -497,7 +568,8 @@ const translations = {
       noMatchingData: "没有符合条件的数据！",
       categoryDataNotFound: "找不到分类数据！",
       categoryDataEmpty: "分类数据为空！",
-      loadDetailFailed: "加载详细数据失败。"
+      loadDetailFailed: "加载详细数据失败。",
+      searchConsoleDelay: "谷歌Search Console数据有 3 天延迟。\n结束日期必须在 {maxDate} 之前。"
     },
     
     // 控制台错误消息

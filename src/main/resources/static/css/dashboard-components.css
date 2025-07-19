@@ -515,3 +515,283 @@ body.light-theme .loading-spinner {
   max-width: 100%;
   max-height: 400px;
 }
+
+/* 리포트 발송 관련 스타일 */
+.report-period-selector {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.light-theme .report-period-selector {
+  background: #f0f4f8;
+  border: 1px solid #e1e8ed;
+}
+
+.report-period-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.period-icon {
+  font-size: 3em;
+  line-height: 1;
+}
+
+.period-content {
+  flex: 1;
+}
+
+.period-label {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.light-theme .period-label {
+  color: #2c3e50;
+}
+
+/* 리포트 미리보기 스타일 */
+.report-preview-box {
+  background: rgba(52, 152, 219, 0.08);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.light-theme .report-preview-box {
+  background: rgba(52, 152, 219, 0.05);
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.preview-header {
+  margin-bottom: 15px;
+}
+
+.preview-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #5dade2;
+}
+
+.light-theme .preview-title {
+  color: #3498db;
+}
+
+.preview-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 5px;
+}
+
+.light-theme .preview-item {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.preview-icon {
+  font-size: 1.2em;
+  margin-right: 10px;
+}
+
+.preview-text {
+  font-size: 0.9em;
+  color: #b0b0b0;
+}
+
+.light-theme .preview-text {
+  color: #666;
+}
+
+/* 수신자 정보 스타일 */
+.recipient-info-box {
+  background: rgba(46, 204, 113, 0.08);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.light-theme .recipient-info-box {
+  background: rgba(46, 204, 113, 0.05);
+  border-color: rgba(46, 204, 113, 0.2);
+}
+
+.recipient-header {
+  margin-bottom: 15px;
+}
+
+.recipient-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #58d68d;
+}
+
+.light-theme .recipient-title {
+  color: #2ecc71;
+}
+
+.recipient-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.recipient-icon {
+  font-size: 1.2em;
+  margin-right: 10px;
+}
+
+.recipient-label {
+  font-weight: 500;
+  margin-right: 10px;
+  color: #e0e0e0;
+}
+
+.light-theme .recipient-label {
+  color: #333;
+}
+
+.recipient-email {
+  color: #5dade2;
+  font-weight: 500;
+}
+
+.light-theme .recipient-email {
+  color: #3498db;
+}
+
+.recipient-note {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(241, 196, 15, 0.08);
+  border-radius: 5px;
+}
+
+.light-theme .recipient-note {
+  background: rgba(241, 196, 15, 0.05);
+}
+
+.note-icon {
+  margin-right: 8px;
+}
+
+.note-text {
+  font-size: 0.85em;
+  color: #b0b0b0;
+}
+
+.light-theme .note-text {
+  color: #666;
+}
+
+/* 발송 버튼 스타일 */
+.send-report-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.send-report-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.send-report-button:active {
+  transform: translateY(0);
+}
+
+.send-report-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-icon {
+  font-size: 1.3em;
+}
+
+/* 상태 박스 스타일 */
+.status-box {
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.loading-status {
+  background: rgba(52, 152, 219, 0.08);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.light-theme .loading-status {
+  background: rgba(52, 152, 219, 0.05);
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.success-status {
+  background: rgba(46, 204, 113, 0.08);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.light-theme .success-status {
+  background: rgba(46, 204, 113, 0.05);
+  border-color: rgba(46, 204, 113, 0.2);
+}
+
+.error-status {
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.light-theme .error-status {
+  background: rgba(231, 76, 60, 0.05);
+  border-color: rgba(231, 76, 60, 0.2);
+}
+
+.status-icon {
+  font-size: 3em;
+  margin-bottom: 10px;
+}
+
+.status-text {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #e0e0e0;
+}
+
+.light-theme .status-text {
+  color: #333;
+}
+
+.status-detail {
+  font-size: 0.9em;
+  color: #b0b0b0;
+}
+
+.light-theme .status-detail {
+  color: #666;
+}

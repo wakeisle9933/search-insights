@@ -59,6 +59,13 @@ function showMainTab(tabName) {
     if (typeof initDailyChartTab === 'function') {
       initDailyChartTab(); // 날짜 필드 초기화만
     }
+  } else if (tabName === 'report-send') {
+    document.querySelector('.main-tab:nth-child(6)').classList.add('active');
+    document.getElementById('report-send-content').classList.add('active');
+    // 리포트 탭 초기화
+    if (typeof initReportTab === 'function') {
+      initReportTab();
+    }
   }
 }
 
