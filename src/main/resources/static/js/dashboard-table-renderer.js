@@ -1,9 +1,9 @@
 // 테이블 렌더링 관련 함수들
 
-// 전체 페이지 제목별 조회수 테이블 업데이트
+// 전체 페이지 제목별 조회수 테이블 업데이트 (DocumentFragment 최적화)
 function updatePageViewsTable(data, tableId) {
   const tableBody = document.getElementById(tableId);
-  tableBody.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   // 총 조회수 계산
   const totalViews = data.reduce((sum, item) => sum + item.pageViews, 0);
@@ -55,14 +55,18 @@ function updatePageViewsTable(data, tableId) {
     ratioCell.appendChild(progressContainer);
 
     row.appendChild(ratioCell);
-    tableBody.appendChild(row);
+    fragment.appendChild(row);
   });
+
+  // 한 번에 DOM 업데이트
+  tableBody.innerHTML = '';
+  tableBody.appendChild(fragment);
 }
 
-// 접두어별 조회수 테이블 업데이트
+// 접두어별 조회수 테이블 업데이트 (DocumentFragment 최적화)
 function updatePrefixViewsTable(data, tableId, wordCount) {
   const tableBody = document.getElementById(tableId);
-  tableBody.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   // 페이지 제목을 접두어로 그룹화
   const prefixGroups = groupByPrefix(data, wordCount);
@@ -124,14 +128,18 @@ function updatePrefixViewsTable(data, tableId, wordCount) {
     ratioCell.appendChild(progressContainer);
 
     row.appendChild(ratioCell);
-    tableBody.appendChild(row);
+    fragment.appendChild(row);
   });
+
+  // 한 번에 DOM 업데이트
+  tableBody.innerHTML = '';
+  tableBody.appendChild(fragment);
 }
 
-// 카테고리별 조회수 테이블 업데이트
+// 카테고리별 조회수 테이블 업데이트 (DocumentFragment 최적화)
 function updateCategoryViewsTable(categoryViews, tableId) {
   const tableBody = document.getElementById(tableId);
-  tableBody.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   // 동기화 배너 표시 여부 설정
   const mainTab = tableId.split('-')[0];
@@ -150,7 +158,9 @@ function updateCategoryViewsTable(categoryViews, tableId) {
     cell.textContent = noDataText + ' 🥺';
     cell.style.textAlign = 'center';
     row.appendChild(cell);
-    tableBody.appendChild(row);
+    fragment.appendChild(row);
+    tableBody.innerHTML = '';
+    tableBody.appendChild(fragment);
     return;
   }
 
@@ -227,8 +237,12 @@ function updateCategoryViewsTable(categoryViews, tableId) {
     ratioCell.appendChild(progressContainer);
 
     row.appendChild(ratioCell);
-    tableBody.appendChild(row);
+    fragment.appendChild(row);
   });
+
+  // 한 번에 DOM 업데이트
+  tableBody.innerHTML = '';
+  tableBody.appendChild(fragment);
 }
 
 // 카테고리별 비교 테이블 업데이트
@@ -275,7 +289,7 @@ function updateComparisonCategoryTable(dataA, dataB, filterType = 'all') {
 
   // 테이블 업데이트
   const tableBody = document.getElementById('comparison-category-table');
-  tableBody.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   if (comparisonData.length === 0) {
     tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">😢 ' + (window.t ? window.t('errors.noMatchingData') : '조건에 맞는 데이터가 없어요!') + '</td></tr>';
@@ -355,8 +369,12 @@ function updateComparisonCategoryTable(dataA, dataB, filterType = 'all') {
     }
     row.appendChild(shareBCell);
 
-    tableBody.appendChild(row);
+    fragment.appendChild(row);
   });
+
+  // 한 번에 DOM 업데이트
+  tableBody.innerHTML = '';
+  tableBody.appendChild(fragment);
 }
 
 // 필터 적용 함수
@@ -455,7 +473,7 @@ function showCategoryDetail(categoryName) {
   detailTitle.textContent = '📈 ' + (window.t ? window.tTemplate('ui.categoryPostDetail', {category: categoryName}) : `"${categoryName}" 카테고리 포스트별 상세 비교`);
   detailBox.style.display = 'block';
   
-  tableBody.innerHTML = '';
+  const fragment = document.createDocumentFragment();
   postComparison.forEach((post, index) => {
     const row = document.createElement('tr');
 
@@ -509,8 +527,12 @@ function showCategoryDetail(categoryName) {
     }
     row.appendChild(changeRateCell);
 
-    tableBody.appendChild(row);
+    fragment.appendChild(row);
   });
+
+  // 한 번에 DOM 업데이트
+  tableBody.innerHTML = '';
+  tableBody.appendChild(fragment);
 
   // 스크롤
   detailBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

@@ -14,6 +14,7 @@ import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import kotlin.math.floor
@@ -39,10 +40,13 @@ class SpreadSheetService(
         val linkStyle = createLinkStyle(workbook)
 
         // Remove duplicate queries - keep only the one with highest impressions
-        val uniqueRows = allRows.groupBy { it.getKeys()[0] }  // group by query
+        // 메모리 효율을 위해 시퀀스 사용
+        val uniqueRows = allRows.asSequence()
+            .groupBy { it.getKeys()[0] }  // group by query
             .map { (_, rows) -> 
                 rows.maxByOrNull { it.impressions } ?: rows.first()  // get row with max impressions
             }
+            .toList()
 
         // Summary Data - use deduplicated data
         val avgPosition = if (uniqueRows.isEmpty()) 0.0 else uniqueRows.map { it.position }.average()

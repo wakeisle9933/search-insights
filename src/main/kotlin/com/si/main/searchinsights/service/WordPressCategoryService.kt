@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.si.main.searchinsights.extension.logger
 import kotlinx.coroutines.*
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.io.File
@@ -238,6 +239,7 @@ class WordPressCategoryService(
     /**
      * 카테고리별 페이지뷰 데이터 가져오기
      */
+    @Cacheable(value = ["wordpressCategories"], key = "#pageViews.size()")
     fun getCategoryPageViews(pageViews: List<com.si.main.searchinsights.data.PageViewInfo>): Map<String, Double> {
         val categoryViews = mutableMapOf<String, Double>()
 

@@ -50,12 +50,14 @@ class SearchConsoleServiceTest {
         mockSearchConsole = mockk(relaxed = true)
         mockAnalyticsClient = mockk(relaxed = true)
         
-        // Service 생성
-        service = spyk(SearchConsoleService(mockSpreadSheetService, domain, propId))
-        
-        // Mock 메서드 설정
-        every { service.getSearchConsoleService() } returns mockSearchConsole
-        every { service.getAnalyticsSerivce() } returns mockAnalyticsClient
+        // Service 생성 - 변경된 생성자에 맞게 수정
+        service = spyk(SearchConsoleService(
+            mockSpreadSheetService, 
+            mockSearchConsole, 
+            mockAnalyticsClient, 
+            domain, 
+            propId
+        ))
     }
 
     @AfterEach

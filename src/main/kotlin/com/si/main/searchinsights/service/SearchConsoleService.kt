@@ -19,7 +19,9 @@ import com.si.main.searchinsights.exception.DataProcessingException
 import com.si.main.searchinsights.exception.ExternalApiException
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -28,6 +30,8 @@ import java.time.LocalDate
 @Service
 class SearchConsoleService (
     private val spreadSheetService: SpreadSheetService,
+    private val searchConsoleClient: SearchConsole,
+    private val analyticsDataClient: BetaAnalyticsDataClient,
     @Value("\${domain}")
     private val domain: String,
     @Value("\${analytics.prop.id}")
@@ -36,48 +40,11 @@ class SearchConsoleService (
 
     private val logger = logger()
 
-    fun getSearchConsoleService(): SearchConsole {
-        val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
-        val jsonFactory = GsonFactory.getDefaultInstance()
-
-        val credentialStream: InputStream =
-            this::class.java.classLoader.getResourceAsStream("credential/search-insights.json")
-                ?: throw BusinessException(
-                    errorCode = ErrorCode.CREDENTIAL_NOT_FOUND,
-                    message = "Google 서비스 계정 인증 파일을 찾을 수 없습니다"
-                )
-
-        val credential = GoogleCredentials.fromStream(credentialStream)
-            .createScoped(listOf("https://www.googleapis.com/auth/webmasters.readonly"))
-
-        return SearchConsole.Builder(httpTransport, jsonFactory, HttpCredentialsAdapter(credential))
-            .setApplicationName("Search Console API Kotlin")
-            .build()
-    }
-
-    fun getAnalyticsSerivce(): BetaAnalyticsDataClient{
-        val credentialStream: InputStream =
-            this::class.java.classLoader.getResourceAsStream("credential/search-insights.json")
-                ?: throw BusinessException(
-                    errorCode = ErrorCode.CREDENTIAL_NOT_FOUND,
-                    message = "Google 서비스 계정 인증 파일을 찾을 수 없습니다"
-                )
-
-        val credential = GoogleCredentials.fromStream(credentialStream)
-            .createScoped(listOf("https://www.googleapis.com/auth/analytics.readonly"))
-
-        return BetaAnalyticsDataClient.create(
-            BetaAnalyticsDataSettings.newBuilder()
-            .setCredentialsProvider(FixedCredentialsProvider.create(credential))
-            .build())
-    }
-
 
     fun fetchSearchAnalyticsData(
         startDate: String = DateUtils.getFormattedDateBeforeDays(3),
         endDate: String = startDate
     ): List<ApiDataRow> {
-        val service = getSearchConsoleService()
         var startRow = 0
         val rowLimit = 1000 // API Max Limit
         val allRows = mutableListOf<ApiDataRow>()
@@ -88,7 +55,7 @@ class SearchConsoleService (
                 .setDimensions(listOf("query", "page"))
                 .setRowLimit(rowLimit)
                 .setStartRow(startRow)
-            val execute = service.searchanalytics().query(domain, request).execute()
+            val execute = searchConsoleClient.searchanalytics().query(domain, request).execute()
             logger.info("GSC rows: ${execute.rows?.size} date=$startDate")
             execute.rows?.let { allRows.addAll(it) } // null safe
             startRow += rowLimit
@@ -108,69 +75,72 @@ class SearchConsoleService (
         val startDate = startDateParam ?: LocalDate.now().minusDays(3).toString()
         val endDate = endDateParam ?: startDate
 
-        return getAnalyticsSerivce().use { client ->
-            val request = RunReportRequest.newBuilder().apply {
-                property = "properties/$propId"
-                addDateRanges(DateRange.newBuilder().apply {
-                    this.startDate = DateUtils.convertToLocalDateString(startDate)
-                    this.endDate = DateUtils.convertToLocalDateString(endDate)
-                })
-                addDimensions(Dimension.newBuilder().setName("pagePath"))
-                addDimensions(Dimension.newBuilder().setName("pageTitle"))
-                addMetrics(Metric.newBuilder().setName("screenPageViews"))
-                limit?.let { this.limit = it.toLong() }
-                addOrderBys(OrderBy.newBuilder().apply {
-                    metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews").build()
-                    desc = true
-                })
-            }.build()
+        val request = RunReportRequest.newBuilder().apply {
+            property = "properties/$propId"
+            addDateRanges(DateRange.newBuilder().apply {
+                this.startDate = DateUtils.convertToLocalDateString(startDate)
+                this.endDate = DateUtils.convertToLocalDateString(endDate)
+            })
+            addDimensions(Dimension.newBuilder().setName("pagePath"))
+            addDimensions(Dimension.newBuilder().setName("pageTitle"))
+            addMetrics(Metric.newBuilder().setName("screenPageViews"))
+            limit?.let { this.limit = it.toLong() }
+            addOrderBys(OrderBy.newBuilder().apply {
+                metric = OrderBy.MetricOrderBy.newBuilder().setMetricName("screenPageViews").build()
+                desc = true
+            })
+        }.build()
 
-            try {
-                client.runReport(request).rowsList.map { row ->
-                    PageViewInfo(
-                        pagePath = row.getDimensionValues(0).value,
-                        pageTitle = row.getDimensionValues(1).value,
-                        pageViews = row.getMetricValues(0).value.toDouble()
-                    )
-                }
-            } catch (e: Exception) {
-                logger.error("Analytics Data fetch error", e)
-                throw ExternalApiException(
-                    errorCode = ErrorCode.ANALYTICS_API_ERROR,
-                    message = "Google Analytics 데이터를 가져오는 중 오류가 발생했습니다",
-                    cause = e
+        try {
+            return analyticsDataClient.runReport(request).rowsList.map { row ->
+                PageViewInfo(
+                    pagePath = row.getDimensionValues(0).value,
+                    pageTitle = row.getDimensionValues(1).value,
+                    pageViews = row.getMetricValues(0).value.toDouble()
                 )
             }
+        } catch (e: Exception) {
+            logger.error("Analytics Data fetch error", e)
+            throw ExternalApiException(
+                errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                message = "Google Analytics 데이터를 가져오는 중 오류가 발생했습니다",
+                cause = e
+            )
         }
     }
 
     fun createExcelFile(allRows: List<ApiDataRow>, analyticsAllRows: List<PageViewInfo>, reportFrequency: ReportFrequency): ByteArrayOutputStream {
+        // 메모리 효율을 위해 일부 최적화는 유지하되, 호환성을 위해 XSSFWorkbook 사용
         val workbook = XSSFWorkbook()
-        spreadSheetService.createRawDataSheet(workbook, allRows)
-        spreadSheetService.createHighImpressionsLowPositionSheet(workbook, allRows)
-        spreadSheetService.createPrefixSummarySheet(workbook, allRows)
-        spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
-        spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)
+        
+        try {
+            spreadSheetService.createRawDataSheet(workbook, allRows)
+            spreadSheetService.createHighImpressionsLowPositionSheet(workbook, allRows)
+            spreadSheetService.createPrefixSummarySheet(workbook, allRows)
+            spreadSheetService.createRawAnalyticsDataSheet(workbook, analyticsAllRows)
+            spreadSheetService.createPrefixAnalyticsSummarySheet(workbook, analyticsAllRows)
 
-        if(reportFrequency == ReportFrequency.WEEKLY ||
-            reportFrequency == ReportFrequency.MONTHLY) {
-            spreadSheetService.createBacklinkSummarySheet(workbook)
+            if(reportFrequency == ReportFrequency.WEEKLY ||
+                reportFrequency == ReportFrequency.MONTHLY) {
+                spreadSheetService.createBacklinkSummarySheet(workbook)
+            }
+
+            if(reportFrequency == ReportFrequency.DAILY) {
+                spreadSheetService.createBacklinkToolSheet(workbook)
+            }
+
+            val outputStream = ByteArrayOutputStream()
+            workbook.write(outputStream)
+            
+            return outputStream
+        } finally {
+            workbook.close()
         }
-
-        if(reportFrequency == ReportFrequency.DAILY) {
-            spreadSheetService.createBacklinkToolSheet(workbook)
-        }
-
-        val outputStream = ByteArrayOutputStream()
-        workbook.write(outputStream)
-        workbook.close()
-
-        return outputStream
     }
 
+    @Cacheable(value = ["realtimeAnalytics"])
     fun fetchRealTimeAnalyticsData(): List<PageViewInfo> {
-        return getAnalyticsSerivce().use { client ->
-            val request = RunReportRequest.newBuilder().apply {
+        val request = RunReportRequest.newBuilder().apply {
                 property = "properties/$propId"
 
                 addDateRanges(DateRange.newBuilder().apply {
@@ -188,47 +158,45 @@ class SearchConsoleService (
                 })
             }.build()
 
-            // 결과 처리 (기존 코드와 동일)
-            try {
-                client.runReport(request).rowsList.map { row ->
-                    PageViewInfo(
-                        pageTitle = row.getDimensionValues(0).value,  // pageTitle
-                        pagePath = row.getDimensionValues(1).value,   // pagePath
-                        pageViews = row.getMetricValues(0).value.toDouble()
-                    )
-                }
-            } catch (e: Exception) {
-                logger.error("Real-time analytics fetch error", e)
-                throw ExternalApiException(
-                    errorCode = ErrorCode.ANALYTICS_API_ERROR,
-                    message = "실시간 분석 데이터를 가져오는 중 오류가 발생했습니다",
-                    cause = e
+        // 결과 처리 (기존 코드와 동일)
+        try {
+            return analyticsDataClient.runReport(request).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value,  // pageTitle
+                    pagePath = row.getDimensionValues(1).value,   // pagePath
+                    pageViews = row.getMetricValues(0).value.toDouble()
                 )
             }
+        } catch (e: Exception) {
+            logger.error("Real-time analytics fetch error", e)
+            throw ExternalApiException(
+                errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                message = "실시간 분석 데이터를 가져오는 중 오류가 발생했습니다",
+                cause = e
+            )
         }
     }
 
+    @Cacheable(value = ["realtimeAnalytics"], key = "'withActiveUsers'")
     fun fetchRealTimeAnalyticsWithActiveUsers(): Map<String, Any> {
-        val activeUsers = getAnalyticsSerivce().use { client ->
-            val request = RunReportRequest.newBuilder().apply {
-                property = "properties/$propId"
-                addDateRanges(DateRange.newBuilder().apply {
-                    this.startDate = "today"
-                    this.endDate = "today"
-                })
-                addMetrics(Metric.newBuilder().setName("activeUsers"))
-            }.build()
+        val request = RunReportRequest.newBuilder().apply {
+            property = "properties/$propId"
+            addDateRanges(DateRange.newBuilder().apply {
+                this.startDate = "today"
+                this.endDate = "today"
+            })
+            addMetrics(Metric.newBuilder().setName("activeUsers"))
+        }.build()
 
-            try {
-                client.runReport(request).rowsList.firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
-            } catch (e: Exception) {
-                logger.error("Analytics active users fetch error", e)
-                throw ExternalApiException(
-                    errorCode = ErrorCode.ANALYTICS_API_ERROR,
-                    message = "활성 사용자 데이터를 가져오는 중 오류가 발생했습니다",
-                    cause = e
-                )
-            }
+        val activeUsers = try {
+            analyticsDataClient.runReport(request).rowsList.firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+        } catch (e: Exception) {
+            logger.error("Analytics active users fetch error", e)
+            throw ExternalApiException(
+                errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                message = "활성 사용자 데이터를 가져오는 중 오류가 발생했습니다",
+                cause = e
+            )
         }
 
         return mapOf(
@@ -237,26 +205,26 @@ class SearchConsoleService (
         )
     }
 
+    @Cacheable(value = ["last30minAnalytics"])
     fun fetchLast30MinAnalyticsWithActiveUsers(): Map<String, Any> {
-        return getAnalyticsSerivce().use { client ->
-            // 최근 29분 활성 사용자 가져오기 (29분이 최대)
-            val activeUsersRequest = RunRealtimeReportRequest.newBuilder()
-                .setProperty("properties/$propId")
-                .addMetrics(Metric.newBuilder().setName("activeUsers"))
-                .addMinuteRanges(
-                    MinuteRange.newBuilder()
-                        .setStartMinutesAgo(29)
-                        .setEndMinutesAgo(0)
-                )
-                .build()
+        // 최근 29분 활성 사용자 가져오기 (29분이 최대)
+        val activeUsersRequest = RunRealtimeReportRequest.newBuilder()
+            .setProperty("properties/$propId")
+            .addMetrics(Metric.newBuilder().setName("activeUsers"))
+            .addMinuteRanges(
+                MinuteRange.newBuilder()
+                    .setStartMinutesAgo(29)
+                    .setEndMinutesAgo(0)
+            )
+            .build()
 
-            val activeUsers = try {
-                client.runRealtimeReport(activeUsersRequest).rowsList
-                    .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
-            } catch (e: Exception) {
-                logger.error("최근 30분 활성 사용자 데이터 가져오기 실패", e)
-                0
-            }
+        val activeUsers = try {
+            analyticsDataClient.runRealtimeReport(activeUsersRequest).rowsList
+                .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+        } catch (e: Exception) {
+            logger.error("최근 30분 활성 사용자 데이터 가져오기 실패", e)
+            0
+        }
 
             // 최근 29분 페이지뷰 가져오기
             val pageViewsRequest = RunRealtimeReportRequest.newBuilder()
@@ -275,29 +243,27 @@ class SearchConsoleService (
                 )
                 .build()
 
-            val pageViews = try {
-                client.runRealtimeReport(pageViewsRequest).rowsList.map { row ->
-                    PageViewInfo(
-                        pageTitle = row.getDimensionValues(0).value, // unifiedScreenName을 pageTitle에 넣기
-                        pagePath = "", // 경로는 없지만 객체 구조 유지
-                        pageViews = row.getMetricValues(0).value.toDouble()
-                    )
-                }
-            } catch (e: Exception) {
-                logger.error("최근 30분 페이지뷰 데이터 가져오기 실패", e)
-                emptyList<PageViewInfo>()
+        val pageViews = try {
+            analyticsDataClient.runRealtimeReport(pageViewsRequest).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value, // unifiedScreenName을 pageTitle에 넣기
+                    pagePath = "", // 경로는 없지만 객체 구조 유지
+                    pageViews = row.getMetricValues(0).value.toDouble()
+                )
             }
-
-            mapOf(
-                "activeUsers" to activeUsers,
-                "pageViews" to pageViews
-            )
+        } catch (e: Exception) {
+            logger.error("최근 30분 페이지뷰 데이터 가져오기 실패", e)
+            emptyList<PageViewInfo>()
         }
+
+        return mapOf(
+            "activeUsers" to activeUsers,
+            "pageViews" to pageViews
+        )
     }
 
+    @Cacheable(value = ["customDateAnalytics"], key = "#startDate + '_' + #endDate")
     fun fetchCustomDateAnalyticsWithActiveUsers(startDate: String, endDate: String): Map<String, Any> {
-        val client = getAnalyticsSerivce()
-
         try {
             // 활성 사용자 가져오기
             val request = RunReportRequest.newBuilder().apply {
@@ -309,7 +275,7 @@ class SearchConsoleService (
                 addMetrics(Metric.newBuilder().setName("activeUsers"))
             }.build()
 
-            val activeUsers = client.runReport(request).rowsList
+            val activeUsers = analyticsDataClient.runReport(request).rowsList
                 .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
 
             // 페이지뷰 가져오기
@@ -328,7 +294,7 @@ class SearchConsoleService (
                 })
             }.build()
 
-            val pageViews = client.runReport(pageViewsRequest).rowsList.map { row ->
+            val pageViews = analyticsDataClient.runReport(pageViewsRequest).rowsList.map { row ->
                 PageViewInfo(
                     pageTitle = row.getDimensionValues(0).value,
                     pagePath = row.getDimensionValues(1).value,
@@ -346,8 +312,6 @@ class SearchConsoleService (
                 "activeUsers" to 0,
                 "pageViews" to emptyList<PageViewInfo>()
             )
-        } finally {
-            client.close()
         }
     }
 

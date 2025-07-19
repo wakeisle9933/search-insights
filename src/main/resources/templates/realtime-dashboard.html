@@ -915,14 +915,14 @@
 <!-- Chart.js 라이브러리 추가 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-<!-- JavaScript 파일들 -->
-<script th:src="@{/js/dashboard-i18n.js}"></script>
-<script th:src="@{/js/dashboard-core.js}"></script>
-<script th:src="@{/js/dashboard-tabs.js}"></script>
-<script th:src="@{/js/dashboard-data-fetcher.js}"></script>
-<script th:src="@{/js/dashboard-table-renderer.js}"></script>
-<script th:src="@{/js/dashboard-category-sync.js}"></script>
-<script th:src="@{/js/dashboard-daily-chart.js}"></script>
+<!-- JavaScript 파일들 (defer로 비동기 로딩 및 순서 보장) -->
+<script th:src="@{/js/dashboard-i18n.js}" defer></script>
+<script th:src="@{/js/dashboard-core.js}" defer></script>
+<script th:src="@{/js/dashboard-tabs.js}" defer></script>
+<script th:src="@{/js/dashboard-data-fetcher.js}" defer></script>
+<script th:src="@{/js/dashboard-table-renderer.js}" defer></script>
+<script th:src="@{/js/dashboard-category-sync.js}" defer></script>
+<script th:src="@{/js/dashboard-daily-chart.js}" defer></script>
 
 </body>
 </html>
