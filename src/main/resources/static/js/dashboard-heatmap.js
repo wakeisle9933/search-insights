@@ -13,16 +13,28 @@ async function fetchHeatmapData() {
         return;
     }
     
+    // 로딩 시작!! 🔄
+    const container = document.getElementById('heatmap-container');
+    const initialMessage = document.getElementById('heatmap-initial-message');
+    const loadingIndicator = document.getElementById('heatmap-loading');
+    
+    if (initialMessage) initialMessage.style.display = 'none';
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    
     try {
         const response = await fetch(`/api/hourly-heatmap?startDate=${startDate}&endDate=${endDate}`);
         if (!response.ok) throw new Error('히트맵 데이터 가져오기 실패');
         
         const data = await response.json();
         heatmapData = data;
+        window.heatmapData = data; // window에도 저장
         renderHeatmap(data);
     } catch (error) {
         console.error('히트맵 데이터 오류:', error);
         showError('히트맵 데이터를 불러올 수 없습니다 😢');
+    } finally {
+        // 로딩 종료!! ✨
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 }
 
@@ -31,6 +43,10 @@ function renderHeatmap(data) {
     const container = document.getElementById('heatmap-container');
     if (!container) return;
     
+    // 초기 메시지 숨기기
+    const initialMessage = document.getElementById('heatmap-initial-message');
+    if (initialMessage) initialMessage.style.display = 'none';
+    
     // 요일 라벨 (월요일부터 시작)
     const dayLabels = {
         'ko': ['월', '화', '수', '목', '금', '토', '일'],
@@ -38,7 +54,7 @@ function renderHeatmap(data) {
         'zh': ['一', '二', '三', '四', '五', '六', '日']
     };
     
-    const currentLang = localStorage.getItem('dashboardLanguage') || 'ko';
+    const currentLang = localStorage.getItem('language') || 'ko';
     const days = dayLabels[currentLang];
     
     // 히트맵 HTML 생성
@@ -185,7 +201,7 @@ function addHeatmapTooltips() {
                 'zh': ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
             };
             
-            const currentLang = localStorage.getItem('dashboardLanguage') || 'ko';
+            const currentLang = localStorage.getItem('language') || 'ko';
             const dayName = dayLabels[currentLang][day];
             const timeStr = `${hour}:00 - ${hour + 1}:00`;
             
@@ -225,3 +241,7 @@ function showError(message) {
         container.innerHTML = `<div class="error-message">${message}</div>`;
     }
 }
+
+// window 객체에 함수 등록 (다국어 전환시 사용)
+window.renderHeatmap = renderHeatmap;
+window.heatmapData = heatmapData;

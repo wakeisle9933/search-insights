@@ -33,7 +33,7 @@
     <div class="main-tab" onclick="showMainTab('last30min')" data-i18n="mainTabs.last30min">⚡ 최근 30분</div>
     <div class="main-tab" onclick="showMainTab('custom-date')" data-i18n="mainTabs.customDate">📆 날짜 지정</div>
     <div class="main-tab" onclick="showMainTab('comparison')" data-i18n="mainTabs.comparison">⚔️ 기간 비교</div>
-    <div class="main-tab" onclick="showMainTab('daily-chart')" data-i18n="mainTabs.dailyChart">📈 일간 차트</div>
+    <div class="main-tab" onclick="showMainTab('daily-chart')" data-i18n="mainTabs.dailyChart">📈 차트 및 히트맵</div>
     <div class="main-tab" onclick="showMainTab('report-send')" data-i18n="mainTabs.reportSend">📧 리포트 발송</div>
   </div>
 
@@ -597,7 +597,7 @@
   <!-- 일간 차트 탭 컨텐츠 -->
   <div id="daily-chart-content" class="tab-content">
     <div class="dashboard-box">
-      <div class="dashboard-title" data-i18n="dashboardTitles.dailyChart">📈 일간 차트 분석</div>
+      <div class="dashboard-title" data-i18n="dashboardTitles.dailyChart">📈 차트 및 히트맵 분석</div>
       <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 15px;">
         <span data-i18n="messages.dailyChartDesc">📌 일별 방문자 추이를 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.</span>
       </div>
@@ -652,12 +652,22 @@
         </div>
         
         <!-- 히트맵 컨테이너 (오른쪽) -->
-        <div id="heatmap-container" style="flex: 0 0 45%; height: 400px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; overflow: auto;">
+        <div id="heatmap-container" style="position: relative; flex: 0 0 45%; height: 400px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; overflow: auto;">
           <!-- 히트맵이 여기에 동적으로 렌더링됩니다 -->
-          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+          <div id="heatmap-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
             <div style="text-align: center;">
               <div style="font-size: 3em; margin-bottom: 10px;">🔥</div>
               <div data-i18n="messages.selectDateForHeatmap">날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!</div>
+            </div>
+          </div>
+          
+          <!-- 로딩 인디케이터 -->
+          <div id="heatmap-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+              <div style="text-align: center;">
+                <div class="loading-spinner"></div>
+                <div style="margin-top: 10px; color: #e0e0e0;" data-i18n="messages.loadingHeatmap">히트맵 데이터를 불러오는 중...</div>
+              </div>
             </div>
           </div>
         </div>

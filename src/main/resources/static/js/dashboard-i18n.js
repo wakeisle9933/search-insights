@@ -10,7 +10,7 @@ const translations = {
       last30min: "최근 30분",
       customDate: "날짜 지정",
       comparison: "기간 비교",
-      dailyChart: "일간 차트",
+      dailyChart: "차트 및 히트맵",
       reportSend: "리포트 발송"
     },
     
@@ -32,7 +32,7 @@ const translations = {
       customActiveUsers: "지정 기간 활성 사용자",
       customPageviews: "지정 기간 전체 조회수",
       comparisonAnalysis: "기간 비교 분석",
-      dailyChart: "일간 차트 분석",
+      dailyChart: "차트 및 히트맵 분석",
       reportSend: "Search Insights 리포트 발송"
     },
     
@@ -137,7 +137,7 @@ const translations = {
       periodInvalidDate: "기간 {period}의 시작일이 종료일보다 늦을 수 없어요!",
       comparisonDesc: "기간 A(이전)에서 기간 B(최근)로의 변화를 분석해요! 상승/하락 트렌드를 한눈에 확인하세요.",
       categoryDetailTitle: "{category} 카테고리 포스트별 상세 비교",
-      dailyChartDesc: "일별 방문자 추이를 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.",
+      dailyChartDesc: "일별 방문자 추이와 시간대별 활동 패턴을 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.",
       loadingChart: "차트 데이터를 불러오는 중...",
       loadingData: "데이터를 불러오는 중...",
       selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!",
@@ -149,7 +149,8 @@ const translations = {
       reportSent: "리포트가 성공적으로 발송되었습니다!",
       reportFailed: "리포트 발송에 실패했습니다.",
       searchConsoleDelay: "구글 Search Console 데이터는 최대 3일의 지연이 있습니다. (오늘 날짜 기준 3일 전까지의 데이터만 사용 가능)",
-      selectDateForHeatmap: "날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!"
+      selectDateForHeatmap: "날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!",
+      loadingHeatmap: "히트맵 데이터를 불러오는 중..."
     },
     
     // 히트맵
@@ -216,7 +217,7 @@ const translations = {
       last30min: "Last 30 min",
       customDate: "Custom Date",
       comparison: "Period Compare",
-      dailyChart: "Daily Chart",
+      dailyChart: "Charts & Heatmap",
       reportSend: "Send Report"
     },
     
@@ -238,7 +239,7 @@ const translations = {
       customActiveUsers: "Custom Period Active Users",
       customPageviews: "Custom Period Total Pageviews",
       comparisonAnalysis: "Period Comparison Analysis",
-      dailyChart: "Daily Chart Analysis",
+      dailyChart: "Charts & Heatmap Analysis",
       reportSend: "Search Insights Report"
     },
     
@@ -343,7 +344,7 @@ const translations = {
       periodInvalidDate: "Period {period} start date cannot be later than end date!",
       comparisonDesc: "Analyze changes from Period A (previous) to Period B (recent)! Check trends at a glance.",
       categoryDetailTitle: "{category} Category Post Detail Comparison",
-      dailyChartDesc: "Check daily visitor trends at a glance! Click on specific dates in the chart to view detailed data.",
+      dailyChartDesc: "Check daily visitor trends and hourly activity patterns at a glance! Click on specific dates in the chart to view detailed data.",
       loadingChart: "Loading chart data...",
       loadingData: "Loading data...",
       selectDateRange: "Please select dates and click the search button!",
@@ -355,7 +356,8 @@ const translations = {
       reportSent: "Report sent successfully!",
       reportFailed: "Failed to send report.",
       searchConsoleDelay: "Google Search Console data has up to 3 days delay. (Only data up to 3 days before today is available)",
-      selectDateForHeatmap: "Select dates to view hourly activity heatmap!"
+      selectDateForHeatmap: "Select dates to view hourly activity heatmap!",
+      loadingHeatmap: "Loading heatmap data..."
     },
     
     // Heatmap
@@ -422,7 +424,7 @@ const translations = {
       last30min: "最近30分钟",
       customDate: "日期指定",
       comparison: "期间比较",
-      dailyChart: "日间图表",
+      dailyChart: "图表及热图",
       reportSend: "发送报告"
     },
     
@@ -444,7 +446,7 @@ const translations = {
       customActiveUsers: "指定期间活跃用户",
       customPageviews: "指定期间总浏览量",
       comparisonAnalysis: "期间比较分析",
-      dailyChart: "日间图表分析",
+      dailyChart: "图表及热图分析",
       reportSend: "Search Insights 报告发送"
     },
     
@@ -549,7 +551,7 @@ const translations = {
       periodInvalidDate: "期间 {period} 的开始日期不能晚于结束日期!",
       comparisonDesc: "分析从期间 A (之前) 到期间 B (最近) 的变化! 一目了然地查看趋势。",
       categoryDetailTitle: "{category} 分类文章详细比较",
-      dailyChartDesc: "一目了然地查看每日访客趋势! 点击图表中的特定日期可查看详细数据。",
+      dailyChartDesc: "一目了然地查看每日访客趋势和按小时活动模式! 点击图表中的特定日期可查看详细数据。",
       loadingChart: "正在加载图表数据...",
       loadingData: "正在加载数据...",
       selectDateRange: "请选择日期并点击查询按钮!",
@@ -561,7 +563,8 @@ const translations = {
       reportSent: "报告发送成功！",
       reportFailed: "报告发送失败。",
       searchConsoleDelay: "谷歌Search Console数据最多有 3 天的延迟。（仅可使用今天之前 3 天的数据）",
-      selectDateForHeatmap: "选择日期即可查看按小时活动热图!"
+      selectDateForHeatmap: "选择日期即可查看按小时活动热图!",
+      loadingHeatmap: "正在加载热图数据..."
     },
     
     // 热图
@@ -666,6 +669,17 @@ function changeLanguage(lang) {
       if (document.getElementById('daily-chart-content') && document.getElementById('daily-chart-content').classList.contains('active')) {
         try {
           window.renderDailyChart();
+        } catch (error) {
+          // 에러 발생 시 조용히 무시
+        }
+      }
+    }
+    
+    // 히트맵이 그려져 있으면 다시 그리기 🔥
+    if (typeof window.renderHeatmap === 'function' && window.heatmapData) {
+      if (document.getElementById('heatmap-container')) {
+        try {
+          window.renderHeatmap(window.heatmapData);
         } catch (error) {
           // 에러 발생 시 조용히 무시
         }

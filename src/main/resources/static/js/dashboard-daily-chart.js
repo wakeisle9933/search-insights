@@ -73,6 +73,11 @@ async function fetchDailyChartData() {
   canvas.style.display = 'none';
   initialMessage.style.display = 'none';
   
+  // 히트맵도 동시에 시작!! 🔥 (로딩 표시가 보이도록)
+  if (typeof refreshHeatmap === 'function') {
+    setTimeout(() => refreshHeatmap(), 100); // 약간의 지연으로 로딩이 보이도록
+  }
+  
   // 초기화
   dailyChartData = {
     dates: [],
@@ -124,11 +129,6 @@ async function fetchDailyChartData() {
     
     // 차트 그리기
     renderDailyChart();
-    
-    // 히트맵도 함께 업데이트!! 🔥
-    if (typeof refreshHeatmap === 'function') {
-      refreshHeatmap();
-    }
     
     // 업데이트 시간 표시
     updateTime('daily-chart-update-time');
