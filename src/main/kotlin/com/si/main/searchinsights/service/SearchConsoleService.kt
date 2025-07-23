@@ -376,4 +376,80 @@ class SearchConsoleService (
         }
     }
 
+    @Cacheable(value = ["hourlyHeatmapData"], key = "#startDate + '_' + #endDate")
+    fun fetchHourlyHeatmapData(startDate: String, endDate: String): Map<String, Any> {
+        try {
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                
+                // 시간대와 요일 dimension 추가!!! 🔥
+                addDimensions(Dimension.newBuilder().setName("hour"))
+                addDimensions(Dimension.newBuilder().setName("dayOfWeek"))
+                
+                // 활성 사용자와 페이지뷰 메트릭
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                
+                // 정렬: 요일 -> 시간 순
+                addOrderBys(OrderBy.newBuilder().apply {
+                    dimension = OrderBy.DimensionOrderBy.newBuilder()
+                        .setDimensionName("dayOfWeek")
+                        .setOrderType(OrderBy.DimensionOrderBy.OrderType.NUMERIC)
+                        .build()
+                })
+                addOrderBys(OrderBy.newBuilder().apply {
+                    dimension = OrderBy.DimensionOrderBy.newBuilder()
+                        .setDimensionName("hour")
+                        .setOrderType(OrderBy.DimensionOrderBy.OrderType.NUMERIC)
+                        .build()
+                })
+            }.build()
+            
+            val response = analyticsDataClient.runReport(request)
+            
+            // 히트맵 데이터 구성 (7일 x 24시간 매트릭스)
+            val heatmapData = Array(7) { Array(24) { 0 } }
+            val pageViewData = Array(7) { Array(24) { 0 } }
+            
+            response.rowsList.forEach { row ->
+                try {
+                    // hour는 "00"~"23" 문자열로 옴
+                    val hour = row.getDimensionValues(0).value.toIntOrNull() ?: 0
+                    // dayOfWeek는 "0"(일요일)~"6"(토요일) 문자열로 옴
+                    val dayOfWeek = row.getDimensionValues(1).value.toIntOrNull() ?: 0
+                    
+                    val activeUsers = row.getMetricValues(0).value.toIntOrNull() ?: 0
+                    val pageViews = row.getMetricValues(1).value.toIntOrNull() ?: 0
+                    
+                    if (dayOfWeek in 0..6 && hour in 0..23) {
+                        // 각 시간대별로 값을 누적 (여러 날짜의 데이터가 합쳐짐)
+                        heatmapData[dayOfWeek][hour] += activeUsers
+                        pageViewData[dayOfWeek][hour] += pageViews
+                    }
+                } catch (e: Exception) {
+                    logger.warn("히트맵 데이터 파싱 중 오류: ${e.message}")
+                }
+            }
+            
+            return mapOf(
+                "heatmapData" to heatmapData,
+                "pageViewData" to pageViewData,
+                "startDate" to startDate,
+                "endDate" to endDate
+            )
+            
+        } catch (e: Exception) {
+            logger.error("Hourly heatmap data fetch error", e)
+            throw ExternalApiException(
+                errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                message = "시간대별 히트맵 데이터를 가져오는 중 오류가 발생했습니다",
+                cause = e
+            )
+        }
+    }
+
 }

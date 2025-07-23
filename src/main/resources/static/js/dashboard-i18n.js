@@ -148,7 +148,16 @@ const translations = {
       reportSending: "리포트를 생성하고 발송 중입니다...",
       reportSent: "리포트가 성공적으로 발송되었습니다!",
       reportFailed: "리포트 발송에 실패했습니다.",
-      searchConsoleDelay: "구글 Search Console 데이터는 최대 3일의 지연이 있습니다. (오늘 날짜 기준 3일 전까지의 데이터만 사용 가능)"
+      searchConsoleDelay: "구글 Search Console 데이터는 최대 3일의 지연이 있습니다. (오늘 날짜 기준 3일 전까지의 데이터만 사용 가능)",
+      selectDateForHeatmap: "날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!"
+    },
+    
+    // 히트맵
+    heatmap: {
+      title: "시간대별 활동",
+      less: "적음",
+      more: "많음",
+      users: "사용자"
     },
     
     // 기타
@@ -345,7 +354,16 @@ const translations = {
       reportSending: "Generating and sending report...",
       reportSent: "Report sent successfully!",
       reportFailed: "Failed to send report.",
-      searchConsoleDelay: "Google Search Console data has up to 3 days delay. (Only data up to 3 days before today is available)"
+      searchConsoleDelay: "Google Search Console data has up to 3 days delay. (Only data up to 3 days before today is available)",
+      selectDateForHeatmap: "Select dates to view hourly activity heatmap!"
+    },
+    
+    // Heatmap
+    heatmap: {
+      title: "Hourly Activity",
+      less: "Less",
+      more: "More",
+      users: "Users"
     },
     
     // Misc
@@ -542,7 +560,16 @@ const translations = {
       reportSending: "正在生成并发送报告...",
       reportSent: "报告发送成功！",
       reportFailed: "报告发送失败。",
-      searchConsoleDelay: "谷歌Search Console数据最多有 3 天的延迟。（仅可使用今天之前 3 天的数据）"
+      searchConsoleDelay: "谷歌Search Console数据最多有 3 天的延迟。（仅可使用今天之前 3 天的数据）",
+      selectDateForHeatmap: "选择日期即可查看按小时活动热图!"
+    },
+    
+    // 热图
+    heatmap: {
+      title: "按小时活动",
+      less: "少",
+      more: "多",
+      users: "用户"
     },
     
     // 其他

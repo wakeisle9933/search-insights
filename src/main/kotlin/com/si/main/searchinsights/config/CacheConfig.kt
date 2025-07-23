@@ -45,7 +45,10 @@ class CacheConfig : CachingConfigurer {
             ExpiringConcurrentMapCache("wordpressCategories", 300_000),
             
             // 🔥 Search Analytics 데이터: 24시간 캐싱 (일간 리포트용)
-            ExpiringConcurrentMapCache("searchAnalyticsData", 86_400_000)
+            ExpiringConcurrentMapCache("searchAnalyticsData", 86_400_000),
+            
+            // 🔥 히트맵 데이터: 5분 캐싱
+            ExpiringConcurrentMapCache("hourlyHeatmapData", 300_000)
         )
         
         cacheManager.setCaches(caches)

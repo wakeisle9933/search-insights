@@ -795,3 +795,187 @@ body.light-theme .loading-spinner {
 .light-theme .status-detail {
   color: #666;
 }
+
+/* 히트맵 스타일링 🔥 */
+.heatmap-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.heatmap-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #d4d4d8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.heatmap-title::before {
+  content: '🔥';
+  font-size: 1.2em;
+}
+
+.heatmap-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  grid-template-rows: 20px 1fr;
+  gap: 5px;
+  flex: 1;
+}
+
+.heatmap-hours {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.hour-label {
+  font-size: 0.7em;
+  color: #999;
+  flex: 1;
+  text-align: center;
+}
+
+.heatmap-days {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding-right: 5px;
+}
+
+.day-label {
+  font-size: 0.8em;
+  color: #999;
+  height: calc(100% / 7);
+  display: flex;
+  align-items: center;
+}
+
+.heatmap-cells {
+  grid-column: 2;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 2px;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.heatmap-cell {
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 20px;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  font-size: 0.85em;
+}
+
+.legend-gradient {
+  width: 150px;
+  height: 12px;
+  background: linear-gradient(to right, 
+    #f5f5f5,          /* 데이터 없음 */
+    #e8f5fd,          /* 아주 연한 파란색 */
+    #b3e5fc,          /* 연한 파란색 */
+    #42a5f5,          /* 중간 파란색 */
+    #0d47a1,          /* 진한 파란색 */
+    #001f3f           /* 아주 진한 남색 */
+  );
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.legend-label {
+  color: #999;
+}
+
+/* 히트맵 툴팁 */
+.heatmap-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heatmap-tooltip strong {
+  color: #2196f3;
+}
+
+/* Light theme 히트맵 조정 */
+.light-theme .heatmap-title {
+  color: #333;
+}
+
+.light-theme .heatmap-cells {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.light-theme .hour-label,
+.light-theme .day-label,
+.light-theme .legend-label {
+  color: #666;
+}
+
+.light-theme .heatmap-tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.light-theme .heatmap-tooltip strong {
+  color: #1976d2;
+}
+
+/* 반응형 처리 */
+@media (max-width: 1200px) {
+  #daily-chart-content .dashboard-box > div:first-of-type {
+    flex-direction: column;
+  }
+  
+  #chart-container {
+    margin-bottom: 20px;
+  }
+  
+  #heatmap-container {
+    flex: 1 !important;
+    min-height: 400px;
+  }
+  
+  .heatmap-cells {
+    gap: 1px;
+  }
+}

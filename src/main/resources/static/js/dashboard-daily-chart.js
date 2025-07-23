@@ -125,6 +125,11 @@ async function fetchDailyChartData() {
     // 차트 그리기
     renderDailyChart();
     
+    // 히트맵도 함께 업데이트!! 🔥
+    if (typeof refreshHeatmap === 'function') {
+      refreshHeatmap();
+    }
+    
     // 업데이트 시간 표시
     updateTime('daily-chart-update-time');
     

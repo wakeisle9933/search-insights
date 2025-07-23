@@ -55,4 +55,12 @@ class RealTimeAnalyticsController(
         wordPressCategoryService.fullSync(forceFullSync)
         return mapOf("status" to "동기화 완료!")
     }
+    
+    @GetMapping("/api/hourly-heatmap")
+    fun getHourlyHeatmap(
+        @RequestParam startDate: String,
+        @RequestParam endDate: String
+    ): Map<String, Any> {
+        return searchConsoleService.fetchHourlyHeatmapData(startDate, endDate)
+    }
 }

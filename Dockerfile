@@ -10,16 +10,16 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
-# Python, pytrends 설치
-RUN apt-get update && apt-get install -y python3 python3-pip
-
 WORKDIR /app
 
 # Get Gradle / Source
 COPY . .
 
-# Python 파일 복사
-COPY src/main/resources/python /app/src/main/resources/python
+# dos2unix 설치 및 gradlew 줄바꿈 문자 변환
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix ./gradlew && \
+    chmod +x ./gradlew && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN ./gradlew build -x test
 
