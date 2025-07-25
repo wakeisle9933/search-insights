@@ -48,7 +48,10 @@ class CacheConfig : CachingConfigurer {
             ExpiringConcurrentMapCache("searchAnalyticsData", 86_400_000),
             
             // 🔥 히트맵 데이터: 5분 캐싱
-            ExpiringConcurrentMapCache("hourlyHeatmapData", 300_000)
+            ExpiringConcurrentMapCache("hourlyHeatmapData", 300_000),
+            
+            // 🕐 시간대별 상세 페이지뷰: 5분 캐싱
+            ExpiringConcurrentMapCache("hourlyDetailPageViews", 300_000)
         )
         
         cacheManager.setCaches(caches)

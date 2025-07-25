@@ -365,6 +365,12 @@ let currentDailyDetailDate = null;
 
 // 날짜별 상세 데이터 표시 함수
 async function showDailyChartDetail(fullDate, displayDate, activeUsers, pageViews) {
+  // 다른 상세 페이지 닫기
+  const hourlyDetail = document.getElementById('hourly-detail');
+  if (hourlyDetail && hourlyDetail.style.display !== 'none') {
+    hourlyDetail.style.display = 'none';
+  }
+  
   const detailBox = document.getElementById('daily-chart-detail');
   const detailTitle = document.getElementById('daily-chart-detail-title');
   const detailActiveUsers = document.getElementById('daily-detail-active-users');
@@ -425,13 +431,13 @@ async function showDailyChartDetail(fullDate, displayDate, activeUsers, pageView
     
     // 카테고리 드롭다운 초기화 - wpCategoryData가 있을 때만
     if (window.wpCategoryData && Object.keys(window.wpCategoryData.categories || {}).length > 0) {
-      initializeCategoryDropdown('daily-detail');
+      initializeCategoryDropdown('daily-detail', data.pageViews);
       checkCategoryDataAvailability('daily-detail');
     } else {
       // 카테고리 데이터가 없으면 나중에 로드되면 초기화하도록 설정
       const checkInterval = setInterval(() => {
         if (window.wpCategoryData && Object.keys(window.wpCategoryData.categories || {}).length > 0) {
-          initializeCategoryDropdown('daily-detail');
+          initializeCategoryDropdown('daily-detail', data.pageViews);
           checkCategoryDataAvailability('daily-detail');
           clearInterval(checkInterval);
         }
@@ -532,7 +538,7 @@ function filterDailyDetailByCategory(categoryId) {
 }
 
 // 카테고리 드롭다운 초기화
-function initializeCategoryDropdown(mainTab) {
+function initializeCategoryDropdown(mainTab, pageViews) {
   const dropdown = document.getElementById(`${mainTab}-full-category-select`);
   if (!dropdown || !window.wpCategoryData) return;
   
@@ -541,12 +547,29 @@ function initializeCategoryDropdown(mainTab) {
     dropdown.remove(1);
   }
   
-  // 카테고리 옵션 추가
+  // 현재 데이터에서 사용된 카테고리 ID들을 수집
+  const usedCategories = new Set();
+  
+  if (pageViews && pageViews.length > 0) {
+    pageViews.forEach(page => {
+      const postId = extractPostId(page.pagePath);
+      if (postId && window.wpCategoryData.posts[postId]) {
+        window.wpCategoryData.posts[postId].forEach(catId => {
+          usedCategories.add(catId.toString());
+        });
+      }
+    });
+  }
+  
+  // 사용된 카테고리만 옵션에 추가
   Object.entries(window.wpCategoryData.categories).forEach(([id, name]) => {
-    const option = document.createElement('option');
-    option.value = id;
-    option.textContent = name.replace(/&amp;/g, '&');
-    dropdown.appendChild(option);
+    // 카테고리가 실제로 사용되고 있는 경우에만 추가
+    if (usedCategories.has(id)) {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = name.replace(/&amp;/g, '&');
+      dropdown.appendChild(option);
+    }
   });
 }
 

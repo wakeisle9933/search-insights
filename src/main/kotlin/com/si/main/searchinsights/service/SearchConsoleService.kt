@@ -451,5 +451,103 @@ class SearchConsoleService (
             )
         }
     }
+    
+    @Cacheable(value = ["hourlyDetailPageViews"], key = "#date + '_' + #hour")
+    fun fetchHourlyDetailPageViews(date: String, hour: Int): Map<String, Any> {
+        try {
+            // 활성 사용자 수 가져오기
+            val activeUsersRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = date
+                    this.endDate = date
+                })
+                
+                // 시간대 필터 추가
+                addDimensions(Dimension.newBuilder().setName("hour"))
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+                
+                // 특정 시간대만 필터링
+                dimensionFilter = FilterExpression.newBuilder().apply {
+                    filter = Filter.newBuilder().apply {
+                        fieldName = "hour"
+                        stringFilter = Filter.StringFilter.newBuilder().apply {
+                            matchType = Filter.StringFilter.MatchType.EXACT
+                            value = hour.toString().padStart(2, '0') // 00~23 형식
+                        }.build()
+                    }.build()
+                }.build()
+            }.build()
+            
+            val activeUsersResponse = analyticsDataClient.runReport(activeUsersRequest)
+            val activeUsers = if (activeUsersResponse.rowsCount > 0) {
+                activeUsersResponse.getRows(0).getMetricValues(0).value.toIntOrNull() ?: 0
+            } else {
+                0
+            }
+            
+            // 페이지별 조회수 가져오기
+            val pageViewsRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = date
+                    this.endDate = date
+                })
+                
+                // Dimensions
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                addDimensions(Dimension.newBuilder().setName("hour"))
+                
+                // Metrics
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                
+                // 특정 시간대만 필터링
+                dimensionFilter = FilterExpression.newBuilder().apply {
+                    filter = Filter.newBuilder().apply {
+                        fieldName = "hour"
+                        stringFilter = Filter.StringFilter.newBuilder().apply {
+                            matchType = Filter.StringFilter.MatchType.EXACT
+                            value = hour.toString().padStart(2, '0')
+                        }.build()
+                    }.build()
+                }.build()
+                
+                // 조회수 기준 내림차순 정렬
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder()
+                        .setMetricName("screenPageViews")
+                        .build()
+                    desc = true
+                })
+                
+                limit = 500 // 상위 500개만
+            }.build()
+            
+            val pageViews = analyticsDataClient.runReport(pageViewsRequest).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value,
+                    pagePath = row.getDimensionValues(1).value,
+                    pageViews = row.getMetricValues(0).value.toDouble()
+                )
+            }
+            
+            return mapOf(
+                "activeUsers" to activeUsers,
+                "pageViews" to pageViews,
+                "hour" to hour,
+                "date" to date
+            )
+            
+        } catch (e: Exception) {
+            logger.error("Hourly detail pageviews fetch error", e)
+            return mapOf(
+                "activeUsers" to 0,
+                "pageViews" to emptyList<PageViewInfo>(),
+                "hour" to hour,
+                "date" to date
+            )
+        }
+    }
 
 }

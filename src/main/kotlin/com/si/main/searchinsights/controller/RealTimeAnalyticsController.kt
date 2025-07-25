@@ -63,4 +63,20 @@ class RealTimeAnalyticsController(
     ): Map<String, Any> {
         return searchConsoleService.fetchHourlyHeatmapData(startDate, endDate)
     }
+    
+    @GetMapping("/api/hourly-detail-pageviews")
+    fun getHourlyDetailPageViews(
+        @RequestParam date: String,
+        @RequestParam hour: Int,
+        @RequestParam(required = false) dayOfWeek: Int? = null
+    ): Map<String, Any> {
+        val data = searchConsoleService.fetchHourlyDetailPageViews(date, hour)
+        val pageViews = data["pageViews"] as? List<com.si.main.searchinsights.data.PageViewInfo> ?: emptyList()
+        
+        // 카테고리별 페이지뷰 가져오기
+        val categoryViews = wordPressCategoryService.getCategoryPageViews(pageViews)
+        
+        // 결과에 categoryViews 추가
+        return data + mapOf("categoryViews" to categoryViews)
+    }
 }

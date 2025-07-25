@@ -343,6 +343,12 @@ function filterByCategoryInFullTab(mainTab, categoryId) {
     return;
   }
   
+  // hourly-detail의 경우 별도 처리
+  if (mainTab === 'hourly-detail') {
+    window.filterHourlyDetailByCategory(categoryId);
+    return;
+  }
+  
   // 필터링 안 함 (전체 카테고리 선택)
   if (!categoryId) {
     // 원본 데이터로 복원
