@@ -55,6 +55,27 @@ function showMainTab(tabName) {
   } else if (tabName === 'daily-chart') {
     document.querySelector('.main-tab:nth-child(5)').classList.add('active');
     document.getElementById('daily-chart-content').classList.add('active');
+    
+    // "전일 기준" 체크박스가 체크되어 있으면 날짜를 어제로 설정
+    const excludeTodayCheckbox = document.getElementById('chart-exclude-today');
+    if (excludeTodayCheckbox && excludeTodayCheckbox.checked) {
+      const now = new Date();
+      const endDate = new Date(now);
+      endDate.setDate(endDate.getDate() - 1); // 어제를 종료일로
+      
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 6); // 어제로부터 7일 전
+      
+      const formatDate = (date) => {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+      };
+      
+      document.getElementById('chart-start-date').value = formatDate(startDate);
+      document.getElementById('chart-end-date').value = formatDate(endDate);
+    }
+    
     // 일간 차트는 수동 조회로 변경 - 자동 조회하지 않음
     if (typeof initDailyChartTab === 'function') {
       initDailyChartTab(); // 날짜 필드 초기화만

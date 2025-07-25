@@ -41,8 +41,8 @@ async function fetchHeatmapData() {
 
 // 히트맵 렌더링
 function renderHeatmap(data) {
-    const container = document.getElementById('heatmap-container');
-    if (!container) return;
+    const contentContainer = document.getElementById('heatmap-content');
+    if (!contentContainer) return;
     
     // 초기 메시지 숨기기
     const initialMessage = document.getElementById('heatmap-initial-message');
@@ -81,7 +81,7 @@ function renderHeatmap(data) {
         </div>
     `;
     
-    container.innerHTML = html;
+    contentContainer.innerHTML = html;
     
     // 툴팁 이벤트 추가
     addHeatmapTooltips();
@@ -238,9 +238,9 @@ function refreshHeatmap() {
 
 // 에러 표시
 function showError(message) {
-    const container = document.getElementById('heatmap-container');
-    if (container) {
-        container.innerHTML = `<div class="error-message">${message}</div>`;
+    const contentContainer = document.getElementById('heatmap-content');
+    if (contentContainer) {
+        contentContainer.innerHTML = `<div class="error-message">${message}</div>`;
     }
 }
 
@@ -523,3 +523,304 @@ window.showHourlyDetail = showHourlyDetail;
 window.closeHourlyDetail = closeHourlyDetail;
 window.updateCategoryTableForHourly = updateCategoryTableForHourly;
 window.filterHourlyDetailByCategory = filterHourlyDetailByCategory;
+
+// 성별/연령별 히트맵 관련 함수들 💕🔥
+let demographicsHeatmapData = null;
+let maleChart = null;
+let femaleChart = null;
+
+// 성별/연령별 히트맵 데이터 가져오기
+async function fetchDemographicsHeatmapData() {
+    const startDate = document.getElementById('chart-start-date').value;
+    const endDate = document.getElementById('chart-end-date').value;
+    
+    if (!startDate || !endDate) {
+        console.log('날짜를 선택해주세요!');
+        return;
+    }
+    
+    // 로딩 시작!! 🔄
+    const container = document.getElementById('demographics-heatmap-container');
+    const initialMessage = document.getElementById('demographics-initial-message');
+    const loadingIndicator = document.getElementById('demographics-loading');
+    
+    if (initialMessage) initialMessage.style.display = 'none';
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    
+    try {
+        const response = await fetch(`/api/demographics-heatmap?startDate=${startDate}&endDate=${endDate}`);
+        if (!response.ok) throw new Error('성별/연령별 데이터 가져오기 실패');
+        
+        const data = await response.json();
+        demographicsHeatmapData = data;
+        window.demographicsHeatmapData = data; // window에도 저장
+        renderDemographicsHeatmap(data);
+    } catch (error) {
+        console.error('성별/연령별 데이터 오류:', error);
+        showDemographicsError('성별/연령별 데이터를 불러올 수 없습니다 😢<br>Google Signals가 활성화되어 있는지 확인해주세요!');
+    } finally {
+        // 로딩 종료!! ✨
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+    }
+}
+
+// 성별/연령별 히트맵 렌더링
+function renderDemographicsHeatmap(data) {
+    const contentContainer = document.getElementById('demographics-content');
+    if (!contentContainer) return;
+    
+    // 초기 메시지 숨기기
+    const initialMessage = document.getElementById('demographics-initial-message');
+    if (initialMessage) initialMessage.style.display = 'none';
+    
+    // 에러 체크
+    if (data.error) {
+        showDemographicsError(data.error);
+        return;
+    }
+    
+    const currentLang = localStorage.getItem('language') || 'ko';
+    console.log('renderDemographicsHeatmap called with language:', currentLang);
+    
+    // 차트 HTML 생성
+    let html = `
+        <div class="demographics-chart-wrapper">
+            <h3 class="heatmap-title">${window.t ? window.t('demographics.title') : '성별/연령별 활동'} 👨‍👩‍👧‍👦</h3>
+            
+            <div class="demographics-charts-container">
+                <div class="demographics-chart-box">
+                    <h4 class="chart-subtitle">👨 ${window.t ? window.t('demographics.male') : '남성'}</h4>
+                    <canvas id="male-chart"></canvas>
+                </div>
+                <div class="demographics-chart-box">
+                    <h4 class="chart-subtitle">👩 ${window.t ? window.t('demographics.female') : '여성'}</h4>
+                    <canvas id="female-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    contentContainer.innerHTML = html;
+    
+    // 차트 생성
+    createDemographicsCharts(data);
+}
+
+// 성별/연령별 차트 생성
+function createDemographicsCharts(data) {
+    // 기존 차트 제거
+    if (maleChart) {
+        maleChart.destroy();
+        maleChart = null;
+    }
+    if (femaleChart) {
+        femaleChart.destroy();
+        femaleChart = null;
+    }
+    
+    if (!data.heatmapData || !data.pageViewData || data.heatmapData.length < 2) {
+        console.error('차트 데이터가 없습니다');
+        return;
+    }
+    
+    // Canvas 요소가 존재하는지 확인
+    const maleCanvas = document.getElementById('male-chart');
+    const femaleCanvas = document.getElementById('female-chart');
+    
+    if (!maleCanvas || !femaleCanvas) {
+        console.error('차트 캔버스를 찾을 수 없습니다');
+        return;
+    }
+    
+    // 여성 데이터 (index 0)
+    const femaleActiveUsers = data.heatmapData[0];
+    const femalePageViews = data.pageViewData[0];
+    
+    // 남성 데이터 (index 1)
+    const maleActiveUsers = data.heatmapData[1];
+    const malePageViews = data.pageViewData[1];
+    
+    // 차트 옵션
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        layout: {
+            padding: {
+                top: 0,
+                bottom: 0,
+                left: 5,
+                right: 5
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    font: {
+                        size: 10
+                    },
+                    padding: 5,
+                    boxWidth: 12
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const value = context.parsed.y;
+                        return `${context.dataset.label}: ${new Intl.NumberFormat('ko-KR').format(Math.round(value))}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    callback: function(value) {
+                        return new Intl.NumberFormat('ko-KR').format(Math.round(value));
+                    }
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 10
+                    }
+                }
+            }
+        }
+    };
+    
+    // 여성 차트 생성 (막대 + 라인 복합 차트)
+    const femaleCtx = document.getElementById('female-chart').getContext('2d');
+    
+    // 라벨 값 확인
+    const pageViewsLabel = window.t ? window.t('demographics.pageViews') : '페이지뷰';
+    const activeUsersLabel = window.t ? window.t('demographics.activeUsers') : '활성 사용자';
+
+    femaleChart = new Chart(femaleCtx, {
+        data: {
+            labels: data.ageLabels,
+            datasets: [{
+                type: 'bar',
+                label: pageViewsLabel,
+                data: femalePageViews,
+                backgroundColor: 'rgba(249, 168, 212, 0.8)',
+                borderColor: 'rgba(249, 168, 212, 1)',
+                borderWidth: 1,
+                yAxisID: 'y',
+                order: 2
+            }, {
+                type: 'line',
+                label: activeUsersLabel,
+                data: femaleActiveUsers,
+                borderColor: 'rgba(236, 72, 153, 1)',
+                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                yAxisID: 'y',
+                order: 1
+            }]
+        },
+        options: chartOptions
+    });
+    
+    // 남성 차트 생성 (막대 + 라인 복합 차트)
+    const maleCtx = document.getElementById('male-chart').getContext('2d');
+    maleChart = new Chart(maleCtx, {
+        data: {
+            labels: data.ageLabels,
+            datasets: [{
+                type: 'bar',
+                label: pageViewsLabel,
+                data: malePageViews,
+                backgroundColor: 'rgba(96, 165, 250, 0.8)',
+                borderColor: 'rgba(96, 165, 250, 1)',
+                borderWidth: 1,
+                yAxisID: 'y',
+                order: 2
+            }, {
+                type: 'line',
+                label: activeUsersLabel,
+                data: maleActiveUsers,
+                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                yAxisID: 'y',
+                order: 1
+            }]
+        },
+        options: chartOptions
+    });
+    
+    // window 객체에 차트 저장
+    window.maleChart = maleChart;
+    window.femaleChart = femaleChart;
+}
+
+// 성별/연령별 뷰 토글 (활성 사용자/페이지뷰)
+function toggleDemographicsView(viewType) {
+    // 버튼 활성화 상태 변경
+    const buttons = document.querySelectorAll('.demographics-toggle-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // 차트 다시 그리기
+    if (demographicsHeatmapData) {
+        createDemographicsCharts(demographicsHeatmapData);
+    }
+}
+
+// 성별/연령별 에러 표시
+function showDemographicsError(message) {
+    const contentContainer = document.getElementById('demographics-content');
+    if (contentContainer) {
+        contentContainer.innerHTML = `
+            <div class="demographics-error-box">
+                <div class="error-icon">⚠️</div>
+                <div class="error-message">${message}</div>
+            </div>
+        `;
+    }
+}
+
+// 성별/연령별 히트맵 새로고침
+function refreshDemographicsHeatmap() {
+    if (document.getElementById('demographics-heatmap-container')) {
+        fetchDemographicsHeatmapData();
+    }
+}
+
+// window 객체에 함수 추가
+window.fetchDemographicsHeatmapData = fetchDemographicsHeatmapData;
+window.renderDemographicsHeatmap = renderDemographicsHeatmap;
+window.toggleDemographicsView = toggleDemographicsView;
+window.refreshDemographicsHeatmap = refreshDemographicsHeatmap;
+window.createDemographicsCharts = createDemographicsCharts;
+
+// 테마 변경 시 차트 다시 그리기
+function handleDemographicsThemeChange() {
+    // 성별/연령별 차트가 존재하고 데이터가 있을 때만 다시 그리기
+    if (window.demographicsHeatmapData && document.getElementById('demographics-heatmap-container')) {
+        // 차트만 다시 생성 (HTML은 유지)
+        createDemographicsCharts(window.demographicsHeatmapData);
+    }
+}
+
+// 기존 toggleTheme 함수에 추가
+if (window.toggleTheme) {
+    const originalToggleTheme = window.toggleTheme;
+    window.toggleTheme = function() {
+        originalToggleTheme();
+        handleDemographicsThemeChange();
+    };
+}

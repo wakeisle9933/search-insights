@@ -51,7 +51,10 @@ class CacheConfig : CachingConfigurer {
             ExpiringConcurrentMapCache("hourlyHeatmapData", 300_000),
             
             // 🕐 시간대별 상세 페이지뷰: 5분 캐싱
-            ExpiringConcurrentMapCache("hourlyDetailPageViews", 300_000)
+            ExpiringConcurrentMapCache("hourlyDetailPageViews", 300_000),
+            
+            // 👨‍👩‍👧‍👦 성별/연령별 데이터: 5분 캐싱
+            ExpiringConcurrentMapCache("demographicsData", 300_000)
         )
         
         cacheManager.setCaches(caches)

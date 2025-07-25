@@ -802,6 +802,7 @@ body.light-theme .loading-spinner {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 360px;
 }
 
 .heatmap-title {
@@ -826,6 +827,7 @@ body.light-theme .loading-spinner {
   grid-template-rows: 20px 1fr;
   gap: 5px;
   flex: 1;
+  min-height: 300px;
 }
 
 .heatmap-hours {
@@ -972,10 +974,293 @@ body.light-theme .loading-spinner {
   
   #heatmap-container {
     flex: 1 !important;
-    min-height: 400px;
+    min-height: 300px;
+  }
+  
+  #demographics-heatmap-container {
+    min-height: 200px !important;
   }
   
   .heatmap-cells {
     gap: 1px;
+  }
+}
+
+/* 성별/연령별 히트맵 스타일링 💕🔥 */
+.demographics-heatmap-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.demographics-toggle-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.demographics-toggle-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #a1a1aa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.85em;
+}
+
+.demographics-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.demographics-toggle-btn.active {
+  background: rgba(147, 51, 234, 0.2);
+  border-color: #9333ea;
+  color: #e9d5ff;
+}
+
+.demographics-heatmap-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  grid-template-rows: 25px 1fr;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.demographics-ages {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.age-label {
+  font-size: 0.8em;
+  color: #71717a;
+  font-weight: 500;
+}
+
+.demographics-genders {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding-right: 8px;
+}
+
+.gender-label {
+  font-size: 0.85em;
+  color: #a1a1aa;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.demographics-cells {
+  grid-column: 2;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.demographics-cell {
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.demographics-cell:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(147, 51, 234, 0.3);
+  z-index: 10;
+}
+
+.demographics-gradient {
+  background: linear-gradient(to right, 
+    #fce7f3 0%, 
+    #f9a8d4 25%, 
+    #c084fc 50%, 
+    #9333ea 75%, 
+    #5b21b6 100%);
+}
+
+.demographics-error-box {
+  text-align: center;
+  padding: 60px 20px;
+  color: #ef4444;
+}
+
+.demographics-error-box .error-icon {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+.demographics-error-box .error-message {
+  font-size: 1.1em;
+  line-height: 1.6;
+}
+
+/* Light theme 성별/연령별 히트맵 조정 */
+.light-theme .demographics-toggle-btn {
+  border-color: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.05);
+  color: #666;
+}
+
+.light-theme .demographics-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.light-theme .demographics-toggle-btn.active {
+  background: rgba(147, 51, 234, 0.15);
+  border-color: #9333ea;
+  color: #7c3aed;
+}
+
+.light-theme .demographics-cells {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.light-theme .age-label,
+.light-theme .gender-label {
+  color: #666;
+}
+
+.light-theme .demographics-cell {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.light-theme .demographics-cell:hover {
+  box-shadow: 0 6px 16px rgba(147, 51, 234, 0.2);
+}
+
+/* 반응형 성별/연령별 히트맵 */
+@media (max-width: 768px) {
+  .demographics-toggle-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .demographics-toggle-btn {
+    width: 100%;
+  }
+  
+  .demographics-cells {
+    gap: 4px;
+    padding: 5px;
+  }
+  
+  .demographics-cell {
+    min-height: 40px;
+  }
+  
+  .age-label {
+    font-size: 0.75em;
+    writing-mode: vertical-lr;
+  }
+  
+  .gender-label {
+    font-size: 0.85em;
+  }
+}
+
+/* 성별/연령별 차트 스타일 */
+.demographics-chart-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.demographics-chart-wrapper .heatmap-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.demographics-charts-container {
+  display: flex;
+  gap: 15px;
+  flex: 1;
+  align-items: stretch;
+  min-height: 0;
+  width: 100%;
+  height: calc(100% - 50px);
+}
+
+.demographics-chart-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 350px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chart-subtitle {
+  font-size: 0.95em;
+  font-weight: 500;
+  color: #a1a1aa;
+  margin-bottom: 8px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.demographics-chart-box canvas {
+  flex: 1;
+  max-height: 320px;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Light theme 차트 스타일 */
+.light-theme .demographics-chart-box {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.light-theme .chart-subtitle {
+  color: #666;
+}
+
+/* 반응형 차트 스타일 */
+@media (max-width: 768px) {
+  .demographics-charts-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .demographics-chart-box {
+    min-height: 200px;
+  }
+  
+  .demographics-chart-box canvas {
+    max-height: 160px;
   }
 }

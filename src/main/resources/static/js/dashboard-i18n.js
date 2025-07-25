@@ -33,7 +33,8 @@ const translations = {
       customPageviews: "지정 기간 전체 조회수",
       comparisonAnalysis: "기간 비교 분석",
       dailyChart: "차트 및 히트맵 분석",
-      reportSend: "Search Insights 리포트 발송"
+      reportSend: "Search Insights 리포트 발송",
+      demographicsHeatmap: "성별/연령별 분석"
     },
     
     // 섹션 제목
@@ -150,7 +151,10 @@ const translations = {
       reportFailed: "리포트 발송에 실패했습니다.",
       searchConsoleDelay: "구글 Search Console 데이터는 최대 3일의 지연이 있습니다. (오늘 날짜 기준 3일 전까지의 데이터만 사용 가능)",
       selectDateForHeatmap: "날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!",
-      loadingHeatmap: "히트맵 데이터를 불러오는 중..."
+      loadingHeatmap: "히트맵 데이터를 불러오는 중...",
+      demographicsDesc: "사용자의 성별과 연령대를 분석해서 타겟 마케팅에 활용하세요!",
+      selectDateForDemographics: "날짜를 선택하면 성별/연령별 분석이 표시됩니다!",
+      loadingDemographics: "성별/연령별 데이터를 불러오는 중..."
     },
     
     // 히트맵
@@ -159,6 +163,15 @@ const translations = {
       less: "적음",
       more: "많음",
       users: "사용자"
+    },
+    
+    // 성별/연령별 분석
+    demographics: {
+      title: "성별/연령별 활동",
+      activeUsers: "활성 사용자",
+      pageViews: "페이지뷰",
+      male: "남성",
+      female: "여성"
     },
     
     // 기타
@@ -240,7 +253,8 @@ const translations = {
       customPageviews: "Custom Period Total Pageviews",
       comparisonAnalysis: "Period Comparison Analysis",
       dailyChart: "Charts & Heatmap Analysis",
-      reportSend: "Search Insights Report"
+      reportSend: "Search Insights Report",
+      demographicsHeatmap: "Gender/Age Analysis"
     },
     
     // Section titles
@@ -357,7 +371,10 @@ const translations = {
       reportFailed: "Failed to send report.",
       searchConsoleDelay: "Google Search Console data has up to 3 days delay. (Only data up to 3 days before today is available)",
       selectDateForHeatmap: "Select dates to view hourly activity heatmap!",
-      loadingHeatmap: "Loading heatmap data..."
+      loadingHeatmap: "Loading heatmap data...",
+      demographicsDesc: "Analyze user demographics by gender and age for targeted marketing!",
+      selectDateForDemographics: "Select dates to view gender/age demographics analysis!",
+      loadingDemographics: "Loading gender/age demographics data..."
     },
     
     // Heatmap
@@ -366,6 +383,15 @@ const translations = {
       less: "Less",
       more: "More",
       users: "Users"
+    },
+    
+    // Demographics
+    demographics: {
+      title: "Gender/Age Activity",
+      activeUsers: "Active Users",
+      pageViews: "Page Views",
+      male: "Male",
+      female: "Female"
     },
     
     // Misc
@@ -447,7 +473,8 @@ const translations = {
       customPageviews: "指定期间总浏览量",
       comparisonAnalysis: "期间比较分析",
       dailyChart: "图表及热图分析",
-      reportSend: "Search Insights 报告发送"
+      reportSend: "Search Insights 报告发送",
+      demographicsHeatmap: "性别/年龄分析"
     },
     
     // 部分标题
@@ -564,7 +591,10 @@ const translations = {
       reportFailed: "报告发送失败。",
       searchConsoleDelay: "谷歌Search Console数据最多有 3 天的延迟。（仅可使用今天之前 3 天的数据）",
       selectDateForHeatmap: "选择日期即可查看按小时活动热图!",
-      loadingHeatmap: "正在加载热图数据..."
+      loadingHeatmap: "正在加载热图数据...",
+      demographicsDesc: "按性别和年龄分析用户人口统计数据，用于精准营销！",
+      selectDateForDemographics: "选择日期以查看性别/年龄人口统计分析！",
+      loadingDemographics: "正在加载性别/年龄人口统计数据..."
     },
     
     // 热图
@@ -573,6 +603,15 @@ const translations = {
       less: "少",
       more: "多",
       users: "用户"
+    },
+    
+    // 人口统计
+    demographics: {
+      title: "性别/年龄活动",
+      activeUsers: "活跃用户",
+      pageViews: "页面浏览量",
+      male: "男性",
+      female: "女性"
     },
     
     // 其他
@@ -680,6 +719,17 @@ function changeLanguage(lang) {
       if (document.getElementById('heatmap-container')) {
         try {
           window.renderHeatmap(window.heatmapData);
+        } catch (error) {
+          // 에러 발생 시 조용히 무시
+        }
+      }
+    }
+    
+    // 성별/연령별 차트가 그려져 있으면 다시 그리기 💕
+    if (typeof window.renderDemographicsHeatmap === 'function' && window.demographicsHeatmapData) {
+      if (document.getElementById('demographics-heatmap-container')) {
+        try {
+          window.renderDemographicsHeatmap(window.demographicsHeatmapData);
         } catch (error) {
           // 에러 발생 시 조용히 무시
         }

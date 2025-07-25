@@ -619,7 +619,7 @@
           <button class="quick-date-btn" onclick="setChartDateRange(30, false)" data-i18n="quickDates.month1">한달</button>
         </div>
         <div style="display: inline-flex; align-items: center; margin-left: 20px;">
-          <input type="checkbox" id="chart-exclude-today" style="margin-right: 5px;">
+          <input type="checkbox" id="chart-exclude-today" style="margin-right: 5px;" checked>
           <label for="chart-exclude-today" style="font-size: 0.85em; color: #666; cursor: pointer;" data-i18n="labels.excludeToday">
             📅 전일 기준 (오늘 제외)
           </label>
@@ -652,21 +652,52 @@
         </div>
         
         <!-- 히트맵 컨테이너 (오른쪽) -->
-        <div id="heatmap-container" style="position: relative; flex: 0 0 45%; height: 400px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; overflow: auto;">
-          <!-- 히트맵이 여기에 동적으로 렌더링됩니다 -->
-          <div id="heatmap-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
-            <div style="text-align: center;">
-              <div style="font-size: 3em; margin-bottom: 10px;">🔥</div>
-              <div data-i18n="messages.selectDateForHeatmap">날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!</div>
+        <div style="position: relative; flex: 0 0 45%;">
+          <!-- 시간대별 히트맵 -->
+          <div id="heatmap-container" style="position: relative; height: 400px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; overflow: auto;">
+            <!-- 히트맵이 여기에 동적으로 렌더링됩니다 -->
+            <div id="heatmap-content" style="height: 360px;">
+              <div id="heatmap-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                <div style="text-align: center;">
+                  <div style="font-size: 3em; margin-bottom: 10px;">🔥</div>
+                  <div data-i18n="messages.selectDateForHeatmap">날짜를 선택하면 시간대별 활동 히트맵이 표시됩니다!</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 로딩 인디케이터 -->
+            <div id="heatmap-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px; z-index: 100;">
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                <div style="text-align: center;">
+                  <div class="loading-spinner"></div>
+                  <div style="margin-top: 10px; color: #e0e0e0;" data-i18n="messages.loadingHeatmap">히트맵 데이터를 불러오는 중...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 성별/연령별 차트 컨테이너 (아래쪽) -->
+      <div style="margin-top: 5px;">
+        <div id="demographics-heatmap-container" style="position: relative; height: 420px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 15px;">
+          <!-- 컨텐츠 영역 -->
+          <div id="demographics-content">
+            <!-- 초기 메시지 -->
+            <div id="demographics-initial-message" style="display: flex; align-items: center; justify-content: center; height: 390px; color: #666;">
+              <div style="text-align: center;">
+                <div style="font-size: 2.5em; margin-bottom: 10px;">👨‍👩‍👧‍👦</div>
+                <div style="font-size: 0.9em;" data-i18n="messages.selectDateForDemographics">날짜를 선택하면 성별/연령별 분석이 표시됩니다!</div>
+              </div>
             </div>
           </div>
           
           <!-- 로딩 인디케이터 -->
-          <div id="heatmap-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px;">
+          <div id="demographics-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px; z-index: 100;">
             <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
               <div style="text-align: center;">
                 <div class="loading-spinner"></div>
-                <div style="margin-top: 10px; color: #e0e0e0;" data-i18n="messages.loadingHeatmap">히트맵 데이터를 불러오는 중...</div>
+                <div style="margin-top: 10px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingDemographics">성별/연령별 데이터를 불러오는 중...</div>
               </div>
             </div>
           </div>
@@ -674,7 +705,7 @@
       </div>
       
       <!-- 업데이트 시간 -->
-      <div class="update-time" id="daily-chart-update-time"><span data-i18n="labels.lastUpdate">마지막 업데이트</span>: -</div>
+      <div class="update-time" id="daily-chart-update-time" style="margin-top: 10px;"><span data-i18n="labels.lastUpdate">마지막 업데이트</span>: -</div>
     </div>
     
     <!-- 날짜별 상세 데이터 (날짜 클릭시 표시) -->

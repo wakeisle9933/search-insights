@@ -79,4 +79,12 @@ class RealTimeAnalyticsController(
         // 결과에 categoryViews 추가
         return data + mapOf("categoryViews" to categoryViews)
     }
+    
+    @GetMapping("/api/demographics-heatmap")
+    fun getDemographicsHeatmap(
+        @RequestParam startDate: String,
+        @RequestParam endDate: String
+    ): Map<String, Any> {
+        return searchConsoleService.fetchDemographicsHeatmapData(startDate, endDate)
+    }
 }

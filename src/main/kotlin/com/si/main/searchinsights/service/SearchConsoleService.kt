@@ -549,5 +549,103 @@ class SearchConsoleService (
             )
         }
     }
+    
+    @Cacheable(value = ["demographicsData"], key = "#startDate + '_' + #endDate")
+    fun fetchDemographicsHeatmapData(startDate: String, endDate: String): Map<String, Any> {
+        try {
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                
+                // 성별과 연령 dimension 추가!!! 🔥💕
+                addDimensions(Dimension.newBuilder().setName("userGender"))
+                addDimensions(Dimension.newBuilder().setName("userAgeBracket"))
+                
+                // 활성 사용자와 페이지뷰 메트릭
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                
+                // 정렬: 성별 -> 연령 순
+                addOrderBys(OrderBy.newBuilder().apply {
+                    dimension = OrderBy.DimensionOrderBy.newBuilder()
+                        .setDimensionName("userGender")
+                        .build()
+                })
+                addOrderBys(OrderBy.newBuilder().apply {
+                    dimension = OrderBy.DimensionOrderBy.newBuilder()
+                        .setDimensionName("userAgeBracket")
+                        .build()
+                })
+            }.build()
+            
+            val response = analyticsDataClient.runReport(request)
+            
+            // 연령대 순서 정의
+            val ageOrder = listOf("18-24", "25-34", "35-44", "45-54", "55-64", "65+")
+            val genderOrder = listOf("female", "male")
+            
+            // 히트맵 데이터 초기화 (성별 x 연령대)
+            val heatmapData = genderOrder.map { gender ->
+                ageOrder.map { 0 }.toMutableList()
+            }.toMutableList()
+            
+            val pageViewData = genderOrder.map { gender ->
+                ageOrder.map { 0 }.toMutableList()
+            }.toMutableList()
+            
+            // 응답 데이터 처리
+            response.rowsList.forEach { row ->
+                try {
+                    val gender = row.getDimensionValues(0).value
+                    val ageBracket = row.getDimensionValues(1).value
+                    
+                    val activeUsers = row.getMetricValues(0).value.toIntOrNull() ?: 0
+                    val pageViews = row.getMetricValues(1).value.toIntOrNull() ?: 0
+                    
+                    val genderIndex = genderOrder.indexOf(gender)
+                    val ageIndex = ageOrder.indexOf(ageBracket)
+                    
+                    if (genderIndex >= 0 && ageIndex >= 0) {
+                        heatmapData[genderIndex][ageIndex] = activeUsers
+                        pageViewData[genderIndex][ageIndex] = pageViews
+                    }
+                } catch (e: Exception) {
+                    logger.error("Demographics data 처리 중 오류: ${e.message}")
+                }
+            }
+            
+            return mapOf(
+                "heatmapData" to heatmapData,
+                "pageViewData" to pageViewData,
+                "genderLabels" to listOf("여성", "남성"),
+                "ageLabels" to ageOrder,
+                "startDate" to startDate,
+                "endDate" to endDate
+            )
+            
+        } catch (e: Exception) {
+            logger.error("Demographics heatmap data fetch error", e)
+            
+            // 에러 시 빈 데이터 반환
+            val ageOrder = listOf("18-24", "25-34", "35-44", "45-54", "55-64", "65+")
+            val emptyData = listOf(
+                ageOrder.map { 0 },
+                ageOrder.map { 0 }
+            )
+            
+            return mapOf(
+                "heatmapData" to emptyData,
+                "pageViewData" to emptyData,
+                "genderLabels" to listOf("여성", "남성"),
+                "ageLabels" to ageOrder,
+                "startDate" to startDate,
+                "endDate" to endDate,
+                "error" to "데이터를 가져올 수 없습니다. Google Signals가 활성화되어 있는지 확인해주세요."
+            )
+        }
+    }
 
 }

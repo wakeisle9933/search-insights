@@ -73,9 +73,14 @@ async function fetchDailyChartData() {
   canvas.style.display = 'none';
   initialMessage.style.display = 'none';
   
-  // 히트맵도 동시에 시작!! 🔥 (로딩 표시가 보이도록)
+  // 히트맵도 동시에 시작!! 🔥
   if (typeof refreshHeatmap === 'function') {
-    setTimeout(() => refreshHeatmap(), 100); // 약간의 지연으로 로딩이 보이도록
+    refreshHeatmap();
+  }
+  
+  // 성별/연령별 히트맵도 함께 로드!! 💕🔥
+  if (typeof refreshDemographicsHeatmap === 'function') {
+    refreshDemographicsHeatmap();
   }
   
   // 초기화
@@ -324,10 +329,13 @@ function formatDateForDisplay(date) {
 
 // 일간 차트 탭 초기화
 function initDailyChartTab() {
-  // 날짜 필드 초기화 (최근 7일)
+  // 날짜 필드 초기화 (전일 기준으로)
   const now = new Date();
-  const startDate = new Date(now);
-  startDate.setDate(startDate.getDate() - 6); // 7일 전 (오늘 포함)
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() - 1); // 어제를 종료일로
+  
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - 6); // 어제로부터 7일 전
   
   const formatDate = (date) => {
     return date.getFullYear() + '-' +
@@ -338,7 +346,7 @@ function initDailyChartTab() {
   // 날짜 필드가 비어있을 때만 초기값 설정
   if (!document.getElementById('chart-start-date').value) {
     document.getElementById('chart-start-date').value = formatDate(startDate);
-    document.getElementById('chart-end-date').value = formatDate(now);
+    document.getElementById('chart-end-date').value = formatDate(endDate);
   }
 }
 
@@ -387,7 +395,8 @@ async function showDailyChartDetail(fullDate, displayDate, activeUsers, pageView
   // 제목 업데이트
   const fullTitle = document.getElementById('daily-detail-full-title');
   if (fullTitle) {
-    fullTitle.textContent = `📈 페이지 제목별 조회수 (${displayDate})`;
+    const titleText = window.t ? window.t('sectionTitles.pageviewsByTitle') : '페이지 제목별 조회수';
+    fullTitle.textContent = `📈 ${titleText} (${displayDate})`;
   }
   
   // 요약 정보 표시
