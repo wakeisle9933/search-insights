@@ -10,6 +10,7 @@ import com.google.api.services.searchconsole.v1.model.SearchAnalyticsQueryReques
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import com.si.main.searchinsights.data.PageViewInfo
+import com.si.main.searchinsights.data.ReferralTraffic
 import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.util.DateUtils
@@ -644,6 +645,78 @@ class SearchConsoleService (
                 "startDate" to startDate,
                 "endDate" to endDate,
                 "error" to "데이터를 가져올 수 없습니다. Google Signals가 활성화되어 있는지 확인해주세요."
+            )
+        }
+    }
+    
+    fun fetchReferralTrafficData(
+        startDate: String,
+        endDate: String
+    ): List<ReferralTraffic> {
+        try {
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                // Dimension: sessionSource (출처 사이트), landingPagePlusQueryString (랜딩 페이지), pageTitle (페이지 제목)
+                addDimensions(Dimension.newBuilder().setName("sessionSource"))
+                addDimensions(Dimension.newBuilder().setName("landingPagePlusQueryString"))
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                // Metrics: sessions (세션수), totalUsers (사용자수), screenPageViews (페이지뷰)
+                addMetrics(Metric.newBuilder().setName("sessions"))
+                addMetrics(Metric.newBuilder().setName("totalUsers"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                // Filter: sessionDefaultChannelGroup이 'Referral'인 것만
+                dimensionFilter = FilterExpression.newBuilder()
+                    .setFilter(Filter.newBuilder()
+                        .setFieldName("sessionDefaultChannelGroup")
+                        .setStringFilter(Filter.StringFilter.newBuilder()
+                            .setMatchType(Filter.StringFilter.MatchType.EXACT)
+                            .setValue("Referral")
+                        )
+                    )
+                    .build()
+                // Order by sessions DESC
+                addOrderBys(OrderBy.newBuilder().apply {
+                    desc = true
+                    metric = OrderBy.MetricOrderBy.newBuilder()
+                        .setMetricName("sessions")
+                        .build()
+                })
+                limit = 1000 // 넉넉하게 1,000개! 🥳
+            }.build()
+            
+            val response = analyticsDataClient.runReport(request)
+            
+            return response.rowsList.map { row ->
+                val source = row.getDimensionValues(0).value
+                val landingPage = row.getDimensionValues(1).value
+                val pageTitle = row.getDimensionValues(2).value
+                
+                // 페이지 제목이 있으면 경로와 함께 표시
+                val landingPageDisplay = if (pageTitle.isNotBlank() && pageTitle != "(not set)") {
+                    "$landingPage ($pageTitle)"
+                } else {
+                    landingPage
+                }
+                
+                ReferralTraffic(
+                    sourceSite = source,
+                    landingPage = landingPageDisplay,
+                    sessions = row.getMetricValues(0).value.toIntOrNull() ?: 0,
+                    users = row.getMetricValues(1).value.toIntOrNull() ?: 0,
+                    pageviews = row.getMetricValues(2).value.toIntOrNull() ?: 0
+                )
+            }.filter { it.sessions > 0 } // 세션이 0인 것은 제외
+            
+        } catch (e: Exception) {
+            logger.error("Referral traffic data fetch error", e)
+            throw ExternalApiException(
+                errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                message = "Referral 트래픽 데이터를 가져오는 중 오류가 발생했습니다",
+                cause = e
             )
         }
     }

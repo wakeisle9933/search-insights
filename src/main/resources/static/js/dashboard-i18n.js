@@ -11,6 +11,7 @@ const translations = {
       customDate: "날짜 지정",
       comparison: "기간 비교",
       dailyChart: "차트 및 히트맵",
+      backlinkCheck: "백링크",
       reportSend: "리포트 발송"
     },
     
@@ -33,6 +34,7 @@ const translations = {
       customPageviews: "지정 기간 전체 조회수",
       comparisonAnalysis: "기간 비교 분석",
       dailyChart: "차트 및 히트맵 분석",
+      backlinkCheck: "백링크",
       reportSend: "Search Insights 리포트 발송",
       demographicsHeatmap: "성별/연령별 분석"
     },
@@ -48,6 +50,8 @@ const translations = {
       pageviewsByCategory: "카테고리별 조회수",
       categoryComparison: "카테고리별 비교",
       postDetailComparison: "포스트별 상세 비교",
+      backlinkSummary: "백링크 상위 10개 누적합",
+      backlinkAnalysis: "백링크 분석 (외부 유입)",
       reportContents: "리포트 포함 내용",
       recipientInfo: "수신자 정보"
     },
@@ -77,7 +81,10 @@ const translations = {
       change: "변화량",
       changeRate: "변화율",
       periodARatio: "기간 A 비중",
-      periodBRatio: "기간 B 비중"
+      periodBRatio: "기간 B 비중",
+      sourceSite: "출처 사이트",
+      landingPage: "랜딩 페이지",
+      sessions: "세션수"
     },
     
     // 라벨
@@ -93,7 +100,8 @@ const translations = {
       selectPeriod: "기간 선택:",
       autoRefresh: "자동 새로고침 (10초)",
       reportPeriod: "리포트 기간 선택",
-      recipient: "수신자:"
+      recipient: "수신자:",
+      domainFilter: "도메인 선택:"
     },
     
     // 차트 라벨
@@ -117,7 +125,8 @@ const translations = {
       all: "전체 보기",
       top25up: "TOP 25 상승",
       top25down: "TOP 25 하락",
-      surge: "급상승 (100%↑)"
+      surge: "급상승 (100%↑)",
+      allDomains: "전체 도메인"
     },
     
     // 메시지
@@ -139,6 +148,7 @@ const translations = {
       comparisonDesc: "기간 A(이전)에서 기간 B(최근)로의 변화를 분석해요! 상승/하락 트렌드를 한눈에 확인하세요.",
       categoryDetailTitle: "{category} 카테고리 포스트별 상세 비교",
       dailyChartDesc: "일별 방문자 추이와 시간대별 활동 패턴을 한눈에 확인하세요! 차트의 특정 날짜를 클릭하면 상세 데이터를 볼 수 있어요.",
+      backlinkDesc: "어느 사이트에서 우리 사이트로 유입되었는지 확인해보세요! 외부 참조 트래픽을 분석합니다.",
       loadingChart: "차트 데이터를 불러오는 중...",
       loadingData: "데이터를 불러오는 중...",
       selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!",
@@ -231,6 +241,7 @@ const translations = {
       customDate: "Custom Date",
       comparison: "Period Compare",
       dailyChart: "Charts & Heatmap",
+      backlinkCheck: "Backlinks",
       reportSend: "Send Report"
     },
     
@@ -253,6 +264,7 @@ const translations = {
       customPageviews: "Custom Period Total Pageviews",
       comparisonAnalysis: "Period Comparison Analysis",
       dailyChart: "Charts & Heatmap Analysis",
+      backlinkCheck: "Backlinks",
       reportSend: "Search Insights Report",
       demographicsHeatmap: "Gender/Age Analysis"
     },
@@ -268,6 +280,8 @@ const translations = {
       pageviewsByCategory: "Pageviews by Category",
       categoryComparison: "Category Comparison",
       postDetailComparison: "Post Detail Comparison",
+      backlinkSummary: "Top 10 Backlinks Summary",
+      backlinkAnalysis: "Backlink Analysis (Referral Traffic)",
       reportContents: "Report Contents",
       recipientInfo: "Recipient Information"
     },
@@ -297,7 +311,10 @@ const translations = {
       change: "Change",
       changeRate: "Change %",
       periodARatio: "Period A %",
-      periodBRatio: "Period B %"
+      periodBRatio: "Period B %",
+      sourceSite: "Source Site",
+      landingPage: "Landing Page",
+      sessions: "Sessions"
     },
     
     // Labels
@@ -313,7 +330,8 @@ const translations = {
       selectPeriod: "Select Period:",
       autoRefresh: "Auto Refresh (10s)",
       reportPeriod: "Select Report Period",
-      recipient: "Recipient:"
+      recipient: "Recipient:",
+      domainFilter: "Select Domain:"
     },
     
     // Chart labels
@@ -337,7 +355,8 @@ const translations = {
       all: "View All",
       top25up: "TOP 25 Up",
       top25down: "TOP 25 Down",
-      surge: "Surge (100%↑)"
+      surge: "Surge (100%↑)",
+      allDomains: "All Domains"
     },
     
     // Messages
@@ -359,6 +378,7 @@ const translations = {
       comparisonDesc: "Analyze changes from Period A (previous) to Period B (recent)! Check trends at a glance.",
       categoryDetailTitle: "{category} Category Post Detail Comparison",
       dailyChartDesc: "Check daily visitor trends and hourly activity patterns at a glance! Click on specific dates in the chart to view detailed data.",
+      backlinkDesc: "Check which sites are referring traffic to your site! Analyze external referral traffic.",
       loadingChart: "Loading chart data...",
       loadingData: "Loading data...",
       selectDateRange: "Please select dates and click the search button!",
@@ -451,6 +471,7 @@ const translations = {
       customDate: "日期指定",
       comparison: "期间比较",
       dailyChart: "图表及热图",
+      backlinkCheck: "反向链接",
       reportSend: "发送报告"
     },
     
@@ -473,6 +494,7 @@ const translations = {
       customPageviews: "指定期间总浏览量",
       comparisonAnalysis: "期间比较分析",
       dailyChart: "图表及热图分析",
+      backlinkCheck: "反向链接",
       reportSend: "Search Insights 报告发送",
       demographicsHeatmap: "性别/年龄分析"
     },
@@ -488,6 +510,8 @@ const translations = {
       pageviewsByCategory: "按分类统计浏览量",
       categoryComparison: "分类比较",
       postDetailComparison: "文章详细比较",
+      backlinkSummary: "前10个反向链接汇总",
+      backlinkAnalysis: "反向链接分析 (外部流量)",
       reportContents: "报告内容",
       recipientInfo: "收件人信息"
     },
@@ -517,7 +541,10 @@ const translations = {
       change: "变化量",
       changeRate: "变化率",
       periodARatio: "期间 A 占比",
-      periodBRatio: "期间 B 占比"
+      periodBRatio: "期间 B 占比",
+      sourceSite: "来源网站",
+      landingPage: "着陆页",
+      sessions: "会话数"
     },
     
     // 标签
@@ -533,7 +560,8 @@ const translations = {
       selectPeriod: "选择期间:",
       autoRefresh: "自动刷新 (10秒)",
       reportPeriod: "选择报告期间",
-      recipient: "收件人:"
+      recipient: "收件人:",
+      domainFilter: "选择域名:"
     },
     
     // 图表标签
@@ -557,7 +585,8 @@ const translations = {
       all: "查看全部",
       top25up: "TOP 25 上升",
       top25down: "TOP 25 下降",
-      surge: "急剧上升 (100%↑)"
+      surge: "急剧上升 (100%↑)",
+      allDomains: "全部域名"
     },
     
     // 消息
@@ -579,6 +608,7 @@ const translations = {
       comparisonDesc: "分析从期间 A (之前) 到期间 B (最近) 的变化! 一目了然地查看趋势。",
       categoryDetailTitle: "{category} 分类文章详细比较",
       dailyChartDesc: "一目了然地查看每日访客趋势和按小时活动模式! 点击图表中的特定日期可查看详细数据。",
+      backlinkDesc: "查看哪些网站向您的网站引流! 分析外部引荐流量。",
       loadingChart: "正在加载图表数据...",
       loadingData: "正在加载数据...",
       selectDateRange: "请选择日期并点击查询按钮!",

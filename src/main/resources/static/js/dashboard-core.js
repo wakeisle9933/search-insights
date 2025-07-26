@@ -42,6 +42,11 @@ function toggleTheme() {
     document.getElementById('theme-stylesheet').href = '/css/dashboard-dark-theme.css';
     document.querySelector('.theme-icon').textContent = '🌙';
   }
+  
+  // 백링크 차트 테마 업데이트
+  if (typeof updateBacklinkChartTheme === 'function') {
+    setTimeout(updateBacklinkChartTheme, 100); // CSS 로드 후 실행
+  }
 }
 
 // 페이지 로드시 처음 데이터 가져오기

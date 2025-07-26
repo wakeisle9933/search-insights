@@ -34,6 +34,7 @@
     <div class="main-tab" onclick="showMainTab('custom-date')" data-i18n="mainTabs.customDate">📆 날짜 지정</div>
     <div class="main-tab" onclick="showMainTab('comparison')" data-i18n="mainTabs.comparison">⚔️ 기간 비교</div>
     <div class="main-tab" onclick="showMainTab('daily-chart')" data-i18n="mainTabs.dailyChart">📈 차트 및 히트맵</div>
+    <div class="main-tab" onclick="showMainTab('backlink-check')" data-i18n="mainTabs.backlinkCheck">🔗 백링크 체크</div>
     <div class="main-tab" onclick="showMainTab('report-send')" data-i18n="mainTabs.reportSend">📧 리포트 발송</div>
   </div>
 
@@ -1010,6 +1011,112 @@
   </div>
 </div>
 
+  <!-- 백링크 체크 탭 컨텐츠 -->
+  <div id="backlink-check-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="dashboard-title" data-i18n="dashboardTitles.backlinkCheck">🔗 백링크 체크</div>
+      <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 20px;">
+        <span data-i18n="messages.backlinkDesc">📌 어느 사이트에서 우리 사이트로 유입되었는지 확인해보세요! 외부 참조 트래픽을 분석합니다.</span>
+      </div>
+      
+      <!-- 날짜 선택 영역 -->
+      <div class="date-selector">
+        <input type="date" id="backlink-start-date" onchange="validateBacklinkDates()" placeholder="YYYY-MM-DD">
+        <span>~</span>
+        <input type="date" id="backlink-end-date" onchange="validateBacklinkDates()" placeholder="YYYY-MM-DD">
+        <button onclick="fetchBacklinkData()" class="fetch-btn">🔍 <span data-i18n="buttons.fetch">조회하기</span></button>
+      </div>
+      
+      <!-- 빠른 날짜 선택 버튼 -->
+      <div style="margin-top: 10px; margin-bottom: 15px;">
+        <span class="quick-date-label" data-i18n="labels.quickSelect">빠른 선택:</span>
+        <div class="quick-date-buttons" style="display: inline-flex; margin-left: 10px;">
+          <button class="quick-date-btn" onclick="setBacklinkDateRange(1)" data-i18n="quickDates.today">오늘</button>
+          <button class="quick-date-btn" onclick="setBacklinkDateRange(3)" data-i18n="quickDates.days3">3일</button>
+          <button class="quick-date-btn" onclick="setBacklinkDateRange(7)" data-i18n="quickDates.days7">7일</button>
+          <button class="quick-date-btn" onclick="setBacklinkDateRange(14)" data-i18n="quickDates.weeks2">2주</button>
+          <button class="quick-date-btn" onclick="setBacklinkDateRange(30)" data-i18n="quickDates.month1">한달</button>
+        </div>
+        <div style="display: inline-flex; align-items: center; margin-left: 20px;">
+          <input type="checkbox" id="backlink-exclude-today" style="margin-right: 5px;">
+          <label for="backlink-exclude-today" style="font-size: 0.85em; color: #666; cursor: pointer;" data-i18n="labels.excludeToday">
+            📅 전일 기준 (오늘 제외)
+          </label>
+        </div>
+      </div>
+      
+      <!-- 초기 메시지 (조회 전) -->
+      <div id="backlink-initial-message" class="dashboard-box" style="padding: 80px 20px; text-align: center;">
+        <div style="font-size: 4em; margin-bottom: 20px;">🔗</div>
+        <div style="font-size: 1.2em; color: #666;" data-i18n="messages.selectDateRange">날짜를 선택하고 조회하기 버튼을 클릭해주세요!</div>
+      </div>
+      
+      <!-- 로딩 인디케이터 -->
+      <div id="backlink-loading" class="dashboard-box" style="display: none; padding: 80px 20px; text-align: center;">
+        <div class="loading-spinner" style="margin: 0 auto;"></div>
+        <div style="margin-top: 20px; font-size: 1.1em; color: #666;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
+      </div>
+      
+      <!-- 데이터 컨텐츠 영역 (조회 후 표시) -->
+      <div id="backlink-data-container" style="display: none;">
+        <!-- 백링크 누적합 차트 -->
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.backlinkSummary">📈 백링크 상위 10개 누적합</div>
+          <div style="display: flex; gap: 20px; align-items: stretch;">
+            <div style="flex: 1;">
+              <canvas id="backlink-chart" style="max-height: 300px;"></canvas>
+            </div>
+            <div style="flex: 1;">
+              <table id="backlink-summary-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="tableHeaders.rank">순번</th>
+                    <th data-i18n="tableHeaders.sourceSite">출처 사이트</th>
+                    <th data-i18n="tableHeaders.sessions">세션수</th>
+                    <th data-i18n="tableHeaders.ratio">비율</th>
+                  </tr>
+                </thead>
+                <tbody id="backlink-summary-tbody">
+                  <!-- 상위 10개 데이터가 여기에 들어감 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 백링크 상세 분석 -->
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.backlinkAnalysis">📊 백링크 분석 (외부 유입)</div>
+          
+          <!-- 도메인 필터 영역 -->
+          <div class="category-container" style="margin-top: 15px; margin-bottom: 15px;">
+            <label style="font-weight: 600; color: #b794f6; margin-right: 10px;" data-i18n="labels.domainFilter">🌐 도메인 선택:</label>
+            <select id="backlink-domain-filter" class="category-dropdown" onchange="filterBacklinkByDomain()">
+              <option value="" data-i18n="filters.allDomains">전체 도메인</option>
+            </select>
+          </div>
+          
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.sourceSite">출처 사이트</th>
+              <th data-i18n="tableHeaders.landingPage">랜딩 페이지</th>
+              <th data-i18n="tableHeaders.sessions">세션수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="backlink-table">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="update-time" id="backlink-update-time"><span data-i18n="labels.lastUpdate">마지막 업데이트</span>: -</div>
+    </div>
+  </div>
+
   <!-- 리포트 발송 탭 컨텐츠 -->
   <div id="report-send-content" class="tab-content">
     <div class="dashboard-box">
@@ -1129,6 +1236,7 @@
 <script th:src="@{/js/dashboard-category-sync.js}" defer></script>
 <script th:src="@{/js/dashboard-daily-chart.js}" defer></script>
 <script th:src="@{/js/dashboard-heatmap.js}" defer></script>
+<script th:src="@{/js/dashboard-backlink.js}" defer></script>
 
 </body>
 </html>

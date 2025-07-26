@@ -233,6 +233,68 @@
   justify-content: center;
 }
 
+/* 백링크 테이블 스타일 */
+#backlink-table {
+  table-layout: auto; /* 자동 레이아웃으로 변경 */
+  width: 100%;
+}
+
+/* 출처 사이트 컬럼 - 작게 + 스크롤 */
+#backlink-table th:nth-child(2),
+#backlink-table td:nth-child(2) {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow-x: auto;
+  position: relative;
+}
+
+/* 랜딩 페이지 컬럼 - 크게 + 스크롤 */
+#backlink-table th:nth-child(3),
+#backlink-table td:nth-child(3) {
+  min-width: 300px;
+  max-width: 500px;
+  overflow-x: auto;
+  white-space: nowrap;
+  position: relative;
+}
+
+/* 세션수와 비율은 자연스럽게 */
+#backlink-table th:nth-child(4),
+#backlink-table td:nth-child(4),
+#backlink-table th:nth-child(5),
+#backlink-table td:nth-child(5) {
+  white-space: nowrap;
+}
+
+/* 스크롤바 스타일링 - 출처 사이트와 랜딩 페이지 모두 */
+#backlink-table td:nth-child(2)::-webkit-scrollbar,
+#backlink-table td:nth-child(3)::-webkit-scrollbar {
+  height: 6px;
+}
+
+#backlink-table td:nth-child(2)::-webkit-scrollbar-track,
+#backlink-table td:nth-child(3)::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+#backlink-table td:nth-child(2)::-webkit-scrollbar-thumb,
+#backlink-table td:nth-child(3)::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: 3px;
+}
+
+#backlink-table td:nth-child(2)::-webkit-scrollbar-thumb:hover,
+#backlink-table td:nth-child(3)::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.5);
+}
+
+/* 호버시 스크롤 힌트 - 출처 사이트와 랜딩 페이지 모두 */
+#backlink-table tr:hover td:nth-child(2),
+#backlink-table tr:hover td:nth-child(3) {
+  box-shadow: inset -10px 0 10px -10px rgba(0, 212, 255, 0.3);
+}
+
 /* 카테고리 필터 스타일 */
 .category-filter-container {
   display: none;
