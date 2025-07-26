@@ -1284,7 +1284,8 @@ body.light-theme .loading-spinner {
   align-items: stretch;
   min-height: 0;
   width: 100%;
-  height: calc(100% - 50px);
+  height: calc(100% - 70px);
+  margin-bottom: 20px;
 }
 
 .demographics-chart-box {
@@ -1294,8 +1295,8 @@ body.light-theme .loading-spinner {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 12px;
-  min-height: 350px;
+  padding: 15px;
+  min-height: 380px;
   height: 100%;
   overflow: hidden;
 }
@@ -1315,7 +1316,7 @@ body.light-theme .loading-spinner {
 
 .demographics-chart-box canvas {
   flex: 1;
-  max-height: 320px;
+  max-height: 350px;
   width: 100% !important;
   height: 100% !important;
 }
