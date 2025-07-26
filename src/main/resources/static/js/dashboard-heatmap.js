@@ -585,7 +585,7 @@ function renderDemographicsHeatmap(data) {
     // 차트 HTML 생성
     let html = `
         <div class="demographics-chart-wrapper">
-            <h3 class="heatmap-title">${window.t ? window.t('demographics.title') : '성별/연령별 활동'} 👨‍👩‍👧‍👦</h3>
+            <h3 class="demographics-title">${window.t ? window.t('demographics.title') : '성별/연령별 활동'}</h3>
             
             <div class="demographics-charts-container">
                 <div class="demographics-chart-box">
