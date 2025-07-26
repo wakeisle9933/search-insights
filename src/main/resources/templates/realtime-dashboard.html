@@ -790,6 +790,169 @@
       </div>
     </div>
     
+    <!-- 성별/연령별 상세 데이터 (연령대 클릭시 표시) -->
+    <div id="demographics-detail" style="margin-top: 20px; display: none;">
+      <div class="dashboard-box">
+        <div class="dashboard-title-with-close">
+          <div class="dashboard-title" id="demographics-detail-title">👨‍👩‍👧‍👦 성별/연령별 상세 분석</div>
+          <span class="close-button" onclick="closeDemographicsDetail()">×</span>
+        </div>
+        
+        <!-- 요약 정보 -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+          <div style="width: 20%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">👤 성별</div>
+            <div class="active-users" id="demographics-detail-gender" style="font-size: 2.5em;">-</div>
+          </div>
+          <div style="width: 20%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🎂 연령대</div>
+            <div class="active-users" id="demographics-detail-age" style="font-size: 2.5em;">-</div>
+          </div>
+          <div style="width: 25%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🔎 활성 사용자</div>
+            <div class="active-users" id="demographics-detail-active-users" style="font-size: 2.5em;">0</div>
+          </div>
+          <div style="width: 25%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🔢 페이지뷰</div>
+            <div class="active-users" id="demographics-detail-pageviews" style="font-size: 2.5em;">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 서브 탭 (성별/연령별 상세) -->
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="showSubTab('demographics-detail', 'full')" data-i18n="subTabs.allTitles">📊 전체 제목</div>
+        <div class="sub-tab" onclick="showSubTab('demographics-detail', 'prefix1')" data-i18n="subTabs.prefix1">1️⃣ 접두어 (1단어)</div>
+        <div class="sub-tab" onclick="showSubTab('demographics-detail', 'prefix2')" data-i18n="subTabs.prefix2">2️⃣ 접두어 (2단어)</div>
+        <div class="sub-tab" onclick="showSubTab('demographics-detail', 'prefix3')" data-i18n="subTabs.prefix3">3️⃣ 접두어 (3단어)</div>
+        <div class="sub-tab" onclick="showSubTab('demographics-detail', 'category')" data-i18n="subTabs.byCategory">📑 카테고리별</div>
+      </div>
+      
+      <!-- 전체 제목 테이블 (성별/연령별 상세) -->
+      <div id="demographics-detail-full-content" class="sub-tab-content active">
+        <div class="dashboard-box">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; padding-top: 3px;">
+            <div class="dashboard-title" id="demographics-detail-full-title">📈 페이지 제목별 조회수</div>
+            <div class="category-filter-container" id="demographics-detail-full-category-filter">
+              <span class="category-label" data-i18n="labels.categorySelect">카테고리 선택:</span>
+              <select class="category-dropdown" id="demographics-detail-full-category-select" onchange="filterByCategoryInFullTab('demographics-detail', this.value)">
+                <option value="" data-i18n="labels.allCategories">전체 카테고리</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="tableHeaders.rank">순번</th>
+                <th data-i18n="tableHeaders.pageTitle">페이지 제목</th>
+                <th data-i18n="tableHeaders.views">조회수</th>
+                <th data-i18n="tableHeaders.ratio">비율</th>
+              </tr>
+            </thead>
+            <tbody id="demographics-detail-page-title-views">
+              <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 1단어 테이블 (성별/연령별 상세) -->
+      <div id="demographics-detail-prefix1-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix1">🔤 접두어별 조회수 (1단어)</div>
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="tableHeaders.rank">순번</th>
+                <th data-i18n="tableHeaders.prefix">접두어</th>
+                <th data-i18n="tableHeaders.views">조회수</th>
+                <th data-i18n="tableHeaders.ratio">비율</th>
+              </tr>
+            </thead>
+            <tbody id="demographics-detail-prefix1-views">
+              <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 2단어 테이블 (성별/연령별 상세) -->
+      <div id="demographics-detail-prefix2-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix2">🔤 접두어별 조회수 (2단어)</div>
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="tableHeaders.rank">순번</th>
+                <th data-i18n="tableHeaders.prefix">접두어</th>
+                <th data-i18n="tableHeaders.views">조회수</th>
+                <th data-i18n="tableHeaders.ratio">비율</th>
+              </tr>
+            </thead>
+            <tbody id="demographics-detail-prefix2-views">
+              <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 3단어 테이블 (성별/연령별 상세) -->
+      <div id="demographics-detail-prefix3-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix3">🔤 접두어별 조회수 (3단어)</div>
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="tableHeaders.rank">순번</th>
+                <th data-i18n="tableHeaders.prefix">접두어</th>
+                <th data-i18n="tableHeaders.views">조회수</th>
+                <th data-i18n="tableHeaders.ratio">비율</th>
+              </tr>
+            </thead>
+            <tbody id="demographics-detail-prefix3-views">
+              <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 카테고리별 테이블 (성별/연령별 상세) -->
+      <div id="demographics-detail-category-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByCategory">📊 카테고리별 조회수</div>
+          
+          <!-- 동기화 배너 -->
+          <div id="sync-banner-demographics-detail" class="sync-banner">
+            <span data-i18n="messages.syncRequired">아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!</span>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="tableHeaders.rank">순번</th>
+                <th data-i18n="tableHeaders.category">카테고리</th>
+                <th data-i18n="tableHeaders.views">조회수</th>
+                <th data-i18n="tableHeaders.ratio">비율</th>
+              </tr>
+            </thead>
+            <tbody id="demographics-detail-category-views">
+              <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 로딩 인디케이터 (demographics-detail용) -->
+    <div id="demographics-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
+      <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+        <div style="text-align: center;">
+          <div class="loading-spinner"></div>
+          <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingDemographicsDetail">성별/연령별 상세 데이터를 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
+    
     <!-- 날짜별 상세 데이터 (날짜 클릭시 표시) -->
     <div id="daily-chart-detail" style="margin-top: 20px; display: none;">
       <div class="dashboard-box">

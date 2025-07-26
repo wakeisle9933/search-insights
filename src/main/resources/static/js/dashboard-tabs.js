@@ -99,9 +99,19 @@ function showMainTab(tabName) {
 
 // 서브 탭 전환 함수
 function showSubTab(mainTab, subTab) {
-  // daily-detail, source-detail의 경우 특별 처리
-  if (mainTab === 'daily-detail' || mainTab === 'source-detail') {
-    const detailBox = document.getElementById(mainTab === 'daily-detail' ? 'daily-chart-detail' : 'source-detail');
+  // daily-detail, source-detail, demographics-detail, hourly-detail의 경우 특별 처리
+  if (mainTab === 'daily-detail' || mainTab === 'source-detail' || mainTab === 'demographics-detail' || mainTab === 'hourly-detail') {
+    let detailBox;
+    if (mainTab === 'daily-detail') {
+      detailBox = document.getElementById('daily-chart-detail');
+    } else if (mainTab === 'source-detail') {
+      detailBox = document.getElementById('source-detail');
+    } else if (mainTab === 'demographics-detail') {
+      detailBox = document.getElementById('demographics-detail');
+    } else if (mainTab === 'hourly-detail') {
+      detailBox = document.getElementById('hourly-detail');
+    }
+    
     const subTabs = detailBox.querySelectorAll('.sub-tab');
     const subContents = detailBox.querySelectorAll('.sub-tab-content');
     
@@ -114,6 +124,7 @@ function showSubTab(mainTab, subTab) {
     
     // 선택한 서브 탭 활성화
     const tabTypes = ['full', 'prefix1', 'prefix2', 'prefix3', 'category'];
+    
     const tabIndex = tabTypes.indexOf(subTab);
     if (tabIndex >= 0 && tabIndex < subTabs.length) {
       subTabs[tabIndex].classList.add('active');

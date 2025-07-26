@@ -173,7 +173,8 @@ const translations = {
       selectDateForTrafficSource: "날짜를 선택하면 도메인별 트래픽 분포가 표시됩니다!",
       selectDateForTrafficTable: "날짜를 선택하면 도메인별 접속량이 표시됩니다!",
       loadingTrafficSource: "트래픽 소스 데이터를 불러오는 중...",
-      loadingTrafficTable: "도메인별 접속량을 불러오는 중..."
+      loadingTrafficTable: "도메인별 접속량을 불러오는 중...",
+      loadingDemographicsDetail: "성별/연령별 상세 데이터를 불러오는 중..."
     },
     
     // 히트맵
@@ -412,7 +413,8 @@ const translations = {
       selectDateForTrafficSource: "Select dates to view traffic distribution by domain!",
       selectDateForTrafficTable: "Select dates to view traffic volume by domain!",
       loadingTrafficSource: "Loading traffic source data...",
-      loadingTrafficTable: "Loading traffic volume by domain..."
+      loadingTrafficTable: "Loading traffic volume by domain...",
+      loadingDemographicsDetail: "Loading gender/age demographic detail data..."
     },
     
     // Heatmap
@@ -651,7 +653,8 @@ const translations = {
       selectDateForTrafficSource: "选择日期以查看按域名分类的流量分布！",
       selectDateForTrafficTable: "选择日期以查看按域名的访问量！",
       loadingTrafficSource: "正在加载流量来源数据...",
-      loadingTrafficTable: "正在加载按域名的访问量..."
+      loadingTrafficTable: "正在加载按域名的访问量...",
+      loadingDemographicsDetail: "正在加载性别/年龄详细数据..."
     },
     
     // 热图
@@ -878,7 +881,8 @@ function updateCategoryDropdowns() {
     document.getElementById('today-full-category-select'),
     document.getElementById('custom-date-full-category-select'),
     document.getElementById('daily-detail-full-category-select'),
-    document.getElementById('hourly-detail-full-category-select')
+    document.getElementById('hourly-detail-full-category-select'),
+    document.getElementById('demographics-detail-full-category-select')
   ];
   
   categoryDropdowns.forEach(dropdown => {

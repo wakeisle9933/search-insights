@@ -880,5 +880,87 @@ class SearchConsoleService (
             )
         }
     }
+    
+    fun fetchDemographicsDetailData(
+        startDate: String, 
+        endDate: String, 
+        gender: String, 
+        ageGroup: String
+    ): Map<String, Any> {
+        try {
+            // 페이지별 데이터 가져오기
+            val pageViewsRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                
+                // 페이지 정보
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                
+                // 성별과 연령 dimension으로 필터링
+                dimensionFilter = FilterExpression.newBuilder()
+                    .setAndGroup(FilterExpressionList.newBuilder()
+                        .addExpressions(FilterExpression.newBuilder()
+                            .setFilter(Filter.newBuilder()
+                                .setFieldName("userGender")
+                                .setStringFilter(Filter.StringFilter.newBuilder()
+                                    .setMatchType(Filter.StringFilter.MatchType.EXACT)
+                                    .setValue(gender)
+                                )
+                            )
+                        )
+                        .addExpressions(FilterExpression.newBuilder()
+                            .setFilter(Filter.newBuilder()
+                                .setFieldName("userAgeBracket")
+                                .setStringFilter(Filter.StringFilter.newBuilder()
+                                    .setMatchType(Filter.StringFilter.MatchType.EXACT)
+                                    .setValue(ageGroup)
+                                )
+                            )
+                        )
+                    )
+                    .build()
+                
+                // 페이지뷰 메트릭
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                
+                // 페이지뷰 기준 내림차순 정렬
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder()
+                        .setMetricName("screenPageViews")
+                        .build()
+                    desc = true
+                })
+                
+                limit = 200 // 상위 200개 페이지
+            }.build()
+            
+            val pageViews = analyticsDataClient.runReport(pageViewsRequest).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value,
+                    pagePath = row.getDimensionValues(1).value,
+                    pageViews = row.getMetricValues(0).value.toDouble()
+                )
+            }
+            
+            return mapOf(
+                "pageViews" to pageViews,
+                "gender" to gender,
+                "ageGroup" to ageGroup,
+                "startDate" to startDate,
+                "endDate" to endDate
+            )
+            
+        } catch (e: Exception) {
+            logger.error("Demographics detail data fetch error", e)
+            return mapOf(
+                "pageViews" to emptyList<PageViewInfo>(),
+                "error" to (e.message ?: "Unknown error")
+            )
+        }
+    }
 
 }

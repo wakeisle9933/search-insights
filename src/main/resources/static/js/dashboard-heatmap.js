@@ -647,6 +647,33 @@ function createDemographicsCharts(data) {
             mode: 'index',
             intersect: false,
         },
+        onClick: async (event, elements) => {
+            if (elements.length > 0) {
+                const element = elements[0];
+                const datasetIndex = element.datasetIndex;
+                const index = element.index;
+                const ageGroup = data.ageLabels[index];
+                
+                // 차트 인스턴스 확인
+                const clickedChart = event.chart;
+                let gender = '';
+                let activeUsers = 0;
+                let pageViews = 0;
+                
+                if (clickedChart === femaleChart) {
+                    gender = 'female';
+                    activeUsers = femaleActiveUsers[index] || 0;
+                    pageViews = femalePageViews[index] || 0;
+                } else if (clickedChart === maleChart) {
+                    gender = 'male';
+                    activeUsers = maleActiveUsers[index] || 0;
+                    pageViews = malePageViews[index] || 0;
+                }
+                
+                // 상세 분석 표시
+                showDemographicsDetail(gender, ageGroup, activeUsers, pageViews);
+            }
+        },
         layout: {
             padding: {
                 top: 0,
@@ -862,3 +889,286 @@ if (window.toggleTheme) {
         handleDemographicsThemeChange();
     };
 }
+
+// 성별/연령별 상세 데이터 전역 변수
+let demographicsDetailData = null;
+let currentDemographicsDetail = null;
+
+// 성별/연령별 상세 데이터 표시 함수
+async function showDemographicsDetail(gender, ageGroup, activeUsers, pageViews) {
+    // 다른 상세 페이지 닫기
+    const dailyDetail = document.getElementById('daily-chart-detail');
+    const hourlyDetail = document.getElementById('hourly-detail');
+    if (dailyDetail && dailyDetail.style.display !== 'none') {
+        dailyDetail.style.display = 'none';
+    }
+    if (hourlyDetail && hourlyDetail.style.display !== 'none') {
+        hourlyDetail.style.display = 'none';
+    }
+    
+    const detailBox = document.getElementById('demographics-detail');
+    const detailTitle = document.getElementById('demographics-detail-title');
+    const detailGender = document.getElementById('demographics-detail-gender');
+    const detailAge = document.getElementById('demographics-detail-age');
+    const detailActiveUsers = document.getElementById('demographics-detail-active-users');
+    const detailPageviews = document.getElementById('demographics-detail-pageviews');
+    const loadingDiv = document.getElementById('demographics-detail-loading');
+    
+    if (!detailBox) {
+        console.error('Demographics detail elements not found');
+        return;
+    }
+    
+    // 현재 선택된 정보 저장
+    currentDemographicsDetail = { gender, ageGroup, activeUsers, pageViews };
+    
+    // 성별 표시 (한글)
+    const genderText = gender === 'male' ? '남성' : '여성';
+    const genderEmoji = gender === 'male' ? '👨' : '👩';
+    
+    // 제목 설정
+    detailTitle.textContent = `${genderEmoji} ${genderText} ${ageGroup} 상세 분석`;
+    
+    // 제목 업데이트
+    const fullTitle = document.getElementById('demographics-detail-full-title');
+    if (fullTitle) {
+        const titleText = window.t ? window.t('sectionTitles.pageviewsByTitle') : '페이지 제목별 조회수';
+        fullTitle.textContent = `📈 ${titleText} (${genderText} ${ageGroup})`;
+    }
+    
+    // 요약 정보 표시
+    detailGender.textContent = genderText;
+    detailAge.textContent = ageGroup;
+    detailActiveUsers.textContent = new Intl.NumberFormat('ko-KR').format(Math.round(activeUsers));
+    detailPageviews.textContent = new Intl.NumberFormat('ko-KR').format(Math.round(pageViews));
+    
+    // 상세 영역 먼저 표시
+    detailBox.style.display = 'block';
+    
+    // 서브 탭 초기화 - 전체 제목 탭 활성화
+    const allSubTabs = detailBox.querySelectorAll('.sub-tab');
+    const allSubContents = detailBox.querySelectorAll('.sub-tab-content');
+    allSubTabs.forEach(tab => tab.classList.remove('active'));
+    allSubContents.forEach(content => content.classList.remove('active'));
+    
+    if (allSubTabs[0]) allSubTabs[0].classList.add('active');
+    const fullContent = document.getElementById('demographics-detail-full-content');
+    if (fullContent) fullContent.classList.add('active');
+    
+    // 카테고리 필터 드롭다운 표시
+    const fullCategoryFilter = document.getElementById('demographics-detail-full-category-filter');
+    if (fullCategoryFilter) {
+        fullCategoryFilter.classList.add('visible');
+    }
+    
+    // 로딩 표시
+    loadingDiv.style.display = 'block';
+    
+    // 스크롤 이동 (부드럽게)
+    setTimeout(() => {
+        detailBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+    
+    // 날짜 범위 가져오기
+    const startDate = document.getElementById('chart-start-date').value;
+    const endDate = document.getElementById('chart-end-date').value;
+    
+    // 상세 데이터 가져오기
+    try {
+        const response = await fetch(`/api/demographics-detail?startDate=${startDate}&endDate=${endDate}&gender=${gender}&ageGroup=${encodeURIComponent(ageGroup)}`);
+        if (!response.ok) throw new Error('데이터 로드 실패');
+        
+        const data = await response.json();
+        
+        // 데이터 저장
+        demographicsDetailData = data;
+        
+        // 카테고리 드롭다운 초기화 - wpCategoryData가 있을 때만
+        if (window.wpCategoryData && Object.keys(window.wpCategoryData.categories || {}).length > 0) {
+            if (window.initializeCategoryDropdown) {
+                window.initializeCategoryDropdown('demographics-detail', data.pageViews);
+            }
+            if (window.checkCategoryDataAvailability) {
+                window.checkCategoryDataAvailability('demographics-detail');
+            }
+        } else {
+            // 카테고리 데이터가 없으면 나중에 로드되면 초기화하도록 설정
+            const checkInterval = setInterval(() => {
+                if (window.wpCategoryData && Object.keys(window.wpCategoryData.categories || {}).length > 0) {
+                    if (window.initializeCategoryDropdown) {
+                        window.initializeCategoryDropdown('demographics-detail', data.pageViews);
+                    }
+                    if (window.checkCategoryDataAvailability) {
+                        window.checkCategoryDataAvailability('demographics-detail');
+                    }
+                    clearInterval(checkInterval);
+                }
+            }, 500);
+            
+            // 10초 후에는 자동으로 중지
+            setTimeout(() => clearInterval(checkInterval), 10000);
+        }
+        
+        // 전체 제목 테이블 업데이트
+        if (data.pageViews && data.pageViews.length > 0) {
+            updatePageViewsTable(data.pageViews, 'demographics-detail-page-title-views');
+        } else {
+            const noDataText = window.t ? window.t('messages.noData') : '데이터가 없습니다';
+            document.getElementById('demographics-detail-page-title-views').innerHTML = 
+                `<tr><td colspan="4" style="text-align: center; color: #999;">${noDataText}</td></tr>`;
+        }
+        
+        // 접두어 데이터 업데이트
+        if (data.pageViews) {
+            updatePrefixViewsTable(data.pageViews, 'demographics-detail-prefix1-views', 1);
+            updatePrefixViewsTable(data.pageViews, 'demographics-detail-prefix2-views', 2);
+            updatePrefixViewsTable(data.pageViews, 'demographics-detail-prefix3-views', 3);
+        }
+        
+        // 카테고리별 데이터 업데이트
+        if (data.pageViews && window.wpCategoryData) {
+            updateCategoryTableForDemographics(data.pageViews, 'demographics-detail-category-views');
+        }
+        
+        // 로딩 숨기기
+        loadingDiv.style.display = 'none';
+        
+    } catch (error) {
+        console.error('성별/연령별 상세 데이터 로드 실패:', error);
+        
+        // 로딩 숨기기
+        loadingDiv.style.display = 'none';
+        
+        // 에러 메시지 표시
+        const errorText = window.t ? window.t('errors.loadDetailFailed') : '상세 데이터를 불러오는데 실패했습니다.';
+        document.getElementById('demographics-detail-page-title-views').innerHTML = 
+            `<tr><td colspan="4" style="text-align: center; color: #ff6b6b;">${errorText}</td></tr>`;
+    }
+}
+
+// 카테고리별 테이블 업데이트 (성별/연령별용)
+function updateCategoryTableForDemographics(pageViews, tableId) {
+    // 기존 updateCategoryTableForDaily 함수와 동일한 로직 사용
+    if (!window.wpCategoryData || !pageViews) return;
+    
+    const tableBody = document.getElementById(tableId);
+    if (!tableBody) return;
+    
+    // 카테고리별 조회수 집계
+    const categoryViews = {};
+    
+    pageViews.forEach(page => {
+        const postId = window.extractPostId ? window.extractPostId(page.pagePath) : null;
+        if (postId && window.wpCategoryData.posts[postId]) {
+            window.wpCategoryData.posts[postId].forEach(catId => {
+                if (!categoryViews[catId]) {
+                    categoryViews[catId] = 0;
+                }
+                categoryViews[catId] += page.pageViews;
+            });
+        }
+    });
+    
+    // 배열로 변환하고 정렬
+    const sortedCategories = Object.entries(categoryViews)
+        .map(([catId, views]) => ({
+            id: catId,
+            name: window.wpCategoryData.categories[catId] || '알 수 없음',
+            views: views
+        }))
+        .sort((a, b) => b.views - a.views);
+    
+    // 총 조회수 계산
+    const totalViews = sortedCategories.reduce((sum, cat) => sum + cat.views, 0);
+    
+    // 테이블 업데이트
+    tableBody.innerHTML = '';
+    
+    sortedCategories.forEach((cat, index) => {
+        const row = document.createElement('tr');
+        
+        // 순번
+        const numCell = document.createElement('td');
+        numCell.textContent = index + 1;
+        row.appendChild(numCell);
+        
+        // 카테고리명
+        const nameCell = document.createElement('td');
+        nameCell.textContent = cat.name.replace(/&amp;/g, '&');
+        row.appendChild(nameCell);
+        
+        // 조회수
+        const viewsCell = document.createElement('td');
+        viewsCell.textContent = Math.round(cat.views);
+        row.appendChild(viewsCell);
+        
+        // 비율 (프로그레스 바)
+        const ratioCell = document.createElement('td');
+        const percentage = totalViews > 0 ? (cat.views / totalViews * 100) : 0;
+        
+        const progressContainer = document.createElement('div');
+        progressContainer.style.display = 'flex';
+        progressContainer.style.alignItems = 'center';
+        
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressBar.style.width = '100px';
+        
+        const progressValue = document.createElement('div');
+        progressValue.className = 'progress-value';
+        progressValue.style.width = `${percentage}%`;
+        
+        const percentText = document.createElement('span');
+        percentText.textContent = `${percentage.toFixed(1)}%`;
+        percentText.style.marginLeft = '10px';
+        percentText.style.fontSize = '0.9em';
+        
+        progressBar.appendChild(progressValue);
+        progressContainer.appendChild(progressBar);
+        progressContainer.appendChild(percentText);
+        ratioCell.appendChild(progressContainer);
+        
+        row.appendChild(ratioCell);
+        tableBody.appendChild(row);
+    });
+    
+    if (sortedCategories.length === 0) {
+        const noDataText = window.t ? window.t('messages.noData') : '데이터가 없습니다';
+        tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">${noDataText}</td></tr>`;
+    }
+}
+
+// 성별/연령별 상세의 카테고리 필터링
+function filterDemographicsDetailByCategory(categoryId) {
+    if (!demographicsDetailData || !demographicsDetailData.pageViews) return;
+    
+    let filteredData = demographicsDetailData.pageViews;
+    
+    if (categoryId && window.wpCategoryData) {
+        filteredData = demographicsDetailData.pageViews.filter(page => {
+            const postId = window.extractPostId ? window.extractPostId(page.pagePath) : null;
+            return postId && window.wpCategoryData.posts[postId] && 
+                   window.wpCategoryData.posts[postId].includes(parseInt(categoryId));
+        });
+    }
+    
+    updatePageViewsTable(filteredData, 'demographics-detail-page-title-views');
+}
+
+// 성별/연령별 상세 닫기
+function closeDemographicsDetail() {
+    const detailBox = document.getElementById('demographics-detail');
+    if (detailBox) {
+        detailBox.style.display = 'none';
+    }
+    
+    // 데이터 초기화
+    demographicsDetailData = null;
+    currentDemographicsDetail = null;
+}
+
+// window 객체에 함수 추가
+window.showDemographicsDetail = showDemographicsDetail;
+window.closeDemographicsDetail = closeDemographicsDetail;
+window.updateCategoryTableForDemographics = updateCategoryTableForDemographics;
+window.filterDemographicsDetailByCategory = filterDemographicsDetailByCategory;
