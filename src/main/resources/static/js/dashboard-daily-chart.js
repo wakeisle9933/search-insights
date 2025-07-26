@@ -73,7 +73,7 @@ async function fetchDailyChartData() {
   canvas.style.display = 'none';
   initialMessage.style.display = 'none';
   
-  // 히트맵도 동시에 시작!! 🔥
+  // 다른 차트들도 동시에 시작!! 🔥
   if (typeof refreshHeatmap === 'function') {
     refreshHeatmap();
   }
@@ -81,6 +81,11 @@ async function fetchDailyChartData() {
   // 성별/연령별 히트맵도 함께 로드!! 💕🔥
   if (typeof refreshDemographicsHeatmap === 'function') {
     refreshDemographicsHeatmap();
+  }
+  
+  // 트래픽 소스도 바로 시작!! 🚀 (히트맵에서 호출하지 않고 여기서 직접!)
+  if (typeof fetchTrafficSourceData === 'function') {
+    fetchTrafficSourceData(startDate, endDate);
   }
   
   // 초기화

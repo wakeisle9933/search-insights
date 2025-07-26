@@ -349,6 +349,12 @@ function filterByCategoryInFullTab(mainTab, categoryId) {
     return;
   }
   
+  // source-detail의 경우 별도 처리
+  if (mainTab === 'source-detail') {
+    window.filterSourceDetailByCategory(categoryId);
+    return;
+  }
+  
   // 필터링 안 함 (전체 카테고리 선택)
   if (!categoryId) {
     // 원본 데이터로 복원

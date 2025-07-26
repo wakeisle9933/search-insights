@@ -11,6 +11,7 @@ import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import com.si.main.searchinsights.data.PageViewInfo
 import com.si.main.searchinsights.data.ReferralTraffic
+import com.si.main.searchinsights.data.TrafficSource
 import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.util.DateUtils
@@ -717,6 +718,165 @@ class SearchConsoleService (
                 errorCode = ErrorCode.ANALYTICS_API_ERROR,
                 message = "Referral 트래픽 데이터를 가져오는 중 오류가 발생했습니다",
                 cause = e
+            )
+        }
+    }
+    
+    /**
+     * 도메인별 트래픽 소스 데이터를 가져옵니다.
+     * Google, Naver, Daum, Yahoo 등 주요 검색엔진 및 소셜미디어, 직접유입 등 모든 트래픽 소스를 분석합니다.
+     */
+    fun fetchTrafficBySource(startDate: String, endDate: String): List<TrafficSource> {
+        try {
+            val request = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                // Dimensions: sessionSource (출처), sessionDefaultChannelGroup (채널 그룹)
+                addDimensions(Dimension.newBuilder().setName("sessionSource"))
+                addDimensions(Dimension.newBuilder().setName("sessionDefaultChannelGroup"))
+                // Metrics: sessions, totalUsers, screenPageViews
+                addMetrics(Metric.newBuilder().setName("sessions"))
+                addMetrics(Metric.newBuilder().setName("totalUsers"))
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                // 세션 수로 정렬 (많은 순)
+                addOrderBys(OrderBy.newBuilder()
+                    .setDesc(true)
+                    .setMetric(OrderBy.MetricOrderBy.newBuilder()
+                        .setMetricName("sessions")
+                    )
+                )
+                limit = 100 // 상위 100개 소스
+            }.build()
+            
+            val response = analyticsDataClient.runReport(request)
+            
+            return response.rowsList.map { row ->
+                val source = row.getDimensionValues(0).value
+                val channelGroup = row.getDimensionValues(1).value
+                val sessions = row.getMetricValues(0).value.toIntOrNull() ?: 0
+                val users = row.getMetricValues(1).value.toIntOrNull() ?: 0
+                val pageviews = row.getMetricValues(2).value.toIntOrNull() ?: 0
+                
+                TrafficSource(
+                    source = source,
+                    channelGroup = channelGroup,
+                    sessions = sessions,
+                    users = users,
+                    pageviews = pageviews
+                )
+            }.filter { it.sessions > 0 } // 세션이 0인 것은 제외
+            
+        } catch (e: Exception) {
+            logger.error("Traffic source data fetch error", e)
+            throw ExternalApiException(
+                errorCode = ErrorCode.ANALYTICS_API_ERROR,
+                message = "트래픽 소스 데이터를 가져오는 중 오류가 발생했습니다",
+                cause = e
+            )
+        }
+    }
+    
+    /**
+     * 특정 도메인/소스에서 유입된 페이지뷰 데이터를 가져옵니다.
+     * 어떤 페이지를 많이 봤는지 분석합니다.
+     */
+    fun fetchPageViewsBySource(
+        startDate: String,
+        endDate: String,
+        sourceDomain: String
+    ): Map<String, Any> {
+        try {
+            // 활성 사용자 수 (해당 소스에서)
+            val activeUsersRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+                
+                // 특정 소스 필터링
+                dimensionFilter = FilterExpression.newBuilder()
+                    .setFilter(Filter.newBuilder()
+                        .setFieldName("sessionSource")
+                        .setStringFilter(Filter.StringFilter.newBuilder()
+                            .setMatchType(Filter.StringFilter.MatchType.CONTAINS)
+                            .setValue(sourceDomain)
+                            .setCaseSensitive(false)
+                        )
+                    )
+                    .build()
+            }.build()
+            
+            val activeUsers = analyticsDataClient.runReport(activeUsersRequest).rowsList
+                .firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+            
+            // 페이지별 조회수 (해당 소스에서)
+            val pageViewsRequest = RunReportRequest.newBuilder().apply {
+                property = "properties/$propId"
+                addDateRanges(DateRange.newBuilder().apply {
+                    this.startDate = startDate
+                    this.endDate = endDate
+                })
+                
+                // Dimensions
+                addDimensions(Dimension.newBuilder().setName("pageTitle"))
+                addDimensions(Dimension.newBuilder().setName("pagePath"))
+                
+                // Metrics
+                addMetrics(Metric.newBuilder().setName("screenPageViews"))
+                addMetrics(Metric.newBuilder().setName("activeUsers"))
+                
+                // 특정 소스 필터링
+                dimensionFilter = FilterExpression.newBuilder()
+                    .setFilter(Filter.newBuilder()
+                        .setFieldName("sessionSource")
+                        .setStringFilter(Filter.StringFilter.newBuilder()
+                            .setMatchType(Filter.StringFilter.MatchType.CONTAINS)
+                            .setValue(sourceDomain)
+                            .setCaseSensitive(false)
+                        )
+                    )
+                    .build()
+                
+                // 조회수 기준 내림차순 정렬
+                addOrderBys(OrderBy.newBuilder().apply {
+                    metric = OrderBy.MetricOrderBy.newBuilder()
+                        .setMetricName("screenPageViews")
+                        .build()
+                    desc = true
+                })
+                
+                limit = 500 // 상위 500개
+            }.build()
+            
+            val pageViews = analyticsDataClient.runReport(pageViewsRequest).rowsList.map { row ->
+                PageViewInfo(
+                    pageTitle = row.getDimensionValues(0).value,
+                    pagePath = row.getDimensionValues(1).value,
+                    pageViews = row.getMetricValues(0).value.toDouble()
+                )
+            }
+            
+            return mapOf(
+                "activeUsers" to activeUsers,
+                "pageViews" to pageViews,
+                "sourceDomain" to sourceDomain,
+                "startDate" to startDate,
+                "endDate" to endDate
+            )
+            
+        } catch (e: Exception) {
+            logger.error("Page views by source fetch error", e)
+            return mapOf(
+                "activeUsers" to 0,
+                "pageViews" to emptyList<PageViewInfo>(),
+                "sourceDomain" to sourceDomain,
+                "error" to (e.message ?: "Unknown error")
             )
         }
     }

@@ -99,9 +99,9 @@ function showMainTab(tabName) {
 
 // 서브 탭 전환 함수
 function showSubTab(mainTab, subTab) {
-  // daily-detail의 경우 특별 처리
-  if (mainTab === 'daily-detail') {
-    const detailBox = document.getElementById('daily-chart-detail');
+  // daily-detail, source-detail의 경우 특별 처리
+  if (mainTab === 'daily-detail' || mainTab === 'source-detail') {
+    const detailBox = document.getElementById(mainTab === 'daily-detail' ? 'daily-chart-detail' : 'source-detail');
     const subTabs = detailBox.querySelectorAll('.sub-tab');
     const subContents = detailBox.querySelectorAll('.sub-tab-content');
     

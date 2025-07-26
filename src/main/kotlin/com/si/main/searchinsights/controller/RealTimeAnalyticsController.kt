@@ -87,4 +87,32 @@ class RealTimeAnalyticsController(
     ): Map<String, Any> {
         return searchConsoleService.fetchDemographicsHeatmapData(startDate, endDate)
     }
+    
+    @GetMapping("/api/traffic-by-source")
+    fun getTrafficBySource(
+        @RequestParam startDate: String,
+        @RequestParam endDate: String
+    ): Map<String, Any> {
+        val trafficSources = searchConsoleService.fetchTrafficBySource(startDate, endDate)
+        return mapOf(
+            "trafficSources" to trafficSources,
+            "totalSessions" to trafficSources.sumOf { it.sessions }
+        )
+    }
+    
+    @GetMapping("/api/pageviews-by-source")
+    fun getPageViewsBySource(
+        @RequestParam startDate: String,
+        @RequestParam endDate: String,
+        @RequestParam sourceDomain: String
+    ): Map<String, Any> {
+        val data = searchConsoleService.fetchPageViewsBySource(startDate, endDate, sourceDomain)
+        val pageViews = data["pageViews"] as? List<com.si.main.searchinsights.data.PageViewInfo> ?: emptyList()
+        
+        // 카테고리별 페이지뷰 가져오기
+        val categoryViews = wordPressCategoryService.getCategoryPageViews(pageViews)
+        
+        // 결과에 categoryViews 추가
+        return data + mapOf("categoryViews" to categoryViews)
+    }
 }

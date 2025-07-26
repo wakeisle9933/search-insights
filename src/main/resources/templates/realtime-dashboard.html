@@ -636,34 +636,37 @@
       <!-- 차트와 히트맵 컨테이너 래퍼 -->
       <div style="display: flex; gap: 20px; margin-bottom: 20px;">
         <!-- 차트 컨테이너 (왼쪽) -->
-        <div id="chart-container" style="position: relative; height: 440px; flex: 1; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box;">
+        <div style="flex: 1;">
+          <div id="chart-container" style="position: relative; height: 530px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box; overflow: hidden;">
+          <h3 class="daily-chart-title" data-i18n="sectionTitles.dailyChartTitle">일간 차트</h3>
           <canvas id="daily-chart-canvas" style="display: none;"></canvas>
-          
-          <!-- 초기 메시지 -->
-          <div id="chart-initial-message" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: #666;">
-            <div style="text-align: center;">
-              <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
-              <div data-i18n="messages.selectDateRange">날짜를 선택하고 조회하기 버튼을 클릭해주세요!</div>
-            </div>
-          </div>
-          
-          <!-- 로딩 인디케이터 -->
-          <div id="chart-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px; z-index: 10;">
-            <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+            
+            <!-- 초기 메시지 -->
+            <div id="chart-initial-message" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: #666;">
               <div style="text-align: center;">
-                <div class="loading-spinner"></div>
-                <div style="margin-top: 10px; color: #e0e0e0;" data-i18n="messages.loadingChart">차트 데이터를 불러오는 중...</div>
+                <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
+                <div data-i18n="messages.selectDateRange">날짜를 선택하고 조회하기 버튼을 클릭해주세요!</div>
+              </div>
+            </div>
+            
+            <!-- 로딩 인디케이터 -->
+            <div id="chart-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px; z-index: 10;">
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                <div style="text-align: center;">
+                  <div class="loading-spinner"></div>
+                  <div style="margin-top: 10px; color: #e0e0e0;" data-i18n="messages.loadingChart">차트 데이터를 불러오는 중...</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
         
         <!-- 히트맵 컨테이너 (오른쪽) -->
-        <div style="position: relative; flex: 0 0 45%;">
-          <!-- 시간대별 히트맵 -->
-          <div id="heatmap-container" style="position: relative; height: 440px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box; overflow: auto;">
+        <div style="flex: 0 0 45%;">
+          <div id="heatmap-container" style="position: relative; height: 530px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box; overflow: hidden;">
+            <h3 class="hourly-activity-title" data-i18n="heatmap.title">시간대별 활동</h3>
             <!-- 히트맵이 여기에 동적으로 렌더링됩니다 -->
-            <div id="heatmap-content" style="height: 100%;">
+            <div id="heatmap-content" style="height: calc(100% - 50px); overflow: auto;">
               <div id="heatmap-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
                 <div style="text-align: center;">
                   <div style="font-size: 3em; margin-bottom: 10px;">🔥</div>
@@ -685,16 +688,91 @@
         </div>
       </div>
       
+      <!-- 도메인별 트래픽 소스 컨테이너 (중간) -->
+      <div style="margin-top: 20px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 20px;">
+          <!-- 와플차트 컨테이너 (왼쪽) -->
+          <div style="width: 45%;">
+            <div id="traffic-source-container" style="position: relative; height: 520px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box;">
+              <h3 class="traffic-source-title" data-i18n="sectionTitles.trafficSourceByDomain">도메인별 트래픽 소스</h3>
+              <div id="waffle-chart-container" style="height: calc(100% - 40px);">
+              <!-- 초기 메시지 -->
+              <div id="waffle-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                <div style="text-align: center;">
+                  <div style="font-size: 3em; margin-bottom: 10px;">🧇</div>
+                  <div style="font-size: 0.9em;" data-i18n="messages.selectDateForTrafficSource">날짜를 선택하면 도메인별 트래픽 분포가 표시됩니다!</div>
+                </div>
+              </div>
+              <!-- 와플차트가 여기에 렌더링됩니다 -->
+              <div id="waffle-chart" style="display: none;"></div>
+            </div>
+            
+            <!-- 로딩 인디케이터 -->
+            <div id="waffle-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px; z-index: 100;">
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                <div style="text-align: center;">
+                  <div class="loading-spinner"></div>
+                  <div style="margin-top: 10px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingTrafficSource">트래픽 소스 데이터를 불러오는 중...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+          
+          <!-- 도메인별 상세 테이블 (오른쪽) -->
+          <div style="flex: 1;">
+            <div id="domain-top-container" style="position: relative; height: 520px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box; overflow: hidden;">
+              <h3 class="domain-top-title" data-i18n="sectionTitles.trafficByDomainTop10">도메인별 접속량 TOP 7</h3>
+              <div style="height: calc(100% - 50px); overflow: auto; position: relative;">
+                <table id="traffic-source-table" style="display: none; margin-top: 10px;">
+                <thead>
+                  <tr>
+                    <th style="width: 10%;" data-i18n="tableHeaders.rank">순번</th>
+                    <th style="width: 45%;" data-i18n="tableHeaders.domain">도메인</th>
+                    <th style="width: 15%;" data-i18n="tableHeaders.channel">채널</th>
+                    <th style="width: 15%;" data-i18n="tableHeaders.sessions">세션수</th>
+                    <th style="width: 15%;" data-i18n="tableHeaders.ratio">비율</th>
+                  </tr>
+                </thead>
+                <tbody id="traffic-source-tbody">
+                  <!-- 데이터가 여기에 동적으로 삽입됩니다 -->
+                </tbody>
+              </table>
+              
+                <!-- 초기 메시지 -->
+                <div id="traffic-source-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
+                  <div style="text-align: center;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
+                    <div data-i18n="messages.selectDateForTrafficTable">날짜를 선택하면 도메인별 접속량이 표시됩니다!</div>
+                  </div>
+                </div>
+              </div>
+            
+            <!-- 로딩 인디케이터 -->
+            <div id="traffic-table-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 8px; z-index: 100;">
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                <div style="text-align: center;">
+                  <div class="loading-spinner"></div>
+                  <div style="margin-top: 10px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingTrafficTable">도메인별 접속량을 불러오는 중...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- 성별/연령별 차트 컨테이너 (아래쪽) -->
-      <div style="margin-top: 5px;">
+      <div style="margin-top: 20px;">
         <div id="demographics-heatmap-container" style="position: relative; height: 550px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.02); padding: 20px; box-sizing: border-box;">
+          <h3 class="demographics-title" data-i18n="demographics.title">성별/연령별 활동</h3>
           <!-- 컨텐츠 영역 -->
-          <div id="demographics-content">
+          <div id="demographics-content" style="height: calc(100% - 50px);">
             <!-- 초기 메시지 -->
             <div id="demographics-initial-message" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
               <div style="text-align: center;">
-                <div style="font-size: 2.5em; margin-bottom: 10px;">👨‍👩‍👧‍👦</div>
-                <div style="font-size: 0.9em;" data-i18n="messages.selectDateForDemographics">날짜를 선택하면 성별/연령별 분석이 표시됩니다!</div>
+                <div style="font-size: 3em; margin-bottom: 10px;">👨‍👩‍👧‍👦</div>
+                <div data-i18n="messages.selectDateForDemographics">날짜를 선택하면 성별/연령별 분석이 표시됩니다!</div>
               </div>
             </div>
           </div>
@@ -850,14 +928,14 @@
           </table>
         </div>
       </div>
-      
-      <!-- 로딩 인디케이터 -->
-      <div id="daily-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
-        <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
-          <div style="text-align: center;">
-            <div class="loading-spinner"></div>
-            <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
-          </div>
+    </div>
+    
+    <!-- 로딩 인디케이터 (daily-chart-detail 밖으로 이동) -->
+    <div id="daily-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
+      <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+        <div style="text-align: center;">
+          <div class="loading-spinner"></div>
+          <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
         </div>
       </div>
     </div>
@@ -1000,16 +1078,166 @@
           </table>
         </div>
       </div>
-      
-      <!-- 로딩 인디케이터 -->
-      <div id="hourly-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
-        <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
-          <div style="text-align: center;">
-            <div class="loading-spinner"></div>
-            <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
+    </div>
+    
+    <!-- 로딩 인디케이터 (hourly-detail 밖으로 이동) -->
+    <div id="hourly-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
+      <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+        <div style="text-align: center;">
+          <div class="loading-spinner"></div>
+          <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 도메인별 상세 데이터 (도메인 클릭시 표시) -->
+    <div id="source-detail" style="margin-top: 20px; display: none;">
+      <div class="dashboard-box">
+        <div class="dashboard-title-with-close">
+          <div class="dashboard-title" id="source-detail-title">📊 도메인별 상세 분석</div>
+          <span class="close-button" onclick="closeSourceDetail()">×</span>
+        </div>
+        
+        <!-- 요약 정보 -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+          <div style="width: 22%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🔎 활성 사용자</div>
+            <div class="active-users" id="source-detail-active-users" style="font-size: 2.5em;">0</div>
+          </div>
+          <div style="width: 74%;">
+            <div class="dashboard-title" style="font-size: 0.9em;">🔢 전체 조회수</div>
+            <div class="active-users" id="source-detail-total-pageviews" style="font-size: 2.5em;">0</div>
           </div>
         </div>
       </div>
+      
+      <!-- 서브 탭 (도메인별 상세) -->
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="showSubTab('source-detail', 'full')" data-i18n="subTabs.allTitles">📊 전체 제목</div>
+        <div class="sub-tab" onclick="showSubTab('source-detail', 'prefix1')" data-i18n="subTabs.prefix1">1️⃣ 접두어 (1단어)</div>
+        <div class="sub-tab" onclick="showSubTab('source-detail', 'prefix2')" data-i18n="subTabs.prefix2">2️⃣ 접두어 (2단어)</div>
+        <div class="sub-tab" onclick="showSubTab('source-detail', 'prefix3')" data-i18n="subTabs.prefix3">3️⃣ 접두어 (3단어)</div>
+        <div class="sub-tab" onclick="showSubTab('source-detail', 'category')" data-i18n="subTabs.byCategory">📑 카테고리별</div>
+      </div>
+      
+      <!-- 전체 제목 테이블 (도메인별 상세) -->
+      <div id="source-detail-full-content" class="sub-tab-content active">
+        <div class="dashboard-box">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; padding-top: 3px;">
+            <div class="dashboard-title" id="source-detail-full-title">📈 페이지 제목별 조회수</div>
+            <div class="category-filter-container" id="source-detail-full-category-filter">
+              <span class="category-label" data-i18n="labels.categorySelect">카테고리 선택:</span>
+              <select class="category-dropdown" id="source-detail-full-category-select" onchange="filterByCategoryInFullTab('source-detail', this.value)">
+                <option value="" data-i18n="labels.allCategories">전체 카테고리</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.pageTitle">페이지 제목</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="source-detail-page-title-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 1단어 테이블 (도메인별 상세) -->
+      <div id="source-detail-prefix1-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix1">🔤 접두어별 조회수 (1단어)</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.prefix">접두어</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="source-detail-prefix1-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 2단어 테이블 (도메인별 상세) -->
+      <div id="source-detail-prefix2-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix2">🔤 접두어별 조회수 (2단어)</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.prefix">접두어</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="source-detail-prefix2-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 접두어 3단어 테이블 (도메인별 상세) -->
+      <div id="source-detail-prefix3-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div class="dashboard-title" data-i18n="sectionTitles.pageviewsByPrefix3">🔤 접두어별 조회수 (3단어)</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.prefix">접두어</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="source-detail-prefix3-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 카테고리별 테이블 (도메인별 상세) -->
+      <div id="source-detail-category-content" class="sub-tab-content">
+        <div class="dashboard-box">
+          <div id="sync-banner-source-detail" class="sync-banner">🔄 아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!</div>
+          <div class="dashboard-title">📑 카테고리별 조회수</div>
+          <table>
+            <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th>카테고리</th>
+              <th data-i18n="tableHeaders.views">조회수</th>
+              <th data-i18n="tableHeaders.ratio">비율</th>
+            </tr>
+            </thead>
+            <tbody id="source-detail-category-views">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 로딩 인디케이터 (source-detail 밖으로 이동) -->
+<div id="source-detail-loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999;">
+  <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+    <div style="text-align: center;">
+      <div class="loading-spinner"></div>
+      <div style="margin-top: 15px; color: #e0e0e0; font-size: 0.9em;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
     </div>
   </div>
 </div>
@@ -1239,6 +1467,7 @@
 <script th:src="@{/js/dashboard-category-sync.js}" defer></script>
 <script th:src="@{/js/dashboard-daily-chart.js}" defer></script>
 <script th:src="@{/js/dashboard-heatmap.js}" defer></script>
+<script th:src="@{/js/dashboard-traffic-source.js}" defer></script>
 <script th:src="@{/js/dashboard-backlink.js}" defer></script>
 
 </body>

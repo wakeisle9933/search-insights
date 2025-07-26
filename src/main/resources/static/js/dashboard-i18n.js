@@ -41,6 +41,7 @@ const translations = {
     
     // 섹션 제목
     sectionTitles: {
+      dailyChartTitle: "일간 차트",
       pageviewsByTitle: "페이지 제목별 조회수",
       pageviewsByTitleToday: "페이지 제목별 조회수 (오늘)",
       pageviewsByTitleCustom: "페이지 제목별 조회수 (지정 기간)",
@@ -53,7 +54,9 @@ const translations = {
       backlinkSummary: "백링크 상위 10개 누적합",
       backlinkAnalysis: "백링크 분석 (외부 유입)",
       reportContents: "리포트 포함 내용",
-      recipientInfo: "수신자 정보"
+      recipientInfo: "수신자 정보",
+      trafficSourceByDomain: "도메인별 트래픽 소스",
+      trafficByDomainTop10: "도메인별 접속량 TOP 7"
     },
     
     // 버튼
@@ -84,7 +87,9 @@ const translations = {
       periodBRatio: "기간 B 비중",
       sourceSite: "출처 사이트",
       landingPage: "랜딩 페이지",
-      sessions: "세션수"
+      sessions: "세션수",
+      domain: "도메인",
+      channel: "채널"
     },
     
     // 라벨
@@ -164,7 +169,11 @@ const translations = {
       loadingHeatmap: "히트맵 데이터를 불러오는 중...",
       demographicsDesc: "사용자의 성별과 연령대를 분석해서 타겟 마케팅에 활용하세요!",
       selectDateForDemographics: "날짜를 선택하면 성별/연령별 분석이 표시됩니다!",
-      loadingDemographics: "성별/연령별 데이터를 불러오는 중..."
+      loadingDemographics: "성별/연령별 데이터를 불러오는 중...",
+      selectDateForTrafficSource: "날짜를 선택하면 도메인별 트래픽 분포가 표시됩니다!",
+      selectDateForTrafficTable: "날짜를 선택하면 도메인별 접속량이 표시됩니다!",
+      loadingTrafficSource: "트래픽 소스 데이터를 불러오는 중...",
+      loadingTrafficTable: "도메인별 접속량을 불러오는 중..."
     },
     
     // 히트맵
@@ -271,6 +280,7 @@ const translations = {
     
     // Section titles
     sectionTitles: {
+      dailyChartTitle: "Daily Chart",
       pageviewsByTitle: "Pageviews by Title",
       pageviewsByTitleToday: "Pageviews by Title (Today)",
       pageviewsByTitleCustom: "Pageviews by Title (Custom Period)",
@@ -283,7 +293,9 @@ const translations = {
       backlinkSummary: "Top 10 Backlinks Summary",
       backlinkAnalysis: "Backlink Analysis (Referral Traffic)",
       reportContents: "Report Contents",
-      recipientInfo: "Recipient Information"
+      recipientInfo: "Recipient Information",
+      trafficSourceByDomain: "Traffic Source by Domain",
+      trafficByDomainTop10: "Top 7 Traffic by Domain"
     },
     
     // Buttons
@@ -314,7 +326,9 @@ const translations = {
       periodBRatio: "Period B %",
       sourceSite: "Source Site",
       landingPage: "Landing Page",
-      sessions: "Sessions"
+      sessions: "Sessions",
+      domain: "Domain",
+      channel: "Channel"
     },
     
     // Labels
@@ -394,7 +408,11 @@ const translations = {
       loadingHeatmap: "Loading heatmap data...",
       demographicsDesc: "Analyze user demographics by gender and age for targeted marketing!",
       selectDateForDemographics: "Select dates to view gender/age demographics analysis!",
-      loadingDemographics: "Loading gender/age demographics data..."
+      loadingDemographics: "Loading gender/age demographics data...",
+      selectDateForTrafficSource: "Select dates to view traffic distribution by domain!",
+      selectDateForTrafficTable: "Select dates to view traffic volume by domain!",
+      loadingTrafficSource: "Loading traffic source data...",
+      loadingTrafficTable: "Loading traffic volume by domain..."
     },
     
     // Heatmap
@@ -501,6 +519,7 @@ const translations = {
     
     // 部分标题
     sectionTitles: {
+      dailyChartTitle: "日间图表",
       pageviewsByTitle: "按标题统计浏览量",
       pageviewsByTitleToday: "按标题统计浏览量 (今日)",
       pageviewsByTitleCustom: "按标题统计浏览量 (指定期间)",
@@ -513,7 +532,9 @@ const translations = {
       backlinkSummary: "前10个反向链接汇总",
       backlinkAnalysis: "反向链接分析 (外部流量)",
       reportContents: "报告内容",
-      recipientInfo: "收件人信息"
+      recipientInfo: "收件人信息",
+      trafficSourceByDomain: "按域名分类的流量来源",
+      trafficByDomainTop10: "按域名访问量前7名"
     },
     
     // 按钮
@@ -544,7 +565,9 @@ const translations = {
       periodBRatio: "期间 B 占比",
       sourceSite: "来源网站",
       landingPage: "着陆页",
-      sessions: "会话数"
+      sessions: "会话数",
+      domain: "域名",
+      channel: "渠道"
     },
     
     // 标签
@@ -624,7 +647,11 @@ const translations = {
       loadingHeatmap: "正在加载热图数据...",
       demographicsDesc: "按性别和年龄分析用户人口统计数据，用于精准营销！",
       selectDateForDemographics: "选择日期以查看性别/年龄人口统计分析！",
-      loadingDemographics: "正在加载性别/年龄人口统计数据..."
+      loadingDemographics: "正在加载性别/年龄人口统计数据...",
+      selectDateForTrafficSource: "选择日期以查看按域名分类的流量分布！",
+      selectDateForTrafficTable: "选择日期以查看按域名的访问量！",
+      loadingTrafficSource: "正在加载流量来源数据...",
+      loadingTrafficTable: "正在加载按域名的访问量..."
     },
     
     // 热图

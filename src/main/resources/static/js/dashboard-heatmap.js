@@ -30,6 +30,8 @@ async function fetchHeatmapData() {
         heatmapData = data;
         window.heatmapData = data; // window에도 저장
         renderHeatmap(data);
+        
+        // 트래픽 소스는 이제 일간 차트에서 직접 호출하므로 여기서는 호출하지 않음
     } catch (error) {
         console.error('히트맵 데이터 오류:', error);
         showError('히트맵 데이터를 불러올 수 없습니다 😢');
@@ -61,7 +63,6 @@ function renderHeatmap(data) {
     // 히트맵 HTML 생성
     let html = `
         <div class="heatmap-wrapper">
-            <h3 class="heatmap-title">${window.t ? window.t('heatmap.title') : '시간대별 활동'}</h3>
             <div class="heatmap-grid">
                 <div class="heatmap-hours">
                     ${generateHourLabels()}
@@ -585,8 +586,6 @@ function renderDemographicsHeatmap(data) {
     // 차트 HTML 생성
     let html = `
         <div class="demographics-chart-wrapper">
-            <h3 class="demographics-title">${window.t ? window.t('demographics.title') : '성별/연령별 활동'}</h3>
-            
             <div class="demographics-charts-container">
                 <div class="demographics-chart-box">
                     <h4 class="chart-subtitle">👨 ${window.t ? window.t('demographics.male') : '남성'}</h4>
@@ -678,15 +677,54 @@ function createDemographicsCharts(data) {
             }
         },
         scales: {
-            y: {
+            'y-pageviews': {
+                type: 'linear',
+                display: true,
+                position: 'left',
                 beginAtZero: true,
+                title: {
+                    display: true,
+                    text: window.t ? window.t('demographics.pageViews') : '페이지뷰',
+                    font: {
+                        size: 10
+                    }
+                },
                 ticks: {
                     font: {
                         size: 10
                     },
+                    color: 'rgba(96, 165, 250, 1)',
                     callback: function(value) {
                         return new Intl.NumberFormat('ko-KR').format(Math.round(value));
                     }
+                },
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                }
+            },
+            'y-users': {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: window.t ? window.t('demographics.activeUsers') : '활성 사용자',
+                    font: {
+                        size: 10
+                    }
+                },
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    color: 'rgba(236, 72, 153, 1)',
+                    callback: function(value) {
+                        return new Intl.NumberFormat('ko-KR').format(Math.round(value));
+                    }
+                },
+                grid: {
+                    drawOnChartArea: false
                 }
             },
             x: {
@@ -716,7 +754,7 @@ function createDemographicsCharts(data) {
                 backgroundColor: 'rgba(249, 168, 212, 0.8)',
                 borderColor: 'rgba(249, 168, 212, 1)',
                 borderWidth: 1,
-                yAxisID: 'y',
+                yAxisID: 'y-pageviews',
                 order: 2
             }, {
                 type: 'line',
@@ -726,7 +764,7 @@ function createDemographicsCharts(data) {
                 backgroundColor: 'rgba(236, 72, 153, 0.1)',
                 borderWidth: 2,
                 tension: 0.3,
-                yAxisID: 'y',
+                yAxisID: 'y-users',
                 order: 1
             }]
         },
@@ -745,7 +783,7 @@ function createDemographicsCharts(data) {
                 backgroundColor: 'rgba(96, 165, 250, 0.8)',
                 borderColor: 'rgba(96, 165, 250, 1)',
                 borderWidth: 1,
-                yAxisID: 'y',
+                yAxisID: 'y-pageviews',
                 order: 2
             }, {
                 type: 'line',
@@ -755,7 +793,7 @@ function createDemographicsCharts(data) {
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 borderWidth: 2,
                 tension: 0.3,
-                yAxisID: 'y',
+                yAxisID: 'y-users',
                 order: 1
             }]
         },

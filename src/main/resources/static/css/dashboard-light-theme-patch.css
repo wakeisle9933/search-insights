@@ -134,3 +134,24 @@ body.light-theme .filter-btn {
 body.light-theme .quick-date-btn {
   color: #1f2937 !important;
 }
+
+/* 라이트 테마 차트 및 인사이트 컨테이너 스타일 */
+body.light-theme #chart-container,
+body.light-theme #heatmap-container,
+body.light-theme #demographics-heatmap-container,
+body.light-theme #traffic-source-container,
+body.light-theme #domain-top-container {
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 호버 효과 추가 */
+body.light-theme #chart-container:hover,
+body.light-theme #heatmap-container:hover,
+body.light-theme #demographics-heatmap-container:hover,
+body.light-theme #traffic-source-container:hover,
+body.light-theme #domain-top-container:hover {
+  border-color: rgba(8, 145, 178, 0.4) !important;
+  box-shadow: 0 0 20px rgba(8, 145, 178, 0.08) !important;
+}
