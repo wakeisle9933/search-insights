@@ -142,15 +142,27 @@ function renderBacklinkData(data) {
 // 백링크 업데이트 시간 갱신
 function updateBacklinkTime() {
   const now = new Date();
-  const timeString = now.getFullYear() + '년 ' +
-      (now.getMonth() + 1) + '월 ' +
-      now.getDate() + '일 ' +
-      now.getHours() + '시 ' +
-      now.getMinutes() + '분 ' +
-      now.getSeconds() + '초';
+  
+  // 현재 언어에 맞는 로케일 설정
+  const locale = window.getCurrentLanguage ? 
+    (window.getCurrentLanguage() === 'ko' ? 'ko-KR' : 
+     window.getCurrentLanguage() === 'en' ? 'en-US' : 'zh-CN') : 'ko-KR';
+  
+  // 로케일에 맞는 시간 형식
+  const timeString = now.toLocaleString(locale, {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+  });
   
   const lastUpdateText = typeof t === 'function' ? t('labels.lastUpdate') : '마지막 업데이트';
-  document.getElementById('backlink-update-time').innerHTML = `${lastUpdateText}: ${timeString}`;
+  const timeElement = document.getElementById('backlink-update-time');
+  if (timeElement) {
+    timeElement.innerHTML = `<span data-i18n="labels.lastUpdate">${lastUpdateText}</span>: ${timeString}`;
+  }
 }
 
 // 도메인 필터 드롭다운 업데이트
@@ -160,17 +172,25 @@ function updateDomainFilter(data) {
   // 기존 옵션 초기화 (전체 도메인 옵션은 유지)
   domainFilter.innerHTML = `<option value="">${typeof t === 'function' ? t('filters.allDomains') : '전체 도메인'}</option>`;
   
-  // 중복 제거한 도메인 목록 추출
-  const domains = [...new Set(data.map(item => item.sourceSite))];
+  // 도메인별 카운트 계산
+  const domainCounts = {};
+  data.forEach(item => {
+    if (!domainCounts[item.sourceSite]) {
+      domainCounts[item.sourceSite] = 0;
+    }
+    domainCounts[item.sourceSite]++;
+  });
   
-  // 도메인 정렬
-  domains.sort();
+  // 도메인 목록을 카운트 기준으로 내림차순 정렬
+  const sortedDomains = Object.entries(domainCounts)
+    .sort((a, b) => b[1] - a[1])  // 카운트가 많은 순으로 정렬
+    .map(([domain, count]) => ({ domain, count }));
   
   // 드롭다운에 옵션 추가
-  domains.forEach(domain => {
+  sortedDomains.forEach(({ domain, count }) => {
     const option = document.createElement('option');
     option.value = domain;
-    option.textContent = domain;
+    option.textContent = `${domain} (${count})`;
     domainFilter.appendChild(option);
   });
 }

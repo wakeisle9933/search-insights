@@ -190,6 +190,14 @@ window.refreshCurrentContent = function() {
       updateTime(elementId);
     }
   });
+  
+  // 백링크 업데이트 시간도 갱신
+  const backlinkTimeElement = document.getElementById('backlink-update-time');
+  if (backlinkTimeElement && !backlinkTimeElement.textContent.endsWith(': -')) {
+    if (typeof updateBacklinkTime === 'function') {
+      updateBacklinkTime();
+    }
+  }
 };
 
 // 자동 업데이트 리스너 초기화

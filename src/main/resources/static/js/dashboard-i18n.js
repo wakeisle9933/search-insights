@@ -801,6 +801,14 @@ function updateAllTranslations() {
     document.title = t('pageTitle') + ' - Search Insights';
   }
   
+  // 백링크 업데이트 시간이 있다면 갱신
+  const backlinkTimeElement = document.getElementById('backlink-update-time');
+  if (backlinkTimeElement && !backlinkTimeElement.textContent.endsWith(': -')) {
+    if (typeof updateBacklinkTime === 'function') {
+      updateBacklinkTime();
+    }
+  }
+  
   // 언어 셀렉트박스 업데이트
   const languageSelect = document.querySelector('.language-select');
   if (languageSelect) {
@@ -836,19 +844,28 @@ const languageNames = {
 // 카테고리 드롭다운 업데이트 함수
 function updateCategoryDropdowns() {
   const allCategoriesText = t('labels.allCategories');
+  const allDomainsText = t('filters.allDomains');
   
   // 모든 카테고리 드롭다운 찾기
-  const dropdowns = [
+  const categoryDropdowns = [
     document.getElementById('today-full-category-select'),
-    document.getElementById('custom-date-full-category-select')
+    document.getElementById('custom-date-full-category-select'),
+    document.getElementById('daily-detail-full-category-select'),
+    document.getElementById('hourly-detail-full-category-select')
   ];
   
-  dropdowns.forEach(dropdown => {
+  categoryDropdowns.forEach(dropdown => {
     if (dropdown && dropdown.options.length > 0) {
       // 첫 번째 옵션(전체 카테고리)의 텍스트 업데이트
       dropdown.options[0].textContent = allCategoriesText;
     }
   });
+  
+  // 백링크 도메인 드롭다운 업데이트
+  const domainDropdown = document.getElementById('backlink-domain-filter');
+  if (domainDropdown && domainDropdown.options.length > 0) {
+    domainDropdown.options[0].textContent = allDomainsText;
+  }
 }
 
 // 다음 언어로 순환
