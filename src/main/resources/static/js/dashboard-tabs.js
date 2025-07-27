@@ -88,7 +88,7 @@ function showMainTab(tabName) {
       initBacklinkTab();
     }
   } else if (tabName === 'report-send') {
-    document.querySelector('.main-tab:nth-child(7)').classList.add('active');
+    document.querySelector('.main-tab:nth-child(8)').classList.add('active');
     document.getElementById('report-send-content').classList.add('active');
     // 리포트 탭 초기화
     if (typeof initReportTab === 'function') {

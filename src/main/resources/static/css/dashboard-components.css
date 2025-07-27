@@ -3,9 +3,11 @@
 /* 메인 탭 스타일링 */
 .main-tabs {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 25px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   gap: 5px;
+  row-gap: 3px;
 }
 .main-tab {
   padding: 12px 24px;
@@ -50,6 +52,15 @@
               inset 0 1px 0 rgba(255, 255, 255, 0.05);
   opacity: 0.95;
 }
+
+/* 빈 줄바꿈 요소 스타일 */
+.tab-break {
+  flex-basis: 100%;
+  height: 0;
+  width: 0;
+  overflow: hidden;
+}
+
 
 /* 서브 탭 스타일링 */
 .sub-tabs {
