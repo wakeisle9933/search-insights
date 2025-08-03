@@ -364,3 +364,4 @@ window.initReportTab = initReportTab;
 window.validateReportDates = validateReportDates;
 window.loadRecipientEmail = loadRecipientEmail;
 window.sendReport = sendReport;
+window.groupByPrefix = groupByPrefix;

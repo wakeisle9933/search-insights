@@ -68,7 +68,7 @@ class SearchConsoleService (
         
         // 전체 데이터가 첫 배치에 다 들어왔으면 바로 반환
         if (firstBatch.size < rowLimit) {
-            logger.info("전체 데이터 ${firstBatch.size}개 - 한 번에 로드 완료! 🎉")
+            // 로그 제거 - 테스트 완료
             return@coroutineScope firstBatch
         }
         
@@ -122,7 +122,7 @@ class SearchConsoleService (
                 .setStartRow(startRow)
             
             val response = searchConsoleClient.searchanalytics().query(domain, request).execute()
-            logger.info("GSC 배치 로드: ${response.rows?.size ?: 0}개 (startRow: $startRow, date: $startDate)")
+            // 로그 제거 - 테스트 완료
             response.rows ?: emptyList()
         } catch (e: Exception) {
             logger.error("배치 로드 실패 (startRow: $startRow): ${e.message}", e)

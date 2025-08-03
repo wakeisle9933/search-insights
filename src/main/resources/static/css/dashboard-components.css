@@ -1561,3 +1561,96 @@ body.light-theme .waffle-legend-value {
   border-right: 5px solid transparent;
   border-top: 5px solid rgba(0, 0, 0, 0.9);
 }
+
+/* 유입 쿼리 관련 스타일 */
+.date-selector-section {
+  margin: 20px 0;
+}
+
+.fetch-button-area {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.summary-info {
+  display: flex;
+  gap: 30px;
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.light-theme .summary-info {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summary-label {
+  font-size: 0.9em;
+  color: #a1a1aa;
+  font-weight: 500;
+}
+
+.light-theme .summary-label {
+  color: #6b7280;
+}
+
+.summary-value {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #0891b2;
+}
+
+.light-theme .summary-value {
+  color: #0e7490;
+}
+
+/* 유입 쿼리 검색어 스크롤 스타일 */
+#search-query-content .dashboard-table td:nth-child(2) div {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f0f0f0;
+}
+
+#search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar {
+  height: 6px;
+}
+
+#search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+#search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+#search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* 다크 테마에서의 스크롤바 스타일 */
+body:not(.light-theme) #search-query-content .dashboard-table td:nth-child(2) div {
+  scrollbar-color: rgba(0, 212, 255, 0.3) rgba(255, 255, 255, 0.05);
+}
+
+body:not(.light-theme) #search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body:not(.light-theme) #search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+}
+
+body:not(.light-theme) #search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.5);
+}

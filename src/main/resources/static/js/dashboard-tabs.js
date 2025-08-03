@@ -94,8 +94,15 @@ function showMainTab(tabName) {
     if (typeof initFlowTab === 'function') {
       initFlowTab();
     }
-  } else if (tabName === 'report-send') {
+  } else if (tabName === 'search-query') {
     document.querySelector('.main-tab:nth-child(9)').classList.add('active');
+    document.getElementById('search-query-content').classList.add('active');
+    // 유입 쿼리 탭 초기화
+    if (typeof initSearchQueryTab === 'function') {
+      initSearchQueryTab();
+    }
+  } else if (tabName === 'report-send') {
+    document.querySelector('.main-tab:nth-child(10)').classList.add('active');
     document.getElementById('report-send-content').classList.add('active');
     // 리포트 탭 초기화
     if (typeof initReportTab === 'function') {

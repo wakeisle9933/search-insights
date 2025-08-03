@@ -1,5 +1,6 @@
 package com.si.main.searchinsights.controller
 
+import com.si.main.searchinsights.data.PrefixSummary
 import com.si.main.searchinsights.enum.ErrorCode
 import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.exception.BusinessException
@@ -127,5 +128,121 @@ class SearchConsoleController(
         
         return Pair(fromDate, toDate)
     }
+    
+    @Operation(
+        summary = "Search Console 유입 쿼리 조회",
+        description = "지정된 기간의 검색 쿼리 및 페이지 정보를 조회 (기본값: 오늘로부터 3일 전)"
+    )
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "조회 성공"),
+        ApiResponse(responseCode = "400", description = "잘못된 날짜 형식")
+    ])
+    @GetMapping("/api/search-queries")
+    fun getSearchQueries(
+        @Parameter(
+            description = "시작일 (yyyy-MM-dd)",
+            example = "2025-02-01",
+            schema = Schema(
+                type = "string",
+                pattern = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+            )
+        )
+        @RequestParam(required = false) fromDate: String? = null,
+
+        @Parameter(
+            description = "종료일 (yyyy-MM-dd)",
+            example = "2025-02-01",
+            schema = Schema(
+                type = "string",
+                pattern = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+            )
+        )
+        @RequestParam(required = false) toDate: String? = null
+    ): SearchQueryResponse {
+        // 기본값 설정 - 날짜 값이 null이면 3일 전 날짜 사용
+        val defaultDate = LocalDate.now().minusDays(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        val effectiveFromDate = fromDate ?: defaultDate
+        val effectiveToDate = toDate ?: defaultDate
+
+        // 날짜 유효성 검사
+        val dateRange = validateDateRange(effectiveFromDate, effectiveToDate)
+
+        // Search Console API 호출
+        val searchAnalyticsData = searchConsoleService.fetchSearchAnalyticsData(dateRange.first, dateRange.second)
+
+        // 데이터 체크
+        if (searchAnalyticsData.isEmpty()) {
+            logger.warn("📭 선택한 기간에 데이터가 없습니다. (기간: ${dateRange.first} ~ ${dateRange.second})")
+            return SearchQueryResponse(
+                summary = SearchQuerySummary(0, 0, 0, 0.0),
+                queries = emptyList(),
+                prefixSummaries = emptyList()
+            )
+        }
+
+        // 중복 제거 (SpreadSheetService의 로직과 동일)
+        val uniqueQueries = searchAnalyticsData.asSequence()
+            .groupBy { it.getKeys()[0] }  // query로 그룹화
+            .map { (_, rows) -> 
+                rows.maxByOrNull { it.impressions } ?: rows.first()  // 가장 높은 impressions 유지
+            }
+            .toList()
+
+        // 항상 전체 데이터를 반환 (클라이언트에서 접두어 분석 처리)
+        // 전체 데이터 기준 요약 정보 계산
+        val totalQueries = uniqueQueries.size
+        val totalClicks = uniqueQueries.sumOf { it.clicks.toInt() }
+        val totalImpressions = uniqueQueries.sumOf { it.impressions.toInt() }
+        val avgPosition = if (uniqueQueries.isEmpty()) 0.0 else 
+            uniqueQueries.map { it.position }.average()
+
+        // 전체 데이터를 변환하여 반환 (클라이언트에서 접두어 분석을 위해)
+        val allQueries = uniqueQueries.asSequence()
+            .map { row ->
+                SearchQueryData(
+                    query = row.getKeys()[0],
+                    position = kotlin.math.floor(row.position * 100) / 100,
+                    clicks = row.clicks.toInt(),
+                    impressions = row.impressions.toInt(),
+                    ctr = kotlin.math.floor(row.ctr * 100) / 100,
+                    pageLink = row.getKeys()[1]
+                )
+            }
+            .sortedByDescending { it.impressions }  // impressions 기준 내림차순 정렬
+            .toList()  // 전체 데이터
+
+        return SearchQueryResponse(
+            summary = SearchQuerySummary(
+                totalQueries = totalQueries,
+                totalClicks = totalClicks,
+                totalImpressions = totalImpressions,
+                avgPosition = kotlin.math.floor(avgPosition * 10) / 10
+            ),
+            queries = allQueries,
+            prefixSummaries = emptyList()
+        )
+    }
 
 }
+
+data class SearchQueryResponse(
+    val summary: SearchQuerySummary,
+    val queries: List<SearchQueryData>,
+    val prefixSummaries: List<PrefixSummary> = emptyList()
+)
+
+data class SearchQuerySummary(
+    val totalQueries: Int,
+    val totalClicks: Int,
+    val totalImpressions: Int,
+    val avgPosition: Double
+)
+
+data class SearchQueryData(
+    val query: String,
+    val position: Double,
+    val clicks: Int,
+    val impressions: Int,
+    val ctr: Double,
+    val pageLink: String
+)

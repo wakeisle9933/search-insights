@@ -13,6 +13,7 @@ const translations = {
       dailyChart: "차트 및 인사이트",
       backlinkCheck: "백링크",
       flow: "플로우",
+      searchQuery: "유입 쿼리",
       reportSend: "리포트 발송"
     },
     
@@ -22,7 +23,8 @@ const translations = {
       prefix1: "접두어 (1단어)",
       prefix2: "접두어 (2단어)",
       prefix3: "접두어 (3단어)",
-      byCategory: "카테고리별"
+      byCategory: "카테고리별",
+      allQueries: "전체 쿼리"
     },
     
     // 대시보드 박스 제목
@@ -37,12 +39,14 @@ const translations = {
       dailyChart: "차트 및 인사이트",
       backlinkCheck: "백링크",
       flow: "사용자 플로우 분석",
+      searchQuery: "유입 쿼리 분석",
       reportSend: "Search Insights 리포트 발송",
       demographicsHeatmap: "성별/연령별 분석"
     },
     
     // 섹션 제목
     sectionTitles: {
+      searchQueryResults: "검색 쿼리 조회 결과",
       dailyChartTitle: "일간 차트",
       pageviewsByTitle: "페이지 제목별 조회수",
       pageviewsByTitleToday: "페이지 제목별 조회수 (오늘)",
@@ -71,7 +75,12 @@ const translations = {
       resetCategories: "카테고리 전체 초기화",
       themeToggle: "테마 변경",
       languageToggle: "언어 변경",
-      sendReport: "리포트 발송하기"
+      sendReport: "리포트 발송하기",
+      yesterday: "어제",
+      last7days: "최근 7일",
+      last30days: "최근 30일",
+      last90days: "최근 90일",
+      customDate: "직접 선택"
     },
     
     // 테이블 헤더
@@ -96,7 +105,14 @@ const translations = {
       landingPage: "랜딩 페이지",
       sessions: "세션수",
       domain: "도메인",
-      channel: "채널"
+      channel: "채널",
+      query: "검색어",
+      position: "포지션",
+      clicks: "클릭수",
+      impressions: "노출수",
+      ctr: "CTR(%)",
+      pageLink: "페이지 링크",
+      prefix: "접두어"
     },
     
     // 라벨
@@ -114,7 +130,11 @@ const translations = {
       reportPeriod: "리포트 기간 선택",
       recipient: "수신자:",
       domainFilter: "도메인 선택:",
-      searchPage: "페이지 검색:"
+      searchPage: "페이지 검색:",
+      totalQueries: "총 쿼리 수:",
+      totalClicks: "총 클릭수:",
+      totalImpressions: "총 노출수:",
+      avgPosition: "평균 순위:"
     },
     
     // 차트 라벨
@@ -126,10 +146,13 @@ const translations = {
     // 빠른 선택 버튼
     quickDates: {
       today: "오늘",
+      yesterday: "어제",
+      latestAvailable: "가장 최근 (3일 전)",
       days3: "3일",
       days7: "7일",
       weeks2: "2주",
       month1: "한달",
+      month3: "3달",
       months3: "3개월"
     },
     
@@ -184,7 +207,9 @@ const translations = {
       selectDateForTrafficTable: "날짜를 선택하면 도메인별 접속량이 표시됩니다!",
       loadingTrafficSource: "트래픽 소스 데이터를 불러오는 중...",
       loadingTrafficTable: "도메인별 접속량을 불러오는 중...",
-      loadingDemographicsDetail: "성별/연령별 상세 데이터를 불러오는 중..."
+      loadingDemographicsDetail: "성별/연령별 상세 데이터를 불러오는 중...",
+      selectDateToFetch: "날짜를 선택하고 조회하기 버튼을 클릭해주세요.",
+      searchQueryDesc: "사용자들이 어떤 검색어로 사이트에 방문했는지 분석해보세요! 검색 순위, 클릭수, 노출수 등 다양한 지표를 확인할 수 있어요."
     },
     
     // 히트맵
@@ -283,6 +308,7 @@ const translations = {
       dailyChart: "Charts & Insights",
       backlinkCheck: "Backlinks",
       flow: "Flow",
+      searchQuery: "Search Queries",
       reportSend: "Send Report"
     },
     
@@ -292,7 +318,8 @@ const translations = {
       prefix1: "Prefix (1 word)",
       prefix2: "Prefix (2 words)",
       prefix3: "Prefix (3 words)",
-      byCategory: "By Category"
+      byCategory: "By Category",
+      allQueries: "All Queries"
     },
     
     // Dashboard box titles
@@ -307,12 +334,14 @@ const translations = {
       dailyChart: "Charts & Insights",
       backlinkCheck: "Backlinks",
       flow: "User Flow Analysis",
+      searchQuery: "Search Query Analysis",
       reportSend: "Search Insights Report",
       demographicsHeatmap: "Gender/Age Analysis"
     },
     
     // Section titles
     sectionTitles: {
+      searchQueryResults: "Search Query Results",
       dailyChartTitle: "Daily Chart",
       pageviewsByTitle: "Pageviews by Title",
       pageviewsByTitleToday: "Pageviews by Title (Today)",
@@ -341,7 +370,12 @@ const translations = {
       resetCategories: "Reset All Categories",
       themeToggle: "Toggle Theme",
       languageToggle: "Change Language",
-      sendReport: "Send Report"
+      sendReport: "Send Report",
+      yesterday: "Yesterday",
+      last7days: "Last 7 days",
+      last30days: "Last 30 days",
+      last90days: "Last 90 days",
+      customDate: "Custom"
     },
     
     // Table headers
@@ -366,7 +400,14 @@ const translations = {
       landingPage: "Landing Page",
       sessions: "Sessions",
       domain: "Domain",
-      channel: "Channel"
+      channel: "Channel",
+      query: "Query",
+      position: "Position",
+      clicks: "Clicks",
+      impressions: "Impressions",
+      ctr: "CTR(%)",
+      pageLink: "Page Link",
+      prefix: "Prefix"
     },
     
     // Labels
@@ -384,7 +425,11 @@ const translations = {
       reportPeriod: "Select Report Period",
       recipient: "Recipient:",
       domainFilter: "Select Domain:",
-      searchPage: "Search Page:"
+      searchPage: "Search Page:",
+      totalQueries: "Total Queries:",
+      totalClicks: "Total Clicks:",
+      totalImpressions: "Total Impressions:",
+      avgPosition: "Avg Position:"
     },
     
     // Chart labels
@@ -396,10 +441,13 @@ const translations = {
     // Quick date buttons
     quickDates: {
       today: "Today",
+      yesterday: "Yesterday",
+      latestAvailable: "Latest Available (3 days ago)",
       days3: "3 Days",
       days7: "7 Days",
       weeks2: "2 Weeks",
       month1: "1 Month",
+      month3: "3 Months",
       months3: "3 Months"
     },
     
@@ -454,7 +502,9 @@ const translations = {
       selectDateForTrafficTable: "Select dates to view traffic volume by domain!",
       loadingTrafficSource: "Loading traffic source data...",
       loadingTrafficTable: "Loading traffic volume by domain...",
-      loadingDemographicsDetail: "Loading gender/age demographic detail data..."
+      loadingDemographicsDetail: "Loading gender/age demographic detail data...",
+      selectDateToFetch: "Please select dates and click the fetch button.",
+      searchQueryDesc: "Analyze which search queries users used to visit your site! Check various metrics including search rankings, clicks, and impressions."
     },
     
     // Heatmap
@@ -553,6 +603,7 @@ const translations = {
       dailyChart: "图表及洞察",
       backlinkCheck: "反向链接",
       flow: "流程",
+      searchQuery: "搜索查询",
       reportSend: "发送报告"
     },
     
@@ -562,7 +613,8 @@ const translations = {
       prefix1: "前缀 (1个词)",
       prefix2: "前缀 (2个词)",
       prefix3: "前缀 (3个词)",
-      byCategory: "按分类"
+      byCategory: "按分类",
+      allQueries: "全部查询"
     },
     
     // 仪表板框标题
@@ -577,12 +629,14 @@ const translations = {
       dailyChart: "图表及洞察",
       backlinkCheck: "反向链接",
       flow: "用户流程分析",
+      searchQuery: "搜索查询分析",
       reportSend: "Search Insights 报告发送",
       demographicsHeatmap: "性别/年龄分析"
     },
     
     // 部分标题
     sectionTitles: {
+      searchQueryResults: "搜索查询结果",
       dailyChartTitle: "日间图表",
       pageviewsByTitle: "按标题统计浏览量",
       pageviewsByTitleToday: "按标题统计浏览量 (今日)",
@@ -611,7 +665,12 @@ const translations = {
       resetCategories: "重置所有分类",
       themeToggle: "切换主题",
       languageToggle: "切换语言",
-      sendReport: "发送报告"
+      sendReport: "发送报告",
+      yesterday: "昨天",
+      last7days: "最近7天",
+      last30days: "最近30天",
+      last90days: "最近90天",
+      customDate: "自定义"
     },
     
     // 表格标题
@@ -636,7 +695,14 @@ const translations = {
       landingPage: "着陆页",
       sessions: "会话数",
       domain: "域名",
-      channel: "渠道"
+      channel: "渠道",
+      query: "查询",
+      position: "位置",
+      clicks: "点击",
+      impressions: "展示",
+      ctr: "点击率(%)",
+      pageLink: "页面链接",
+      prefix: "前缀"
     },
     
     // 标签
@@ -654,7 +720,11 @@ const translations = {
       reportPeriod: "选择报告期间",
       recipient: "收件人:",
       domainFilter: "选择域名:",
-      searchPage: "搜索页面:"
+      searchPage: "搜索页面:",
+      totalQueries: "总查询数:",
+      totalClicks: "总点击数:",
+      totalImpressions: "总展示数:",
+      avgPosition: "平均排名:"
     },
     
     // 图表标签
@@ -666,10 +736,13 @@ const translations = {
     // 快速日期按钮
     quickDates: {
       today: "今天",
+      yesterday: "昨天",
+      latestAvailable: "最新可用 (3天前)",
       days3: "3天",
       days7: "7天",
       weeks2: "2周",
       month1: "1个月",
+      month3: "3个月",
       months3: "3个月"
     },
     
@@ -724,7 +797,9 @@ const translations = {
       selectDateForTrafficTable: "选择日期以查看按域名的访问量！",
       loadingTrafficSource: "正在加载流量来源数据...",
       loadingTrafficTable: "正在加载按域名的访问量...",
-      loadingDemographicsDetail: "正在加载性别/年龄详细数据..."
+      loadingDemographicsDetail: "正在加载性别/年龄详细数据...",
+      selectDateToFetch: "请选择日期并点击查询按钮。",
+      searchQueryDesc: "分析用户使用哪些搜索词访问您的网站！查看搜索排名、点击数、展示次数等各种指标。"
     },
     
     // 热图
