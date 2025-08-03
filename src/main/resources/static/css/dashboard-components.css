@@ -1654,3 +1654,8 @@ body:not(.light-theme) #search-query-content .dashboard-table td:nth-child(2) di
 body:not(.light-theme) #search-query-content .dashboard-table td:nth-child(2) div::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 212, 255, 0.5);
 }
+
+/* 유입 쿼리 prefix 모드에서 페이지 링크 헤더 숨기기 */
+#search-query-results-table.prefix-mode .page-link-header {
+  display: none !important;
+}

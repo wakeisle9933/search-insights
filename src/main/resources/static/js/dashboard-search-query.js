@@ -37,18 +37,32 @@ function showSearchQuerySubTab(tab) {
 
 // 테이블 헤더 업데이트 함수
 function updateSearchQueryTableHeaders(isPrefix) {
-    const thead = document.querySelector('#search-query-content .dashboard-table thead tr');
-    if (!thead) return;
+    const table = document.getElementById('search-query-results-table');
+    if (!table) return;
     
-    const headers = thead.querySelectorAll('th');
-    if (headers.length > 6) {
-        // 페이지 링크 헤더 표시/숨김
-        headers[6].style.display = isPrefix ? 'none' : '';
+    // 테이블에 prefix 모드 클래스 추가/제거
+    if (isPrefix) {
+        table.classList.add('prefix-mode');
+    } else {
+        table.classList.remove('prefix-mode');
+    }
+    
+    // 페이지 링크 헤더 선택
+    const pageLinkHeader = table.querySelector('.page-link-header');
+    if (pageLinkHeader) {
+        pageLinkHeader.style.display = isPrefix ? 'none' : '';
+        // 강제로 display 속성 설정 (인라인 스타일로)
+        if (isPrefix) {
+            pageLinkHeader.style.setProperty('display', 'none', 'important');
+        } else {
+            pageLinkHeader.style.removeProperty('display');
+        }
     }
     
     // 검색어/접두어 헤더 텍스트 변경
-    if (headers[1]) {
-        headers[1].innerHTML = isPrefix ? 
+    const queryHeader = table.querySelector('thead th:nth-child(2)');
+    if (queryHeader) {
+        queryHeader.innerHTML = isPrefix ? 
             (window.t ? window.t('tableHeaders.prefix') : '접두어') : 
             (window.t ? window.t('tableHeaders.query') : '검색어');
     }
