@@ -12,6 +12,7 @@ const translations = {
       comparison: "기간 비교",
       dailyChart: "차트 및 인사이트",
       backlinkCheck: "백링크",
+      flow: "플로우",
       reportSend: "리포트 발송"
     },
     
@@ -35,6 +36,7 @@ const translations = {
       comparisonAnalysis: "기간 비교 분석",
       dailyChart: "차트 및 인사이트",
       backlinkCheck: "백링크",
+      flow: "사용자 플로우 분석",
       reportSend: "Search Insights 리포트 발송",
       demographicsHeatmap: "성별/연령별 분석"
     },
@@ -56,7 +58,9 @@ const translations = {
       reportContents: "리포트 포함 내용",
       recipientInfo: "수신자 정보",
       trafficSourceByDomain: "도메인별 트래픽 소스",
-      trafficByDomainTop10: "도메인별 접속량 TOP 7"
+      trafficByDomainTop10: "도메인별 접속량 TOP 7",
+      topPages: "상위 페이지 TOP 20",
+      flowDetail: "사용자 플로우 상세"
     },
     
     // 버튼
@@ -74,9 +78,12 @@ const translations = {
     tableHeaders: {
       rank: "순번",
       pageTitle: "페이지 제목",
+      pagePath: "페이지 경로",
       postTitle: "포스트 제목",
       views: "조회수",
+      pageViews: "조회수",
       ratio: "비율",
+      actions: "분석",
       prefix: "접두어",
       category: "카테고리",
       periodA: "기간 A",
@@ -106,7 +113,8 @@ const translations = {
       autoRefresh: "자동 새로고침 (10초)",
       reportPeriod: "리포트 기간 선택",
       recipient: "수신자:",
-      domainFilter: "도메인 선택:"
+      domainFilter: "도메인 선택:",
+      searchPage: "페이지 검색:"
     },
     
     // 차트 라벨
@@ -154,6 +162,7 @@ const translations = {
       categoryDetailTitle: "{category} 카테고리 포스트별 상세 비교",
       dailyChartDesc: "일별 방문자 추이, 시간대별 활동 패턴, 성별/연령별 분석까지! 다양한 인사이트를 한눈에 확인하세요. 차트를 클릭하면 상세 데이터를 볼 수 있어요.",
       backlinkDesc: "어느 사이트에서 우리 사이트로 유입되었는지 확인해보세요! 외부 참조 트래픽을 분석합니다.",
+      flowDesc: "사용자들이 어떤 경로로 사이트를 탐색하는지 분석해보세요! 페이지별 이동 경로를 시각화합니다.",
       loadingChart: "차트 데이터를 불러오는 중...",
       loadingData: "데이터를 불러오는 중...",
       selectDateRange: "날짜를 선택하고 조회하기 버튼을 클릭해주세요!",
@@ -197,6 +206,22 @@ const translations = {
     // 기타
     misc: {
       dataLoading: "여기에 데이터가 동적으로 삽입됩니다"
+    },
+    
+    // 플레이스홀더
+    placeholders: {
+      searchPage: "페이지 제목 또는 URL 입력"
+    },
+    
+    // 플로우 상세
+    flowDetail: {
+      totalViews: "총 조회수",
+      previousPage: "어디서 왔나? (이전 페이지)",
+      nextPage: "어디로 갔나? (다음 페이지)",
+      siteExit: "사이트 이탈",
+      analyzeFlow: "플로우 분석",
+      analyzingFlow: "플로우 데이터를 분석하는 중...",
+      searchHelp: "목록에 없는 페이지도 검색하면 분석할 수 있습니다"
     },
     
     // 리포트 내용
@@ -252,6 +277,7 @@ const translations = {
       comparison: "Period Compare",
       dailyChart: "Charts & Insights",
       backlinkCheck: "Backlinks",
+      flow: "Flow",
       reportSend: "Send Report"
     },
     
@@ -275,6 +301,7 @@ const translations = {
       comparisonAnalysis: "Period Comparison Analysis",
       dailyChart: "Charts & Insights",
       backlinkCheck: "Backlinks",
+      flow: "User Flow Analysis",
       reportSend: "Search Insights Report",
       demographicsHeatmap: "Gender/Age Analysis"
     },
@@ -296,7 +323,9 @@ const translations = {
       reportContents: "Report Contents",
       recipientInfo: "Recipient Information",
       trafficSourceByDomain: "Traffic Source by Domain",
-      trafficByDomainTop10: "Top 7 Traffic by Domain"
+      trafficByDomainTop10: "Top 7 Traffic by Domain",
+      topPages: "Top 20 Pages",
+      flowDetail: "User Flow Detail"
     },
     
     // Buttons
@@ -314,9 +343,12 @@ const translations = {
     tableHeaders: {
       rank: "Rank",
       pageTitle: "Page Title",
+      pagePath: "Page Path",
       postTitle: "Post Title",
       views: "Views",
+      pageViews: "Page Views",
       ratio: "Ratio",
+      actions: "Analysis",
       prefix: "Prefix",
       category: "Category",
       periodA: "Period A",
@@ -346,7 +378,8 @@ const translations = {
       autoRefresh: "Auto Refresh (10s)",
       reportPeriod: "Select Report Period",
       recipient: "Recipient:",
-      domainFilter: "Select Domain:"
+      domainFilter: "Select Domain:",
+      searchPage: "Search Page:"
     },
     
     // Chart labels
@@ -394,6 +427,7 @@ const translations = {
       categoryDetailTitle: "{category} Category Post Detail Comparison",
       dailyChartDesc: "Check daily visitor trends, hourly activity patterns, and demographics analysis! Get various insights at a glance. Click on charts to view detailed data.",
       backlinkDesc: "Check which sites are referring traffic to your site! Analyze external referral traffic.",
+      flowDesc: "Analyze how users navigate through your site! Visualize page-to-page navigation paths.",
       loadingChart: "Loading chart data...",
       loadingData: "Loading data...",
       selectDateRange: "Please select dates and click the search button!",
@@ -437,6 +471,22 @@ const translations = {
     // Misc
     misc: {
       dataLoading: "Data will be loaded here dynamically"
+    },
+    
+    // Placeholders
+    placeholders: {
+      searchPage: "Enter page title or URL"
+    },
+    
+    // Flow Detail
+    flowDetail: {
+      totalViews: "Total Views",
+      previousPage: "Where did they come from? (Previous Page)",
+      nextPage: "Where did they go? (Next Page)",
+      siteExit: "Exit Site",
+      analyzeFlow: "Analyze Flow",
+      analyzingFlow: "Analyzing flow data...",
+      searchHelp: "Pages not in the list can also be analyzed by searching"
     },
     
     // Report contents
@@ -492,6 +542,7 @@ const translations = {
       comparison: "期间比较",
       dailyChart: "图表及洞察",
       backlinkCheck: "反向链接",
+      flow: "流程",
       reportSend: "发送报告"
     },
     
@@ -515,6 +566,7 @@ const translations = {
       comparisonAnalysis: "期间比较分析",
       dailyChart: "图表及洞察",
       backlinkCheck: "反向链接",
+      flow: "用户流程分析",
       reportSend: "Search Insights 报告发送",
       demographicsHeatmap: "性别/年龄分析"
     },
@@ -536,7 +588,9 @@ const translations = {
       reportContents: "报告内容",
       recipientInfo: "收件人信息",
       trafficSourceByDomain: "按域名分类的流量来源",
-      trafficByDomainTop10: "按域名访问量前7名"
+      trafficByDomainTop10: "按域名访问量前7名",
+      topPages: "前20个页面",
+      flowDetail: "用户流程详情"
     },
     
     // 按钮
@@ -554,9 +608,12 @@ const translations = {
     tableHeaders: {
       rank: "排名",
       pageTitle: "页面标题",
+      pagePath: "页面路径",
       postTitle: "文章标题",
       views: "浏览量",
+      pageViews: "页面浏览量",
       ratio: "比例",
+      actions: "分析",
       prefix: "前缀",
       category: "分类",
       periodA: "期间 A",
@@ -586,7 +643,8 @@ const translations = {
       autoRefresh: "自动刷新 (10秒)",
       reportPeriod: "选择报告期间",
       recipient: "收件人:",
-      domainFilter: "选择域名:"
+      domainFilter: "选择域名:",
+      searchPage: "搜索页面:"
     },
     
     // 图表标签
@@ -634,6 +692,7 @@ const translations = {
       categoryDetailTitle: "{category} 分类文章详细比较",
       dailyChartDesc: "查看每日访客趋势、按小时活动模式以及性别/年龄分析！一目了然地获得各种洞察。点击图表可查看详细数据。",
       backlinkDesc: "查看哪些网站向您的网站引流! 分析外部引荐流量。",
+      flowDesc: "分析用户如何浏览您的网站！可视化页面间的导航路径。",
       loadingChart: "正在加载图表数据...",
       loadingData: "正在加载数据...",
       selectDateRange: "请选择日期并点击查询按钮!",
@@ -677,6 +736,22 @@ const translations = {
     // 其他
     misc: {
       dataLoading: "数据将在此处动态加载"
+    },
+    
+    // 占位符
+    placeholders: {
+      searchPage: "输入页面标题或URL"
+    },
+    
+    // 流程详情
+    flowDetail: {
+      totalViews: "总浏览量",
+      previousPage: "从哪里来？（上一页）",
+      nextPage: "到哪里去？（下一页）",
+      siteExit: "离开网站",
+      analyzeFlow: "分析流程",
+      analyzingFlow: "正在分析流程数据...",
+      searchHelp: "列表中没有的页面也可以通过搜索进行分析"
     },
     
     // 报告内容

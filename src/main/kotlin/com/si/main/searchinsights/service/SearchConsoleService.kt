@@ -12,6 +12,9 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.si.main.searchinsights.data.PageViewInfo
 import com.si.main.searchinsights.data.ReferralTraffic
 import com.si.main.searchinsights.data.TrafficSource
+import com.si.main.searchinsights.data.PageFlowData
+import com.si.main.searchinsights.data.PageFlowSource
+import com.si.main.searchinsights.data.PageFlowDestination
 import com.si.main.searchinsights.enum.ReportFrequency
 import com.si.main.searchinsights.extension.logger
 import com.si.main.searchinsights.util.DateUtils
@@ -960,6 +963,262 @@ class SearchConsoleService (
                 "pageViews" to emptyList<PageViewInfo>(),
                 "error" to (e.message ?: "Unknown error")
             )
+        }
+    }
+    
+    // 페이지 플로우 데이터 가져오기 (GA4 page_referrer 활용)
+    fun fetchPageFlowData(pagePath: String, startDate: String, endDate: String): PageFlowData {
+        logger.info("페이지 플로우 분석 시작: $pagePath ($startDate ~ $endDate)")
+        
+        // 1. 해당 페이지의 총 조회수 가져오기
+        val pageViews = fetchPageTotalViews(pagePath, startDate, endDate)
+        
+        // 2. 이전 페이지 (어디서 왔나?) 분석
+        val sources = fetchPageSources(pagePath, startDate, endDate)
+        
+        // 3. 다음 페이지 (어디로 갔나?) 분석 - 현재 페이지를 referrer로 가진 페이지들
+        val destinations = fetchPageDestinations(pagePath, startDate, endDate)
+        
+        // 페이지 제목 가져오기
+        val pageTitle = getPageTitle(pagePath, startDate, endDate)
+        
+        return PageFlowData(
+            pagePath = pagePath,
+            pageTitle = pageTitle,
+            totalViews = pageViews,
+            sources = sources,
+            destinations = destinations
+        )
+    }
+    
+    // 특정 페이지의 총 조회수
+    private fun fetchPageTotalViews(pagePath: String, startDate: String, endDate: String): Int {
+        val request = RunReportRequest.newBuilder().apply {
+            property = "properties/$propId"
+            addDateRanges(DateRange.newBuilder().apply {
+                this.startDate = startDate
+                this.endDate = endDate
+            })
+            
+            addDimensions(Dimension.newBuilder().setName("pagePath"))
+            addMetrics(Metric.newBuilder().setName("screenPageViews"))
+            
+            // 특정 페이지만 필터링
+            dimensionFilter = FilterExpression.newBuilder()
+                .setFilter(Filter.newBuilder()
+                    .setFieldName("pagePath")
+                    .setStringFilter(Filter.StringFilter.newBuilder()
+                        .setMatchType(Filter.StringFilter.MatchType.EXACT)
+                        .setValue(pagePath)
+                    )
+                ).build()
+        }.build()
+        
+        return try {
+            val response = analyticsDataClient.runReport(request)
+            response.rowsList.firstOrNull()?.getMetricValues(0)?.value?.toInt() ?: 0
+        } catch (e: Exception) {
+            logger.error("페이지 조회수 가져오기 실패: $pagePath", e)
+            0
+        }
+    }
+    
+    // 페이지로의 유입 경로 (이전 페이지) 분석
+    private fun fetchPageSources(pagePath: String, startDate: String, endDate: String): List<PageFlowSource> {
+        val request = RunReportRequest.newBuilder().apply {
+            property = "properties/$propId"
+            addDateRanges(DateRange.newBuilder().apply {
+                this.startDate = startDate
+                this.endDate = endDate
+            })
+            
+            // pageReferrer를 사용하여 이전 페이지 추적
+            addDimensions(Dimension.newBuilder().setName("pageReferrer"))
+            addDimensions(Dimension.newBuilder().setName("pagePath"))
+            addMetrics(Metric.newBuilder().setName("sessions"))
+            
+            // 현재 페이지로의 유입만 필터링
+            dimensionFilter = FilterExpression.newBuilder()
+                .setFilter(Filter.newBuilder()
+                    .setFieldName("pagePath")
+                    .setStringFilter(Filter.StringFilter.newBuilder()
+                        .setMatchType(Filter.StringFilter.MatchType.EXACT)
+                        .setValue(pagePath)
+                    )
+                ).build()
+                
+            // 세션수 기준 정렬
+            addOrderBys(OrderBy.newBuilder().apply {
+                metric = OrderBy.MetricOrderBy.newBuilder()
+                    .setMetricName("sessions")
+                    .build()
+                desc = true
+            })
+            
+            limit = 20 // 상위 20개 소스
+        }.build()
+        
+        return try {
+            val response = analyticsDataClient.runReport(request)
+            val totalSessions = response.rowsList.sumOf { 
+                it.getMetricValues(0).value.toIntOrNull() ?: 0 
+            }
+            
+            response.rowsList.map { row ->
+                val referrer = row.getDimensionValues(0).value
+                val sessions = row.getMetricValues(0).value.toIntOrNull() ?: 0
+                val percentage = if (totalSessions > 0) {
+                    (sessions.toDouble() / totalSessions * 100)
+                } else 0.0
+                
+                // 외부/내부 구분
+                val isExternal = !referrer.startsWith("/") && referrer != "(not set)"
+                
+                PageFlowSource(
+                    sourcePage = if (referrer == "(not set)") "직접 유입" else referrer,
+                    sourceTitle = if (!isExternal && referrer != "(not set)") {
+                        getPageTitle(referrer, startDate, endDate)
+                    } else "",
+                    sessions = sessions,
+                    percentage = percentage,
+                    isExternal = isExternal
+                )
+            }
+        } catch (e: Exception) {
+            logger.error("페이지 유입 경로 분석 실패: $pagePath", e)
+            emptyList()
+        }
+    }
+    
+    // 페이지에서의 이탈 경로 (다음 페이지) 분석
+    private fun fetchPageDestinations(pagePath: String, startDate: String, endDate: String): List<PageFlowDestination> {
+        // GA4에서는 다음 페이지를 직접 추적하기 어려우므로
+        // 현재 페이지를 pageReferrer로 가진 페이지들을 찾아서 분석
+        val request = RunReportRequest.newBuilder().apply {
+            property = "properties/$propId"
+            addDateRanges(DateRange.newBuilder().apply {
+                this.startDate = startDate
+                this.endDate = endDate
+            })
+            
+            addDimensions(Dimension.newBuilder().setName("pageReferrer"))
+            addDimensions(Dimension.newBuilder().setName("pagePath"))
+            addDimensions(Dimension.newBuilder().setName("pageTitle"))
+            addMetrics(Metric.newBuilder().setName("sessions"))
+            
+            // 현재 페이지가 referrer인 경우만 필터링
+            dimensionFilter = FilterExpression.newBuilder()
+                .setFilter(Filter.newBuilder()
+                    .setFieldName("pageReferrer")
+                    .setStringFilter(Filter.StringFilter.newBuilder()
+                        .setMatchType(Filter.StringFilter.MatchType.CONTAINS)
+                        .setValue(pagePath)
+                    )
+                ).build()
+                
+            addOrderBys(OrderBy.newBuilder().apply {
+                metric = OrderBy.MetricOrderBy.newBuilder()
+                    .setMetricName("sessions")
+                    .build()
+                desc = true
+            })
+            
+            limit = 20
+        }.build()
+        
+        return try {
+            val response = analyticsDataClient.runReport(request)
+            val destinations = mutableListOf<PageFlowDestination>()
+            
+            val totalSessions = response.rowsList.sumOf { 
+                it.getMetricValues(0).value.toIntOrNull() ?: 0 
+            }
+            
+            // 실제 다음 페이지들
+            response.rowsList.forEach { row ->
+                val nextPage = row.getDimensionValues(1).value
+                val nextTitle = row.getDimensionValues(2).value
+                val sessions = row.getMetricValues(0).value.toIntOrNull() ?: 0
+                val percentage = if (totalSessions > 0) {
+                    (sessions.toDouble() / totalSessions * 100)
+                } else 0.0
+                
+                destinations.add(PageFlowDestination(
+                    destinationPage = nextPage,
+                    destinationTitle = nextTitle,
+                    sessions = sessions,
+                    percentage = percentage,
+                    isExit = false
+                ))
+            }
+            
+            // 이탈률 계산 - 전체 페이지뷰 기준이 아닌, 소스에서 온 세션 기준으로 계산
+            val sourceTotalSessions = fetchPageSources(pagePath, startDate, endDate).sumOf { it.sessions }
+            val exitSessions = if (sourceTotalSessions > totalSessions) {
+                sourceTotalSessions - totalSessions
+            } else {
+                0
+            }
+            
+            // 퍼센트 재계산 (이탈 포함한 전체 기준)
+            val totalWithExit = totalSessions + exitSessions
+            val recalculatedDestinations = destinations.map { dest ->
+                dest.copy(
+                    percentage = if (totalWithExit > 0) {
+                        (dest.sessions.toDouble() / totalWithExit * 100)
+                    } else 0.0
+                )
+            }.toMutableList()
+            
+            if (exitSessions > 0) {
+                val exitPercentage = (exitSessions.toDouble() / totalWithExit * 100)
+                recalculatedDestinations.add(PageFlowDestination(
+                    destinationPage = "사이트 이탈",
+                    destinationTitle = "",
+                    sessions = exitSessions,
+                    percentage = exitPercentage,
+                    isExit = true
+                ))
+            }
+            
+            recalculatedDestinations.sortedByDescending { it.sessions }
+        } catch (e: Exception) {
+            logger.error("페이지 이탈 경로 분석 실패: $pagePath", e)
+            emptyList()
+        }
+    }
+    
+    // 페이지 제목 가져오기
+    private fun getPageTitle(pagePath: String, startDate: String, endDate: String): String {
+        val request = RunReportRequest.newBuilder().apply {
+            property = "properties/$propId"
+            addDateRanges(DateRange.newBuilder().apply {
+                this.startDate = startDate
+                this.endDate = endDate
+            })
+            
+            addDimensions(Dimension.newBuilder().setName("pagePath"))
+            addDimensions(Dimension.newBuilder().setName("pageTitle"))
+            addMetrics(Metric.newBuilder().setName("screenPageViews"))
+            
+            dimensionFilter = FilterExpression.newBuilder()
+                .setFilter(Filter.newBuilder()
+                    .setFieldName("pagePath")
+                    .setStringFilter(Filter.StringFilter.newBuilder()
+                        .setMatchType(Filter.StringFilter.MatchType.EXACT)
+                        .setValue(pagePath)
+                    )
+                ).build()
+                
+            limit = 1
+        }.build()
+        
+        return try {
+            val response = analyticsDataClient.runReport(request)
+            response.rowsList.firstOrNull()?.getDimensionValues(1)?.value ?: "(제목 없음)"
+        } catch (e: Exception) {
+            logger.warn("페이지 제목 가져오기 실패: $pagePath", e)
+            "(제목 없음)"
         }
     }
 

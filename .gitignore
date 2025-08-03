@@ -56,3 +56,9 @@ settings.local.json
 
 ### Windows ###
 nul
+
+### Python ###
+venv/
+
+### WordPress Data ###
+wp_posts_data/

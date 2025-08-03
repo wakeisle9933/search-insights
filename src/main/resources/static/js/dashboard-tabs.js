@@ -87,8 +87,15 @@ function showMainTab(tabName) {
     if (typeof initBacklinkTab === 'function') {
       initBacklinkTab();
     }
+  } else if (tabName === 'flow') {
+    document.querySelector('.main-tab:nth-child(7)').classList.add('active');
+    document.getElementById('flow-content').classList.add('active');
+    // 플로우 탭 초기화
+    if (typeof initFlowTab === 'function') {
+      initFlowTab();
+    }
   } else if (tabName === 'report-send') {
-    document.querySelector('.main-tab:nth-child(8)').classList.add('active');
+    document.querySelector('.main-tab:nth-child(9)').classList.add('active');
     document.getElementById('report-send-content').classList.add('active');
     // 리포트 탭 초기화
     if (typeof initReportTab === 'function') {

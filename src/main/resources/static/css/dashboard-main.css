@@ -120,10 +120,16 @@ input[type="checkbox"] {
 }
 
 label {
-  cursor: pointer;
   user-select: none;
   color: #b8b8bc;
   transition: color 0.2s ease;
+}
+
+/* 클릭 가능한 레이블에만 포인터 커서 적용 */
+input[type="checkbox"] + label,
+input[type="radio"] + label,
+label[for] {
+  cursor: pointer;
 }
 
 label:hover {

@@ -35,6 +35,7 @@
     <div class="main-tab" onclick="showMainTab('comparison')" data-i18n="mainTabs.comparison">⚔️ 기간 비교</div>
     <div class="main-tab" onclick="showMainTab('daily-chart')" data-i18n="mainTabs.dailyChart">📈 차트 및 인사이트</div>
     <div class="main-tab" onclick="showMainTab('backlink-check')" data-i18n="mainTabs.backlinkCheck">🔗 백링크 체크</div>
+    <div class="main-tab" onclick="showMainTab('flow')" data-i18n="mainTabs.flow">🌊 플로우</div>
     <div class="tab-break"></div>
     <div class="main-tab" onclick="showMainTab('report-send')" data-i18n="mainTabs.reportSend">📧 리포트 발송</div>
   </div>
@@ -1512,6 +1513,98 @@
     </div>
   </div>
 
+  <!-- 플로우 탭 컨텐츠 -->
+  <div id="flow-content" class="tab-content">
+    <div class="dashboard-box">
+      <div class="dashboard-title" data-i18n="dashboardTitles.flow">🌊 사용자 플로우 분석</div>
+      <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 20px;">
+        <span data-i18n="messages.flowDesc">📌 사용자들이 어떤 경로로 사이트를 탐색하는지 분석해보세요! 페이지별 이동 경로를 시각화합니다.</span>
+      </div>
+      
+      <!-- 날짜 선택 영역 -->
+      <div class="date-selector">
+        <input type="date" id="flow-start-date" onchange="validateFlowDates()" placeholder="YYYY-MM-DD">
+        <span>~</span>
+        <input type="date" id="flow-end-date" onchange="validateFlowDates()" placeholder="YYYY-MM-DD">
+        <button onclick="fetchFlowData()" class="fetch-btn">🔍 <span data-i18n="buttons.fetch">조회하기</span></button>
+      </div>
+      
+      <!-- 빠른 날짜 선택 버튼 -->
+      <div style="margin-top: 10px; margin-bottom: 15px;">
+        <span class="quick-date-label" data-i18n="labels.quickSelect">빠른 선택:</span>
+        <div class="quick-date-buttons" style="display: inline-flex; margin-left: 10px;">
+          <button class="quick-date-btn" onclick="setFlowDateRange(1)" data-i18n="quickDates.today">오늘</button>
+          <button class="quick-date-btn" onclick="setFlowDateRange(3)" data-i18n="quickDates.days3">3일</button>
+          <button class="quick-date-btn" onclick="setFlowDateRange(7)" data-i18n="quickDates.days7">7일</button>
+          <button class="quick-date-btn" onclick="setFlowDateRange(14)" data-i18n="quickDates.weeks2">2주</button>
+          <button class="quick-date-btn" onclick="setFlowDateRange(30)" data-i18n="quickDates.month1">한달</button>
+        </div>
+        <div style="display: inline-flex; align-items: center; margin-left: 20px;">
+          <input type="checkbox" id="flow-exclude-today" style="margin-right: 5px;">
+          <label for="flow-exclude-today" style="font-size: 0.85em; color: #666; cursor: pointer;" data-i18n="labels.excludeToday">
+            📅 전일 기준 (오늘 제외)
+          </label>
+        </div>
+      </div>
+      
+      <div class="update-time" id="flow-update-time"><span data-i18n="labels.lastUpdate">마지막 업데이트</span>: -</div>
+    </div>
+    
+    <!-- 초기 메시지 (조회 전) -->
+    <div id="flow-initial-message" class="dashboard-box" style="padding: 80px 20px; text-align: center;">
+      <div style="font-size: 4em; margin-bottom: 20px;">🌊</div>
+      <div style="font-size: 1.2em; color: #666;" data-i18n="messages.selectDateRange">날짜를 선택하고 조회하기 버튼을 클릭해주세요!</div>
+    </div>
+    
+    <!-- 로딩 인디케이터 -->
+    <div id="flow-loading" class="dashboard-box" style="display: none; padding: 80px 20px; text-align: center;">
+      <div class="loading-spinner" style="margin: 0 auto;"></div>
+      <div style="margin-top: 20px; font-size: 1.1em; color: #666;" data-i18n="messages.loadingData">데이터를 불러오는 중...</div>
+    </div>
+    
+    <!-- 데이터 컨텐츠 영역 (조회 후 표시) -->
+    <div id="flow-data-container" style="display: none;">
+      <!-- 상위 페이지 목록 -->
+      <div class="dashboard-box">
+        <div class="dashboard-title" data-i18n="sectionTitles.topPages">📊 상위 페이지 TOP 20</div>
+        
+        <!-- 검색 기능 -->
+        <div class="category-container" style="margin-top: 15px; margin-bottom: 15px;">
+          <label style="font-weight: 600; color: #b794f6; margin-right: 10px;" data-i18n="labels.searchPage">🔍 페이지 검색:</label>
+          <input type="text" id="flow-page-search" class="page-search-input" data-i18n-placeholder="placeholders.searchPage" placeholder="페이지 제목 또는 URL 입력" onkeyup="filterFlowPages()" style="width: 300px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;">
+          <div style="font-size: 0.85em; color: #666; margin-top: 5px; margin-left: 120px;" data-i18n="flowDetail.searchHelp">💡 목록에 없는 페이지도 검색하면 분석할 수 있습니다</div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순번</th>
+              <th data-i18n="tableHeaders.pageTitle">페이지 제목</th>
+              <th data-i18n="tableHeaders.pagePath">페이지 경로</th>
+              <th data-i18n="tableHeaders.pageViews">조회수</th>
+              <th data-i18n="tableHeaders.actions">분석</th>
+            </tr>
+          </thead>
+          <tbody id="flow-pages-table">
+            <!-- 여기에 데이터가 동적으로 삽입됩니다 -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 플로우 상세 분석 (클릭 시 표시) -->
+      <div id="flow-detail" class="dashboard-box" style="display: none;">
+        <div class="dashboard-title">
+          <span data-i18n="sectionTitles.flowDetail">📄 사용자 플로우 상세</span>
+          <button onclick="closeFlowDetail()" style="float: right; background: transparent; border: none; font-size: 1.2em; cursor: pointer; color: #666;">✖</button>
+        </div>
+        
+        <div id="flow-detail-content">
+          <!-- 플로우 분석 내용이 여기에 동적으로 삽입됩니다 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 리포트 발송 탭 컨텐츠 -->
   <div id="report-send-content" class="tab-content">
     <div class="dashboard-box">
@@ -1633,6 +1726,7 @@
 <script th:src="@{/js/dashboard-heatmap.js}" defer></script>
 <script th:src="@{/js/dashboard-traffic-source.js}" defer></script>
 <script th:src="@{/js/dashboard-backlink.js}" defer></script>
+<script th:src="@{/js/dashboard-flow.js}" defer></script>
 
 </body>
 </html>
