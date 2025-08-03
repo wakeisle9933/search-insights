@@ -184,3 +184,230 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* 플로우 탭 스타일 */
+.flow-loading-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.flow-loading-text {
+  margin-top: 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.flow-error-container {
+  text-align: center;
+  padding: 40px;
+  color: #ef4444;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.flow-no-data-cell {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.flow-table-cell-ellipsis {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.flow-analyze-btn {
+  background: linear-gradient(135deg, #9333ea 0%, #b794f6 100%);
+  color: white;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.2);
+}
+
+.flow-analyze-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(147, 51, 234, 0.3);
+  background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+}
+
+/* 플로우 상세 스타일 */
+.flow-detail-wrapper {
+  padding: 20px;
+}
+
+.flow-page-info {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.flow-page-title {
+  margin: 0 0 10px 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.flow-page-path {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9em;
+}
+
+.flow-page-views {
+  color: #b794f6;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.flow-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.flow-column {
+  min-width: 0;
+}
+
+.flow-section-title {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 15px;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.flow-section-box {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(5px);
+}
+
+.flow-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.flow-icon {
+  font-size: 1.5em;
+  margin-right: 10px;
+  flex-shrink: 0;
+  filter: brightness(1.2);
+}
+
+.flow-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.flow-content-title {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-content-path {
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-progress-bar {
+  background: rgba(255, 255, 255, 0.05);
+  height: 20px;
+  border-radius: 10px;
+  margin-top: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.flow-progress-source {
+  background: linear-gradient(90deg, #9333ea 0%, #b794f6 100%);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.flow-progress-destination {
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.flow-percentage {
+  margin-left: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.flow-percentage-source {
+  color: #b794f6;
+}
+
+.flow-percentage-destination {
+  color: #818cf8;
+}
+
+.flow-no-data {
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding: 20px;
+}
+
+.flow-no-data-alert {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.flow-no-data-title {
+  color: #f87171;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.flow-no-data-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
+}
+
+.flow-no-data-box {
+  margin-top: 20px;
+}
+
+/* 플로우 검색 입력 필드 */
+.page-search-input {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e4e4e7 !important;
+}
+
+.page-search-input:focus {
+  border-color: rgba(0, 212, 255, 0.3) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1) !important;
+}
+
+.page-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  opacity: 1;
+}

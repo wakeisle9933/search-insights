@@ -146,6 +146,7 @@ const translations = {
     messages: {
       noTitle: "(제목 없음)",
       noData: "데이터가 없거나 아직 카테고리가 동기화되지 않았어요!",
+      unknownPage: "알 수 없는 페이지",
       clickDetail: "(클릭하여 상세보기)",
       noMatchData: "조건에 맞는 데이터가 없어요!",
       syncRequired: "아직 동기화된 카테고리 데이터가 없어요! 동기화 버튼을 눌러주세요!",
@@ -215,13 +216,17 @@ const translations = {
     
     // 플로우 상세
     flowDetail: {
+      userFlowAnalysis: "사용자 플로우 분석",
       totalViews: "총 조회수",
       previousPage: "어디서 왔나? (이전 페이지)",
       nextPage: "어디로 갔나? (다음 페이지)",
       siteExit: "사이트 이탈",
       analyzeFlow: "플로우 분석",
       analyzingFlow: "플로우 데이터를 분석하는 중...",
-      searchHelp: "목록에 없는 페이지도 검색하면 분석할 수 있습니다"
+      searchHelp: "목록에 없는 페이지도 검색하면 분석할 수 있습니다",
+      noFlowData: "플로우 데이터가 없습니다",
+      noFlowDataDesc: "선택한 기간 동안 이 페이지의 플로우 데이터가 충분하지 않습니다.",
+      noFlowDataSuggestion: "더 긴 기간을 선택하거나, 다른 페이지를 확인해보세요."
     },
     
     // 리포트 내용
@@ -411,6 +416,7 @@ const translations = {
     messages: {
       noTitle: "(No Title)",
       noData: "No data or categories not synced yet!",
+      unknownPage: "Unknown Page",
       clickDetail: "(Click for details)",
       noMatchData: "No matching data found!",
       syncRequired: "No synced category data yet! Please click sync button!",
@@ -480,13 +486,17 @@ const translations = {
     
     // Flow Detail
     flowDetail: {
+      userFlowAnalysis: "User Flow Analysis",
       totalViews: "Total Views",
       previousPage: "Where did they come from? (Previous Page)",
       nextPage: "Where did they go? (Next Page)",
       siteExit: "Exit Site",
       analyzeFlow: "Analyze Flow",
       analyzingFlow: "Analyzing flow data...",
-      searchHelp: "Pages not in the list can also be analyzed by searching"
+      searchHelp: "Pages not in the list can also be analyzed by searching",
+      noFlowData: "No Flow Data",
+      noFlowDataDesc: "Not enough flow data for this page during the selected period.",
+      noFlowDataSuggestion: "Try selecting a longer period or check other pages."
     },
     
     // Report contents
@@ -676,6 +686,7 @@ const translations = {
     messages: {
       noTitle: "(无标题)",
       noData: "没有数据或分类尚未同步!",
+      unknownPage: "未知页面",
       clickDetail: "(点击查看详情)",
       noMatchData: "没有符合条件的数据!",
       syncRequired: "还没有同步的分类数据! 请点击同步按钮!",
@@ -745,13 +756,17 @@ const translations = {
     
     // 流程详情
     flowDetail: {
+      userFlowAnalysis: "用户流程分析",
       totalViews: "总浏览量",
       previousPage: "从哪里来？（上一页）",
       nextPage: "到哪里去？（下一页）",
       siteExit: "离开网站",
       analyzeFlow: "分析流程",
       analyzingFlow: "正在分析流程数据...",
-      searchHelp: "列表中没有的页面也可以通过搜索进行分析"
+      searchHelp: "列表中没有的页面也可以通过搜索进行分析",
+      noFlowData: "没有流程数据",
+      noFlowDataDesc: "所选期间内此页面的流程数据不足。",
+      noFlowDataSuggestion: "请尝试选择更长的时间段或查看其他页面。"
     },
     
     // 报告内容
@@ -865,6 +880,34 @@ function changeLanguage(lang) {
       if (document.getElementById('demographics-heatmap-container')) {
         try {
           window.renderDemographicsHeatmap(window.demographicsHeatmapData);
+        } catch (error) {
+          // 에러 발생 시 조용히 무시
+        }
+      }
+    }
+    
+    // 플로우 상세가 열려 있으면 다시 그리기 🌊
+    if (typeof window.renderFlowDetail === 'function' && window.currentFlowData) {
+      const flowDetail = document.getElementById('flow-detail');
+      if (flowDetail && flowDetail.style.display !== 'none') {
+        try {
+          window.renderFlowDetail(window.currentFlowData);
+        } catch (error) {
+          // 에러 발생 시 조용히 무시
+        }
+      }
+    }
+    
+    // 플로우 페이지 목록이 있으면 다시 그리기 🌊
+    if (typeof window.renderFlowPages === 'function' && window.flowPageData) {
+      const flowContent = document.getElementById('flow-content');
+      if (flowContent && flowContent.classList.contains('active')) {
+        try {
+          window.renderFlowPages(window.flowPageData.slice(0, 20));
+          // 플로우 시간도 업데이트
+          if (typeof window.updateFlowTime === 'function') {
+            window.updateFlowTime();
+          }
         } catch (error) {
           // 에러 발생 시 조용히 무시
         }

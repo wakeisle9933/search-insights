@@ -1,6 +1,7 @@
 // 플로우 분석 관련 전역 변수
 let flowPageData = null;
 let currentPageFlow = null;
+let currentFlowData = null;  // 현재 표시중인 플로우 상세 데이터
 
 // 플로우 탭 초기화
 function initFlowTab() {
@@ -26,7 +27,7 @@ function validateFlowDates() {
     const endDate = document.getElementById('flow-end-date').value;
     
     if (startDate && endDate && startDate > endDate) {
-        const message = typeof t === 'function' ? t('messages.invalidDateRange') : '시작일이 종료일보다 늦을 수 없어요!';
+        const message = window.t ? window.t('messages.invalidDateRange') : '시작일이 종료일보다 늦을 수 없어요!';
         alert(message);
         document.getElementById('flow-end-date').value = startDate;
     }
@@ -61,7 +62,7 @@ async function fetchFlowData() {
     const endDate = document.getElementById('flow-end-date').value;
     
     if (!startDate || !endDate) {
-        const message = typeof t === 'function' ? t('messages.selectDates') : '시작일과 종료일을 모두 선택해주세요!';
+        const message = window.t ? window.t('messages.selectDates') : '시작일과 종료일을 모두 선택해주세요!';
         alert(message);
         return;
     }
@@ -92,7 +93,8 @@ async function fetchFlowData() {
         document.getElementById('flow-data-container').style.display = 'block';
     } catch (error) {
         console.error('Error fetching flow data:', error);
-        alert('플로우 데이터를 가져오는 중 오류가 발생했습니다.');
+        const errorMessage = window.t ? window.t('errors.loadDetailFailed') : '플로우 데이터를 가져오는 중 오류가 발생했습니다.';
+        alert(errorMessage);
         document.getElementById('flow-loading').style.display = 'none';
         document.getElementById('flow-initial-message').style.display = 'block';
     }
@@ -103,11 +105,16 @@ function renderFlowPages(data) {
     const tbody = document.getElementById('flow-pages-table');
     tbody.innerHTML = ''; // 기존 데이터 초기화
     
+    // 현재 언어에 맞는 로케일 설정
+    const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'ko';
+    const locale = currentLang === 'ko' ? 'ko-KR' : 
+                   currentLang === 'en' ? 'en-US' : 'zh-CN';
+    
     if (!data || data.length === 0) {
-        const noDataMessage = typeof t === 'function' ? t('messages.noData') : '데이터가 없어요!';
+        const noDataMessage = window.t ? window.t('messages.noData') : '데이터가 없어요!';
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                <td colspan="5" class="flow-no-data-cell">
                     ${noDataMessage}
                 </td>
             </tr>
@@ -120,18 +127,17 @@ function renderFlowPages(data) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.pageTitle || '(제목 없음)'}">
-                ${item.pageTitle || '(제목 없음)'}
+            <td class="flow-table-cell-ellipsis" title="${item.pageTitle || window.t('messages.noTitle')}">
+                ${item.pageTitle || window.t('messages.noTitle')}
             </td>
-            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.pagePath}">
+            <td class="flow-table-cell-ellipsis" title="${item.pagePath}">
                 ${item.pagePath}
             </td>
-            <td>${item.pageViews.toLocaleString()}</td>
+            <td>${item.pageViews.toLocaleString(locale)}</td>
             <td>
-                <button onclick="showPageFlow('${escapeHtml(item.pagePath)}', '${escapeHtml(item.pageTitle || '(제목 없음)')}')" 
-                        class="analyze-btn" 
-                        style="background: #9333ea; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
-                    🔍 ${t('flowDetail.analyzeFlow')}
+                <button onclick="showPageFlow('${escapeHtml(item.pagePath)}', '${escapeHtml(item.pageTitle || window.t('messages.noTitle'))}')" 
+                        class="flow-analyze-btn">
+                    🔍 ${window.t('flowDetail.analyzeFlow')}
                 </button>
             </td>
         `;
@@ -173,7 +179,7 @@ function updateFlowTime() {
         second: 'numeric'
     });
     
-    const lastUpdateText = typeof t === 'function' ? t('labels.lastUpdate') : '마지막 업데이트';
+    const lastUpdateText = window.t ? window.t('labels.lastUpdate') : '마지막 업데이트';
     const timeElement = document.getElementById('flow-update-time');
     if (timeElement) {
         timeElement.innerHTML = `<span data-i18n="labels.lastUpdate">${lastUpdateText}</span>: ${timeString}`;
@@ -187,9 +193,9 @@ async function showPageFlow(pagePath, pageTitle) {
     
     // 로딩 표시
     detailContent.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
+        <div class="flow-loading-container">
             <div class="loading-spinner"></div>
-            <div style="margin-top: 20px;">${t('flowDetail.analyzingFlow')}</div>
+            <div class="flow-loading-text">${window.t('flowDetail.analyzingFlow')}</div>
         </div>
     `;
     detailBox.style.display = 'block';
@@ -209,21 +215,88 @@ async function showPageFlow(pagePath, pageTitle) {
         }
         
         const flowData = await response.json();
+        currentFlowData = flowData;  // 전역 변수에 저장
         renderFlowDetail(flowData);
     } catch (error) {
         console.error('Error fetching page flow:', error);
         detailContent.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #e74c3c;">
-                플로우 데이터를 가져오는 중 오류가 발생했습니다.
+            <div class="flow-error-container">
+                ${window.t ? window.t('errors.loadDetailFailed') : '플로우 데이터를 가져오는 중 오류가 발생했습니다.'}
             </div>
         `;
     }
 }
 
+// 소스 페이지 표시 타이틀 결정 헬퍼 함수
+function getSourceDisplayTitle(source, currentLang, directEntryText) {
+    // sourceTitle이 있고 빈 문자열이 아니면 사용
+    if (source.sourceTitle && source.sourceTitle.trim()) {
+        return source.sourceTitle;
+    }
+    
+    // 직접 유입인 경우
+    if (source.sourcePage === '직접 유입') {
+        return directEntryText[currentLang];
+    }
+    
+    // 외부 사이트인 경우 URL에서 도메인만 추출해서 표시
+    if (source.isExternal && source.sourcePage) {
+        try {
+            const url = new URL(source.sourcePage);
+            return url.hostname;
+        } catch (e) {
+            // URL 파싱 실패 시 전체 URL 표시
+            return source.sourcePage;
+        }
+    }
+    
+    // sourcePage가 있고 빈 문자열이 아니면 사용
+    if (source.sourcePage && source.sourcePage.trim()) {
+        return source.sourcePage;
+    }
+    
+    // 모두 비어있으면 기본값
+    return window.t ? window.t('messages.unknownPage') : 'Unknown Page';
+}
+
+// 소스 페이지 경로 표시 여부 결정
+function shouldShowSourcePath(source) {
+    // 외부 사이트의 경우 전체 URL을 표시
+    if (source.isExternal && source.sourcePage) {
+        return true;
+    }
+    
+    // 내부 페이지: sourceTitle이 있고, sourcePage와 다르고, 둘 다 빈 문자열이 아닐 때만 표시
+    return source.sourceTitle && 
+           source.sourceTitle.trim() && 
+           source.sourcePage && 
+           source.sourcePage.trim() && 
+           source.sourcePage !== source.sourceTitle;
+}
+
+// 소스 페이지 경로 표시 텍스트 결정
+function getSourceDisplayPath(source, currentLang, directEntryText) {
+    if (source.sourcePage === '직접 유입') {
+        return directEntryText[currentLang];
+    }
+    return source.sourcePage || '';
+}
 
 // 플로우 상세 렌더링
 function renderFlowDetail(flowData) {
     const detailContent = document.getElementById('flow-detail-content');
+    
+    // 현재 언어에 맞는 로케일 설정
+    const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'ko';
+    const locale = currentLang === 'ko' ? 'ko-KR' : 
+                   currentLang === 'en' ? 'en-US' : 'zh-CN'
+    
+    // 직접 유입 텍스트 (언어별)
+    const directEntryText = {
+        ko: '직접 유입',
+        en: 'Direct Entry',
+        zh: '直接进入'
+    };
     
     // 아이콘 매핑
     const getSourceIcon = (source) => {
@@ -231,7 +304,7 @@ function renderFlowDetail(flowData) {
             if (source.sourcePage.includes('google')) return '🔍';
             if (source.sourcePage.includes('naver')) return '🟨';
             return '🌐';
-        } else if (source.sourcePage === '직접 유입') {
+        } else if (source.sourcePage === directEntryText[currentLang] || source.sourcePage === '직접 유입') {
             return '🔗';
         } else if (source.sourcePage === '/') {
             return '🏠';
@@ -246,74 +319,80 @@ function renderFlowDetail(flowData) {
     };
     
     detailContent.innerHTML = `
-        <div style="padding: 20px;">
+        <div class="flow-detail-wrapper">
             <!-- 페이지 정보 -->
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
-                <h3 style="margin: 0 0 10px 0; color: #333;">📄 ${flowData.pageTitle}</h3>
-                <div style="color: #666; font-size: 0.9em;">${flowData.pagePath}</div>
-                <div style="color: #9333ea; font-weight: bold; margin-top: 10px;">
-                    ${t('flowDetail.totalViews')}: ${flowData.totalViews.toLocaleString()}
+            <div class="flow-page-info">
+                <h3 class="flow-page-title">📄 ${flowData.pageTitle}</h3>
+                <div class="flow-page-path">${flowData.pagePath}</div>
+                <div class="flow-page-views">
+                    ${window.t('flowDetail.totalViews')}: ${flowData.totalViews.toLocaleString(locale)}
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1200px; margin: 0 auto;">
-                <!-- 유입 경로 -->
-                <div style="min-width: 0;">
-                    <h4 style="color: #333; margin-bottom: 15px;">🔙 ${t('flowDetail.previousPage')}</h4>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow: hidden;">
+            <!-- 어디서 왔나? / 어디로 갔나? -->
+            <div class="dashboard-box">
+                <div class="dashboard-title">🌊 ${window.t('flowDetail.userFlowAnalysis')}</div>
+                <div class="flow-grid-container">
+                    <!-- 유입 경로 -->
+                    <div class="flow-column">
+                        <h4 class="flow-section-title">🔙 ${window.t('flowDetail.previousPage')}</h4>
+                        <div class="flow-section-box">
                         ${flowData.sources.length > 0 ? flowData.sources.slice(0, 10).map(source => `
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <span style="font-size: 1.5em; margin-right: 10px; flex-shrink: 0;">${getSourceIcon(source)}</span>
-                                <div style="flex: 1; min-width: 0;">
-                                    <div style="font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${source.sourceTitle || source.sourcePage}">
-                                        ${source.sourceTitle || source.sourcePage}
+                            <div class="flow-item">
+                                <span class="flow-icon">${getSourceIcon(source)}</span>
+                                <div class="flow-content">
+                                    <div class="flow-content-title" title="${getSourceDisplayTitle(source, currentLang, directEntryText)}">
+                                        ${getSourceDisplayTitle(source, currentLang, directEntryText)}
                                     </div>
-                                    ${source.sourceTitle && source.sourcePage !== source.sourceTitle ? 
-                                        `<div style="font-size: 0.8em; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${source.sourcePage}">${source.sourcePage}</div>` : ''}
-                                    <div style="background: #e9ecef; height: 20px; border-radius: 10px; margin-top: 5px; overflow: hidden;">
-                                        <div style="background: #9333ea; height: 100%; width: ${Math.min(source.percentage.toFixed(1), 100)}%; transition: width 0.5s ease;"></div>
+                                    ${shouldShowSourcePath(source) ? 
+                                        `<div class="flow-content-path" title="${getSourceDisplayPath(source, currentLang, directEntryText)}">${getSourceDisplayPath(source, currentLang, directEntryText)}</div>` : ''}
+                                    <div class="flow-progress-bar">
+                                        <div class="flow-progress-source" style="width: ${Math.min(source.percentage.toFixed(1), 100)}%;"></div>
                                     </div>
                                 </div>
-                                <span style="margin-left: 10px; font-weight: bold; color: #9333ea; flex-shrink: 0;">${source.percentage.toFixed(1)}%</span>
+                                <span class="flow-percentage flow-percentage-source">${source.percentage.toFixed(1)}%</span>
                             </div>
-                        `).join('') : '<div style="color: #666;">데이터가 없습니다.</div>'}
+                        `).join('') : `<div class="flow-no-data">${window.t('messages.noData')}</div>`}
                     </div>
                 </div>
                 
                 <!-- 이탈 경로 -->
-                <div style="min-width: 0;">
-                    <h4 style="color: #333; margin-bottom: 15px;">🔜 ${t('flowDetail.nextPage')}</h4>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow: hidden;">
+                <div class="flow-column">
+                    <h4 class="flow-section-title">🔜 ${window.t('flowDetail.nextPage')}</h4>
+                    <div class="flow-section-box">
                         ${flowData.destinations.length > 0 ? flowData.destinations.slice(0, 10).map(dest => `
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <span style="font-size: 1.5em; margin-right: 10px; flex-shrink: 0;">${getDestinationIcon(dest)}</span>
-                                <div style="flex: 1; min-width: 0;">
-                                    <div style="font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${dest.isExit ? t('flowDetail.siteExit') : (dest.destinationTitle || dest.destinationPage)}">
-                                        ${dest.isExit ? t('flowDetail.siteExit') : (dest.destinationTitle || dest.destinationPage)}
+                            <div class="flow-item">
+                                <span class="flow-icon">${getDestinationIcon(dest)}</span>
+                                <div class="flow-content">
+                                    <div class="flow-content-title" title="${dest.isExit ? window.t('flowDetail.siteExit') : (dest.destinationTitle || dest.destinationPage)}">
+                                        ${dest.isExit ? window.t('flowDetail.siteExit') : (dest.destinationTitle || dest.destinationPage)}
                                     </div>
                                     ${dest.destinationTitle && dest.destinationPage !== dest.destinationTitle && !dest.isExit ? 
-                                        `<div style="font-size: 0.8em; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${dest.destinationPage}">${dest.destinationPage}</div>` : ''}
-                                    <div style="background: #e9ecef; height: 20px; border-radius: 10px; margin-top: 5px; overflow: hidden;">
-                                        <div style="background: #6366f1; height: 100%; width: ${Math.min(dest.percentage.toFixed(1), 100)}%; transition: width 0.5s ease;"></div>
+                                        `<div class="flow-content-path" title="${dest.destinationPage}">${dest.destinationPage}</div>` : ''}
+                                    <div class="flow-progress-bar">
+                                        <div class="flow-progress-destination" style="width: ${Math.min(dest.percentage.toFixed(1), 100)}%;"></div>
                                     </div>
                                 </div>
-                                <span style="margin-left: 10px; font-weight: bold; color: #6366f1; flex-shrink: 0;">${dest.percentage.toFixed(1)}%</span>
+                                <span class="flow-percentage flow-percentage-destination">${dest.percentage.toFixed(1)}%</span>
                             </div>
-                        `).join('') : '<div style="color: #666;">데이터가 없습니다.</div>'}
+                        `).join('') : `<div class="flow-no-data">${window.t('messages.noData')}</div>`}
                     </div>
                 </div>
+            </div>
             </div>
             
             ${!flowData.sources.length && !flowData.destinations.length ? `
                 <!-- 데이터 없음 안내 -->
-                <div style="margin-top: 30px; padding: 20px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px;">
-                    <div style="color: #721c24; font-weight: bold; margin-bottom: 10px;">
-                        ⚠️ 플로우 데이터가 없습니다
+                <div class="dashboard-box flow-no-data-box">
+                <div class="flow-no-data-alert">
+                    <div class="flow-no-data-title">
+                        ⚠️ ${window.t('flowDetail.noFlowData')}
                     </div>
-                    <div style="color: #721c24; font-size: 0.9em;">
-                        선택한 기간 동안 이 페이지의 플로우 데이터가 충분하지 않습니다.<br>
-                        더 긴 기간을 선택하거나, 다른 페이지를 확인해보세요.
+                    <div class="flow-no-data-description">
+                        ${window.t('flowDetail.noFlowDataDesc')}<br>
+                        ${window.t('flowDetail.noFlowDataSuggestion')}
                     </div>
+                </div>
                 </div>
             ` : ''}
         </div>
@@ -323,6 +402,7 @@ function renderFlowDetail(flowData) {
 // 플로우 상세 닫기
 function closeFlowDetail() {
     document.getElementById('flow-detail').style.display = 'none';
+    // currentFlowData는 유지 (언어 변경 시 재사용을 위해)
 }
 
 // HTML 이스케이프
@@ -345,3 +425,20 @@ window.fetchFlowData = fetchFlowData;
 window.filterFlowPages = filterFlowPages;
 window.showPageFlow = showPageFlow;
 window.closeFlowDetail = closeFlowDetail;
+window.renderFlowDetail = renderFlowDetail;
+window.renderFlowPages = renderFlowPages;
+window.updateFlowTime = updateFlowTime;
+window.getSourceDisplayTitle = getSourceDisplayTitle;
+window.shouldShowSourcePath = shouldShowSourcePath;
+window.getSourceDisplayPath = getSourceDisplayPath;
+
+// 전역 변수 getter 추가
+Object.defineProperty(window, 'currentFlowData', {
+    get: function() { return currentFlowData; },
+    set: function(value) { currentFlowData = value; }
+});
+
+Object.defineProperty(window, 'flowPageData', {
+    get: function() { return flowPageData; },
+    set: function(value) { flowPageData = value; }
+});
