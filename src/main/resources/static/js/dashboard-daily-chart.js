@@ -575,13 +575,26 @@ function initializeCategoryDropdown(mainTab, pageViews) {
     });
   }
   
+  // 각 카테고리별 포스트 개수 계산
+  const categoryPostCounts = {};
+  Object.values(window.wpCategoryData.posts).forEach(categoryIds => {
+    if (categoryIds && Array.isArray(categoryIds)) {
+      categoryIds.forEach(catId => {
+        const catIdStr = catId.toString();
+        categoryPostCounts[catIdStr] = (categoryPostCounts[catIdStr] || 0) + 1;
+      });
+    }
+  });
+  
   // 사용된 카테고리만 옵션에 추가
   Object.entries(window.wpCategoryData.categories).forEach(([id, name]) => {
     // 카테고리가 실제로 사용되고 있는 경우에만 추가
     if (usedCategories.has(id)) {
       const option = document.createElement('option');
       option.value = id;
-      option.textContent = name.replace(/&amp;/g, '&');
+      const postCount = categoryPostCounts[id] || 0;
+      const decodedName = name.replace(/&amp;/g, '&');
+      option.textContent = `${decodedName} (${postCount})`;
       dropdown.appendChild(option);
     }
   });

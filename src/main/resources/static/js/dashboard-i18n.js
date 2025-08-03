@@ -1000,13 +1000,27 @@ function updateCategoryDropdowns() {
     document.getElementById('custom-date-full-category-select'),
     document.getElementById('daily-detail-full-category-select'),
     document.getElementById('hourly-detail-full-category-select'),
-    document.getElementById('demographics-detail-full-category-select')
+    document.getElementById('demographics-detail-full-category-select'),
+    document.getElementById('source-detail-full-category-select')
   ];
   
   categoryDropdowns.forEach(dropdown => {
     if (dropdown && dropdown.options.length > 0) {
       // 첫 번째 옵션(전체 카테고리)의 텍스트 업데이트
       dropdown.options[0].textContent = allCategoriesText;
+      
+      // 나머지 옵션들의 텍스트 업데이트 (포스트 개수 유지)
+      for (let i = 1; i < dropdown.options.length; i++) {
+        const option = dropdown.options[i];
+        const currentText = option.textContent;
+        
+        // 괄호 안의 숫자 추출
+        const match = currentText.match(/\((\d+)\)$/);
+        if (match && window.wpCategoryData && window.wpCategoryData.categories[option.value]) {
+          const categoryName = window.wpCategoryData.categories[option.value].replace(/&amp;/g, '&');
+          option.textContent = `${categoryName} (${match[1]})`;
+        }
+      }
     }
   });
   

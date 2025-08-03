@@ -42,6 +42,9 @@ function loadWpCategoryData() {
     const todayFullSelect = document.getElementById('today-full-category-select');
     const customDateFullSelect = document.getElementById('custom-date-full-category-select');
     const dailyDetailFullSelect = document.getElementById('daily-detail-full-category-select');
+    const hourlyDetailFullSelect = document.getElementById('hourly-detail-full-category-select');
+    const demographicsDetailFullSelect = document.getElementById('demographics-detail-full-category-select');
+    const sourceDetailFullSelect = document.getElementById('source-detail-full-category-select');
     
     // 기존 옵션 초기화 (전체 카테고리 옵션은 유지)
     const allCategoriesText = window.t ? window.t('labels.allCategories') : '전체 카테고리';
@@ -54,6 +57,15 @@ function loadWpCategoryData() {
     }
     if (dailyDetailFullSelect) {
       dailyDetailFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
+    }
+    if (hourlyDetailFullSelect) {
+      hourlyDetailFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
+    }
+    if (demographicsDetailFullSelect) {
+      demographicsDetailFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
+    }
+    if (sourceDetailFullSelect) {
+      sourceDetailFullSelect.innerHTML = `<option value="">${allCategoriesText}</option>`;
     }
     
     if (!data.categories) {
@@ -69,6 +81,17 @@ function loadWpCategoryData() {
       }
     });
     
+    // 각 카테고리별 포스트 개수 계산
+    const categoryPostCounts = {};
+    Object.values(data.posts).forEach(categoryIds => {
+      if (categoryIds && Array.isArray(categoryIds)) {
+        categoryIds.forEach(catId => {
+          const catIdStr = catId.toString();
+          categoryPostCounts[catIdStr] = (categoryPostCounts[catIdStr] || 0) + 1;
+        });
+      }
+    });
+    
     // 포스트가 있는 카테고리만 정렬 (이름 기준)
     const sortedCategories = Object.entries(data.categories)
       .filter(([id, name]) => categoriesWithPosts.has(id))
@@ -79,23 +102,45 @@ function loadWpCategoryData() {
       // HTML 엔티티 디코딩
       const decodedName = name.replace(/&amp;/g, '&');
       
+      // 카테고리별 포스트 개수 가져오기
+      const postCount = categoryPostCounts[id] || 0;
+      const displayName = `${decodedName} (${postCount})`;
+      
       // 오늘 전체 탭 드롭다운
       const option1 = document.createElement('option');
       option1.value = id;
-      option1.textContent = decodedName;
+      option1.textContent = displayName;
       if (todayFullSelect) todayFullSelect.appendChild(option1);
       
       // 날짜 지정 탭 드롭다운
       const option2 = document.createElement('option');
       option2.value = id;
-      option2.textContent = decodedName;
+      option2.textContent = displayName;
       if (customDateFullSelect) customDateFullSelect.appendChild(option2);
       
       // 일간 차트 상세 탭 드롭다운
       const option3 = document.createElement('option');
       option3.value = id;
-      option3.textContent = decodedName;
+      option3.textContent = displayName;
       if (dailyDetailFullSelect) dailyDetailFullSelect.appendChild(option3);
+      
+      // 시간별 상세 탭 드롭다운
+      const option4 = document.createElement('option');
+      option4.value = id;
+      option4.textContent = displayName;
+      if (hourlyDetailFullSelect) hourlyDetailFullSelect.appendChild(option4);
+      
+      // 인구통계 상세 탭 드롭다운
+      const option5 = document.createElement('option');
+      option5.value = id;
+      option5.textContent = displayName;
+      if (demographicsDetailFullSelect) demographicsDetailFullSelect.appendChild(option5);
+      
+      // 트래픽 소스 상세 탭 드롭다운
+      const option6 = document.createElement('option');
+      option6.value = id;
+      option6.textContent = displayName;
+      if (sourceDetailFullSelect) sourceDetailFullSelect.appendChild(option6);
     });
   })
   .catch(error => {
