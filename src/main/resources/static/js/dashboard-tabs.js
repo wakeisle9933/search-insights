@@ -101,8 +101,15 @@ function showMainTab(tabName) {
     if (typeof initSearchQueryTab === 'function') {
       initSearchQueryTab();
     }
-  } else if (tabName === 'report-send') {
+  } else if (tabName === 'potential') {
     document.querySelector('.main-tab:nth-child(10)').classList.add('active');
+    document.getElementById('potential-content').classList.add('active');
+    // 포텐셜 탭 초기화
+    if (typeof initPotentialTab === 'function') {
+      initPotentialTab();
+    }
+  } else if (tabName === 'report-send') {
+    document.querySelector('.main-tab:nth-child(11)').classList.add('active');
     document.getElementById('report-send-content').classList.add('active');
     // 리포트 탭 초기화
     if (typeof initReportTab === 'function') {

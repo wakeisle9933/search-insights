@@ -14,6 +14,7 @@ const translations = {
       backlinkCheck: "백링크",
       flow: "플로우",
       searchQuery: "유입 쿼리",
+      potential: "포텐셜",
       reportSend: "리포트 발송"
     },
     
@@ -40,6 +41,7 @@ const translations = {
       backlinkCheck: "백링크",
       flow: "사용자 플로우 분석",
       searchQuery: "유입 쿼리 분석",
+      potential: "포텐셜 히트 분석",
       reportSend: "Search Insights 리포트 발송",
       demographicsHeatmap: "성별/연령별 분석"
     },
@@ -47,6 +49,7 @@ const translations = {
     // 섹션 제목
     sectionTitles: {
       searchQueryResults: "검색 쿼리 조회 결과",
+      potentialResults: "포텐셜 히트 조회 결과",
       dailyChartTitle: "일간 차트",
       pageviewsByTitle: "페이지 제목별 조회수",
       pageviewsByTitleToday: "페이지 제목별 조회수 (오늘)",
@@ -134,7 +137,11 @@ const translations = {
       totalQueries: "총 쿼리 수:",
       totalClicks: "총 클릭수:",
       totalImpressions: "총 노출수:",
-      avgPosition: "평균 순위:"
+      avgPosition: "평균 순위:",
+      totalPotential: "총 포텐셜 쿼리:",
+      totalPotentialClicks: "총 클릭수:",
+      totalPotentialImpressions: "총 노출수:",
+      avgPotentialPosition: "평균 순위:"
     },
     
     // 차트 라벨
@@ -209,7 +216,10 @@ const translations = {
       loadingTrafficTable: "도메인별 접속량을 불러오는 중...",
       loadingDemographicsDetail: "성별/연령별 상세 데이터를 불러오는 중...",
       selectDateToFetch: "날짜를 선택하고 조회하기 버튼을 클릭해주세요.",
-      searchQueryDesc: "사용자들이 어떤 검색어로 사이트에 방문했는지 분석해보세요! 검색 순위, 클릭수, 노출수 등 다양한 지표를 확인할 수 있어요."
+      searchQueryDesc: "사용자들이 어떤 검색어로 사이트에 방문했는지 분석해보세요! 검색 순위, 클릭수, 노출수 등 다양한 지표를 확인할 수 있어요.",
+      potentialDesc: "검색 순위는 낮지만 노출수가 높은 쿼리들을 발견해보세요! 개선 시 큰 효과를 볼 수 있는 키워드들입니다.",
+      potentialCriteria: "페이지 링크 기준 검색 순위 3위 이하이면서 노출수가 높은 쿼리들만 표시됩니다.",
+      noPotentialData: "해당 기간에 포텐셜 히트 데이터가 없습니다."
     },
     
     // 히트맵
@@ -309,6 +319,7 @@ const translations = {
       backlinkCheck: "Backlinks",
       flow: "Flow",
       searchQuery: "Search Queries",
+      potential: "Potential",
       reportSend: "Send Report"
     },
     
@@ -335,6 +346,7 @@ const translations = {
       backlinkCheck: "Backlinks",
       flow: "User Flow Analysis",
       searchQuery: "Search Query Analysis",
+      potential: "Potential Hits Analysis",
       reportSend: "Search Insights Report",
       demographicsHeatmap: "Gender/Age Analysis"
     },
@@ -342,6 +354,7 @@ const translations = {
     // Section titles
     sectionTitles: {
       searchQueryResults: "Search Query Results",
+      potentialResults: "Potential Hits Results",
       dailyChartTitle: "Daily Chart",
       pageviewsByTitle: "Pageviews by Title",
       pageviewsByTitleToday: "Pageviews by Title (Today)",
@@ -429,7 +442,11 @@ const translations = {
       totalQueries: "Total Queries:",
       totalClicks: "Total Clicks:",
       totalImpressions: "Total Impressions:",
-      avgPosition: "Avg Position:"
+      avgPosition: "Avg Position:",
+      totalPotential: "Total Potential Queries:",
+      totalPotentialClicks: "Total Clicks:",
+      totalPotentialImpressions: "Total Impressions:",
+      avgPotentialPosition: "Avg Position:"
     },
     
     // Chart labels
@@ -504,7 +521,10 @@ const translations = {
       loadingTrafficTable: "Loading traffic volume by domain...",
       loadingDemographicsDetail: "Loading gender/age demographic detail data...",
       selectDateToFetch: "Please select dates and click the fetch button.",
-      searchQueryDesc: "Analyze which search queries users used to visit your site! Check various metrics including search rankings, clicks, and impressions."
+      searchQueryDesc: "Analyze which search queries users used to visit your site! Check various metrics including search rankings, clicks, and impressions.",
+      potentialDesc: "Discover queries with low search rankings but high impressions! These are keywords that can have a big impact when improved.",
+      potentialCriteria: "Only queries with search ranking below 3rd position per page link and high impressions are displayed.",
+      noPotentialData: "No potential hits data for the selected period."
     },
     
     // Heatmap
@@ -604,6 +624,7 @@ const translations = {
       backlinkCheck: "反向链接",
       flow: "流程",
       searchQuery: "搜索查询",
+      potential: "潜力",
       reportSend: "发送报告"
     },
     
@@ -630,6 +651,7 @@ const translations = {
       backlinkCheck: "反向链接",
       flow: "用户流程分析",
       searchQuery: "搜索查询分析",
+      potential: "潜力热点分析",
       reportSend: "Search Insights 报告发送",
       demographicsHeatmap: "性别/年龄分析"
     },
@@ -637,6 +659,7 @@ const translations = {
     // 部分标题
     sectionTitles: {
       searchQueryResults: "搜索查询结果",
+      potentialResults: "潜力热点查询结果",
       dailyChartTitle: "日间图表",
       pageviewsByTitle: "按标题统计浏览量",
       pageviewsByTitleToday: "按标题统计浏览量 (今日)",
@@ -724,7 +747,11 @@ const translations = {
       totalQueries: "总查询数:",
       totalClicks: "总点击数:",
       totalImpressions: "总展示数:",
-      avgPosition: "平均排名:"
+      avgPosition: "平均排名:",
+      totalPotential: "潜力查询总数:",
+      totalPotentialClicks: "总点击数:",
+      totalPotentialImpressions: "总展示次数:",
+      avgPotentialPosition: "平均排名:"
     },
     
     // 图表标签
@@ -799,7 +826,10 @@ const translations = {
       loadingTrafficTable: "正在加载按域名的访问量...",
       loadingDemographicsDetail: "正在加载性别/年龄详细数据...",
       selectDateToFetch: "请选择日期并点击查询按钮。",
-      searchQueryDesc: "分析用户使用哪些搜索词访问您的网站！查看搜索排名、点击数、展示次数等各种指标。"
+      searchQueryDesc: "分析用户使用哪些搜索词访问您的网站！查看搜索排名、点击数、展示次数等各种指标。",
+      potentialDesc: "发现搜索排名低但展示次数高的查询！这些是改进后可能产生重大影响的关键词。",
+      potentialCriteria: "仅显示基于页面链接的搜索排名在第3位以下且展示次数高的查询。",
+      noPotentialData: "所选期间没有潜力热点数据。"
     },
     
     // 热图

@@ -38,6 +38,7 @@
     <div class="main-tab" onclick="showMainTab('flow')" data-i18n="mainTabs.flow">🌊 플로우</div>
     <div class="tab-break"></div>
     <div class="main-tab" onclick="showMainTab('search-query')" data-i18n="mainTabs.searchQuery">🔍 유입 쿼리</div>
+    <div class="main-tab" onclick="showMainTab('potential')" data-i18n="mainTabs.potential">💡 포텐셜</div>
     <div class="main-tab" onclick="showMainTab('report-send')" data-i18n="mainTabs.reportSend">📧 리포트 발송</div>
   </div>
 
@@ -1634,7 +1635,6 @@
           <button class="quick-date-btn" onclick="setSearchQueryDateRange(7)" data-i18n="quickDates.days7">7일</button>
           <button class="quick-date-btn" onclick="setSearchQueryDateRange(14)" data-i18n="quickDates.weeks2">2주</button>
           <button class="quick-date-btn" onclick="setSearchQueryDateRange(30)" data-i18n="quickDates.month1">한달</button>
-          <button class="quick-date-btn" onclick="setSearchQueryDateRange(90)" data-i18n="quickDates.month3">3달</button>
         </div>
       </div>
     </div>
@@ -1686,6 +1686,88 @@
             </tr>
           </thead>
           <tbody id="search-query-table">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 40px;">
+                <span data-i18n="messages.selectDateToFetch">날짜를 선택하고 조회하기 버튼을 클릭해주세요.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 포텐셜 탭 컨텐츠 -->
+  <div id="potential-content" class="tab-content">
+    <!-- 검색 조건 박스 -->
+    <div class="dashboard-box">
+      <div class="dashboard-title" data-i18n="dashboardTitles.potential">💡 포텐셜 히트 분석</div>
+      <div style="font-size: 0.9em; color: #666; margin-top: 5px; margin-bottom: 20px;">
+        <span data-i18n="messages.potentialDesc">📌 검색 순위는 낮지만 노출수가 높은 쿼리들을 발견해보세요! 개선 시 큰 효과를 볼 수 있는 키워드들입니다.</span>
+        <br>
+        <span style="color: #e74c3c; margin-top: 5px; display: inline-block;" data-i18n="messages.potentialCriteria">⚠️ 검색 순위 3위 이하이면서 노출수가 높은 쿼리들만 표시됩니다.</span>
+      </div>
+      
+      <!-- 날짜 선택 영역 -->
+      <div class="date-selector">
+        <input type="date" id="potential-start-date" onchange="validatePotentialDates(event)" placeholder="YYYY-MM-DD">
+        <span>~</span>
+        <input type="date" id="potential-end-date" onchange="validatePotentialDates(event)" placeholder="YYYY-MM-DD">
+        <button onclick="fetchPotentialHits()" class="fetch-btn">💡 <span data-i18n="buttons.fetch">조회하기</span></button>
+      </div>
+      
+      <!-- 빠른 날짜 선택 버튼 -->
+      <div style="margin-top: 10px; margin-bottom: 15px;">
+        <span class="quick-date-label" data-i18n="labels.quickSelect">빠른 선택:</span>
+        <div class="quick-date-buttons" style="display: inline-flex; margin-left: 10px;">
+          <button class="quick-date-btn" onclick="setPotentialDateRange(1)" data-i18n="quickDates.latestAvailable">가장 최근 (3일 전)</button>
+          <button class="quick-date-btn" onclick="setPotentialDateRange(3)" data-i18n="quickDates.days3">3일</button>
+          <button class="quick-date-btn" onclick="setPotentialDateRange(7)" data-i18n="quickDates.days7">7일</button>
+          <button class="quick-date-btn" onclick="setPotentialDateRange(14)" data-i18n="quickDates.weeks2">2주</button>
+          <button class="quick-date-btn" onclick="setPotentialDateRange(30)" data-i18n="quickDates.month1">한달</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 조회 결과 박스 -->
+    <div class="dashboard-box" style="margin-top: 20px;">
+      <div class="dashboard-title" data-i18n="sectionTitles.potentialResults">💡 포텐셜 히트 조회 결과</div>
+      
+      <!-- 데이터 요약 정보 -->
+      <div id="potential-summary" class="summary-info" style="display: none;">
+        <div class="summary-item">
+          <span class="summary-label" data-i18n="labels.totalPotential">총 포텐셜 쿼리:</span>
+          <span class="summary-value" id="total-potential">0</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label" data-i18n="labels.totalPotentialClicks">총 클릭수:</span>
+          <span class="summary-value" id="total-potential-clicks">0</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label" data-i18n="labels.totalPotentialImpressions">총 노출수:</span>
+          <span class="summary-value" id="total-potential-impressions">0</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label" data-i18n="labels.avgPotentialPosition">평균 순위:</span>
+          <span class="summary-value" id="avg-potential-position">0</span>
+        </div>
+      </div>
+      
+      <!-- 포텐셜 히트 테이블 -->
+      <div class="table-container">
+        <table class="dashboard-table" id="potential-results-table">
+          <thead>
+            <tr>
+              <th data-i18n="tableHeaders.rank">순위</th>
+              <th data-i18n="tableHeaders.query">검색어</th>
+              <th data-i18n="tableHeaders.position">포지션</th>
+              <th data-i18n="tableHeaders.clicks">클릭수</th>
+              <th data-i18n="tableHeaders.impressions">노출수</th>
+              <th data-i18n="tableHeaders.ctr">CTR(%)</th>
+              <th class="page-link-header" data-i18n="tableHeaders.pageLink">페이지 링크</th>
+            </tr>
+          </thead>
+          <tbody id="potential-table">
             <tr>
               <td colspan="7" style="text-align: center; padding: 40px;">
                 <span data-i18n="messages.selectDateToFetch">날짜를 선택하고 조회하기 버튼을 클릭해주세요.</span>
@@ -1820,6 +1902,7 @@
 <script th:src="@{/js/dashboard-backlink.js}" defer></script>
 <script th:src="@{/js/dashboard-flow.js}" defer></script>
 <script th:src="@{/js/dashboard-search-query.js}" defer></script>
+<script th:src="@{/js/dashboard-potential.js}" defer></script>
 
 </body>
 </html>
