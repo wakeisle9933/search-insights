@@ -332,7 +332,7 @@ function processAndDisplayData() {
         const wordCount = currentSearchQuerySubTab === 'prefix1' ? 1 :
                          currentSearchQuerySubTab === 'prefix2' ? 2 : 3;
         
-        const groupedData = groupByPrefix(searchQueryRawData.queries, wordCount);
+        const groupedData = groupSearchQueriesByPrefix(searchQueryRawData.queries, wordCount);
         const prefixData = calculatePrefixSummary(groupedData);
         
         // 접두어 요약 정보를 테이블 형식으로 변환
@@ -354,7 +354,7 @@ function processAndDisplayData() {
 }
 
 // 클라이언트에서 접두어로 그룹화 (SpreadSheetService와 동일한 로직)
-function groupByPrefix(queries, wordCount) {
+function groupSearchQueriesByPrefix(queries, wordCount) {
     const grouped = {};
     
     queries.forEach(query => {
